@@ -708,7 +708,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .wr-go{margin-top:22px;border:0;background:var(--accent);color:var(--accent-ink);font:700 15px var(--f-body);padding:10px 22px;border-radius:999px;box-shadow:0 6px 20px #f5a9d655}
 .wr-big{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px auto 0;max-width:860px}
 .wr-big div{background:#1c0f21b3;border:1px solid #f5a9d655;border-radius:16px;padding:16px 10px;backdrop-filter:blur(4px)}
-.wr-big b{display:block;font:400 clamp(30px,5vw,48px)/1 var(--f-bubble);color:#fff;font-variant-numeric:tabular-nums}
+.wr-big div{container-type:inline-size;min-width:0;overflow:hidden}
+.wr-big b{display:block;font:400 min(48px,24cqw)/1.05 var(--f-bubble);color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap}
 .wr-big small{display:block;margin-top:6px;font:600 11px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:#f1cfe6}
 .wr-cal{display:inline-grid;grid-template-columns:auto repeat(31,1fr);gap:3px;margin:18px auto 6px;max-width:100%;font:600 10px var(--f-mono);color:#f1cfe6;align-items:center}
 .wr-cal span{width:clamp(7px,1.9vw,17px);aspect-ratio:1;border-radius:3px;background:#ffffff10}
