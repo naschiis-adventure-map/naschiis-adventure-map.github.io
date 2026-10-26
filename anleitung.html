@@ -491,14 +491,14 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
       <li>Höchstens ein Klick alle 2 Minuten</li>
       <li>Für den Normalfall nicht nötig – die Automatik läuft von selbst</li>
     </ul></div>
-    <div class="card"><h3>🎁 Jahresrückblick</h3><ul><li>Knopf <span class="ui-btn">🎁 Rückblick 2025</span> in der Anmeldebox – <b>nur für Kanal, Mods und Bearbeiter</b> sichtbar, Besucher sehen ihn nicht</li><li>Folien im Vollbild: Zahlen, Kalender, Kategorien, Rekorde, Ausflüge auf der Karte, Top-Clips, Clip des Monats, legendäre Streams, Danke</li><li>Alles wird aus den Daten berechnet; Clips lassen sich direkt abspielen</li><li>Blättern mit ‹ ›, Pfeiltasten oder Wischen, <kbd>Esc</kbd> schließt</li><li>Noch im Test – später auch für 2026</li></ul></div>
+    <div class="card"><h3>🎁 Jahresrückblick</h3><ul><li>Knopf <span class="ui-btn">🎁 2025</span> in der Anmeldebox – <b>nur für Kanal, Mods und Bearbeiter</b> sichtbar, Besucher sehen ihn nicht</li><li>Folien im Vollbild: Zahlen, Kalender, Kategorien, Rekorde, Ausflüge auf der Karte, Top-Clips, Clip des Monats, legendäre Streams, Danke</li><li>Alles wird aus den Daten berechnet; Clips lassen sich direkt abspielen</li><li>Blättern mit ‹ ›, Pfeiltasten oder Wischen, <kbd>Esc</kbd> schließt</li><li>Noch im Test – später auch für 2026</li></ul></div>
     <div class="card"><h3>⏻ Seite offline nehmen</h3><ul>
       <li>Im Anmeldekasten neben <i>Daten aktualisieren</i> – nur für Kanalbetreiber, Mods und Berechtigte</li>
       <li>Zur Sicherheit zweimal klicken („Sicher? Nochmal klicken“)</li>
       <li>Nach ca. 1–2 Minuten sehen alle Besucher nur noch <b>„Zurzeit in Bearbeitung“</b> – Karte, Liste und Zahlen sind ausgeblendet</li>
       <li>Header mit Anmeldung sowie Fußleiste mit Impressum und Datenschutz bleiben sichtbar – so kann man sich jederzeit anmelden und die Seite wieder einschalten</li>
       <li>Angemeldete Bearbeiter sehen die Karte weiter normal, mit rotem Hinweis „Für Besucher offline“</li>
-      <li><span class="ui-btn">▶ Seite online stellen</span> schaltet zurück, ebenfalls nach ca. 1–2 Minuten</li>
+      <li><span class="ui-btn">▶ Online stellen</span> schaltet zurück, ebenfalls nach ca. 1–2 Minuten</li>
       <li>Hinweis: Das ist ein Wartungsmodus. Die Datendateien selbst liegen weiter öffentlich bei GitHub.</li>
     </ul></div>
   </div>
@@ -526,7 +526,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
     <tr><td><b>bei neuen Zahlen</b></td><td>Header-Zahlen, „Automatisch aktualisiert“-Zeit und das Teilen-Vorschaubild für Discord, WhatsApp &amp; Co. werden erneuert.</td></tr>
     <tr><td><b>montags früh</b></td><td>Die Clip-Collage im Rahmen wird neu gemischt und als ein einziges Bild gespeichert. Von Hand: GitHub → Actions → „Collage erneuern“ → <i>Run workflow</i>.</td></tr>
     <tr><td><b>nach „Speichern“</b></td><td>Eine gezeichnete Route, Beschreibung oder ein Ort ist nach ca. 1–2 Minuten für alle sichtbar.</td></tr>
-    <tr><td><b>per Knopf</b></td><td>Kanalbetreiber, Mods und Berechtigte können mit <span class="ui-btn">⟳ Daten aktualisieren</span> sofort ein Update auslösen.</td></tr>
+    <tr><td><b>per Knopf</b></td><td>Kanalbetreiber, Mods und Berechtigte können mit <span class="ui-btn">⟳ Aktualisieren</span> sofort ein Update auslösen.</td></tr>
   </table></div>
 
   <h3 style="margin-top:20px">Was die Seite alles selbst erledigt</h3>
@@ -553,7 +553,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
       <li>Schriften und Karten-Software liegen auf der Seite selbst – keine Verbindung zu Google Fonts oder Cloudflare. Impressum und Datenschutz unten verlinkt</li>
     </ul></div>
   </div>
-  <div class="tip"><b class="i">i</b><div>„Automatisch aktualisiert“ zeigt die letzte <b>Änderung</b> der Daten – geprüft wird trotzdem alle 15 Minuten. Steht dort länger eine alte Zeit, obwohl gestreamt wurde, hilft der Knopf <span class="ui-btn">⟳ Daten aktualisieren</span>.</div></div>
+  <div class="tip"><b class="i">i</b><div>„Automatisch aktualisiert“ zeigt die letzte <b>Änderung</b> der Daten – geprüft wird trotzdem alle 15 Minuten. Steht dort länger eine alte Zeit, obwohl gestreamt wurde, hilft der Knopf <span class="ui-btn">⟳ Aktualisieren</span>.</div></div>
 </section>
 
 <!-- FAQ -->
@@ -594,8 +594,8 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
     <tr><td><b>Routen-Varianten</b></td><td>Route zeichnen → <i>💾 Als Entwurf speichern</i> → <i>🎬 Präsentieren</i></td></tr>
     <tr><td><b>Alte Route zurück</b></td><td>Route bearbeiten → 🛟 <i>Vorherige Route</i> → Laden → Speichern</td></tr>
     <tr><td><b>Route aus Datei</b></td><td>Route zeichnen → <i>📂 Route importieren</i> → GPX/KML/KMZ wählen</td></tr>
-    <tr><td><b>Update erzwingen</b></td><td>anmelden → <i>⟳ Daten aktualisieren</i></td></tr>
-    <tr><td><b>Seite offline / online</b></td><td>anmelden → <i>⏻ Seite offline nehmen</i> (2× klicken) bzw. <i>▶ Seite online stellen</i></td></tr>
+    <tr><td><b>Update erzwingen</b></td><td>anmelden → <i>⟳ Aktualisieren</i></td></tr>
+    <tr><td><b>Seite offline / online</b></td><td>anmelden → <i>⏻ Offline nehmen</i> (2× klicken) bzw. <i>▶ Online stellen</i></td></tr>
   </table></div>
 </section>
 

@@ -1357,17 +1357,17 @@ body.vodbig .vt-info.live-info{margin-bottom:auto}
 .seg button[aria-pressed="true"]{background:#f5a9d61f;color:var(--accent)}
 .hero .auth{flex-direction:column;align-items:flex-end;gap:6px}
 .auth-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.authbox{display:flex;flex-direction:column;gap:7px;padding:8px;min-width:290px;max-width:340px;background:#1c0f21e0;border:1px solid #f5a9d655;border-radius:14px;box-shadow:0 6px 20px #0006;backdrop-filter:blur(6px)}
+.authbox{display:flex;flex-direction:column;gap:6px;padding:6px 7px;min-width:270px;max-width:330px;background:#1c0f21e0;border:1px solid #f5a9d655;border-radius:14px;box-shadow:0 6px 20px #0006;backdrop-filter:blur(6px)}
 .authbox.is-off{border-color:#ff6b6b}
 .ab-top{display:flex;align-items:center;gap:8px;min-width:0}
-.ab-top .av{position:relative;flex:none;width:28px;height:28px;border-radius:50%;background:var(--twitch);color:#fff;display:grid;place-items:center;font:600 12px var(--f-body);overflow:hidden}
+.ab-top .av{position:relative;flex:none;width:24px;height:24px;border-radius:50%;background:var(--twitch);color:#fff;display:grid;place-items:center;font:600 12px var(--f-body);overflow:hidden}
 .ab-top .av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.ab-name{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-size:14px;color:var(--fg);white-space:nowrap;overflow:hidden}
+.ab-name{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--fg);white-space:nowrap;overflow:hidden}
 .ab-name>span{overflow:hidden;text-overflow:ellipsis}
 .ab-name .tag{margin:0;flex:none}
-.ab-out{flex:none;font-size:12px;padding:4px 9px}
-.ab-acts{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-top:7px;border-top:1px solid #f5a9d633}
-.ab-acts .btn{font-size:12px;padding:6px 8px;justify-content:center;text-align:center;white-space:nowrap}
+.ab-out{flex:none;font-size:11.5px;padding:3px 8px}
+.ab-acts{display:grid;grid-template-columns:1fr 1fr auto;gap:5px;padding-top:6px;border-top:1px solid #f5a9d633}
+.ab-acts .btn{font-size:11.5px;padding:4px 7px;justify-content:center;text-align:center;white-space:nowrap}
 .ab-acts .site-off-btn{border-color:#ff6b6b88;color:#ffd0d0}
 .ab-acts .site-off-btn:hover:not(:disabled){border-color:#ff6b6b;color:#fff;background:#ff6b6b22}
 .ab-acts .site-off-btn.confirm{background:#c0392b;border-color:#ff6b6b;color:#fff}
@@ -3102,11 +3102,11 @@ function renderAuth(){
     '<button type="button" class="btn ghost ab-out" id="logout">'+T('Abmelden','Log out')+'</button></div>';
   if(ed&&CONFIG.saveUrl){
     var pend=SITE_PENDING!==null,off=pend?SITE_PENDING:SITE_OFF;
-    h+='<div class="ab-acts"><button type="button" class="btn upd-btn" id="manual-upd" title="'+T('Holt sofort neue Streams, Clips und Zahlen von Twitch – falls die automatische Aktualisierung hängt','Fetches new streams, clips and numbers from Twitch right now – in case the automatic update is stuck')+'"'+(busy?' disabled':'')+'>'+(busy?T('⟳ Update läuft …','⟳ Updating …'):T('⟳ Daten aktualisieren','⟳ Update data'))+'</button>'+
-      (pend?'<button type="button" class="btn '+(off?'site-off-btn':'site-on-btn')+'" disabled>'+(off?T('Wird offline genommen …','Going offline …'):T('Geht wieder online …','Going online …'))+'</button>'
-        :SITE_OFF?'<button type="button" class="btn site-on-btn" id="site-toggle" title="'+T('Seite für alle Besucher wieder anzeigen','Show the site to all visitors again')+'">▶ '+T('Seite online stellen','Put site online')+'</button>'
-        :'<button type="button" class="btn site-off-btn" id="site-toggle" title="'+T('Besucher sehen dann nur „Zurzeit in Bearbeitung“. Bearbeiter sehen die Seite weiter.','Visitors then only see “Currently under maintenance”. Editors still see the site.')+'">⏻ '+T('Seite offline nehmen','Take site offline')+'</button>')+
-      WRAP_YEARS.map(function(y){return '<button type="button" class="btn wr-btn" data-wrapy="'+y+'" title="'+T('Nur für Kanal, Mods und Bearbeiter sichtbar','Only visible to the channel, mods and editors')+'">🎁 '+T('Rückblick ','Review ')+y+'</button>'}).join('')+
+    h+='<div class="ab-acts"><button type="button" class="btn upd-btn" id="manual-upd" title="'+T('Holt sofort neue Streams, Clips und Zahlen von Twitch – falls die automatische Aktualisierung hängt','Fetches new streams, clips and numbers from Twitch right now – in case the automatic update is stuck')+'"'+(busy?' disabled':'')+'>'+(busy?T('⟳ Läuft …','⟳ Updating …'):T('⟳ Aktualisieren','⟳ Update'))+'</button>'+
+      (pend?'<button type="button" class="btn '+(off?'site-off-btn':'site-on-btn')+'" disabled>'+(off?T('Geht offline …','Going offline …'):T('Geht online …','Going online …'))+'</button>'
+        :SITE_OFF?'<button type="button" class="btn site-on-btn" id="site-toggle" title="'+T('Seite für alle Besucher wieder anzeigen','Show the site to all visitors again')+'">▶ '+T('Online stellen','Put online')+'</button>'
+        :'<button type="button" class="btn site-off-btn" id="site-toggle" title="'+T('Besucher sehen dann nur „Zurzeit in Bearbeitung“. Bearbeiter sehen die Seite weiter.','Visitors then only see “Currently under maintenance”. Editors still see the site.')+'">⏻ '+T('Offline nehmen','Take offline')+'</button>')+
+      WRAP_YEARS.map(function(y){return '<button type="button" class="btn wr-btn" data-wrapy="'+y+'" title="'+T('Jahresrückblick – nur für Kanal, Mods und Bearbeiter sichtbar','Year in review – only visible to the channel, mods and editors')+'" aria-label="'+T('Jahresrückblick ','Year in review ')+y+'">🎁 '+y+'</button>'}).join('')+
       '</div>';
     if(SITE_OFF)h+='<div class="ab-state"><i></i>'+T('Für Besucher offline – nur Bearbeiter sehen die Karte','Offline for visitors – only editors see the map')+'</div>';
   }
@@ -3127,7 +3127,7 @@ function siteSwitch(btn){
   var u=state.user;if(!canEdit(u)||!CONFIG.saveUrl)return;
   var target=!SITE_OFF;
   if(target&&!btn.classList.contains('confirm')){ // erst nachfragen
-    btn.classList.add('confirm');btn.textContent=T('Sicher? Nochmal klicken','Sure? Click again');
+    btn.classList.add('confirm');btn.textContent=T('Sicher? Nochmal','Sure? Again');
     clearTimeout(siteConfirmT);siteConfirmT=setTimeout(renderAuth,5000);return;
   }
   clearTimeout(siteConfirmT);
