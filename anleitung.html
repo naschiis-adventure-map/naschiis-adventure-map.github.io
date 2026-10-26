@@ -173,7 +173,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
 <body>
 <header><div class="sky"></div><h1>Naschii’s Adventure Map</h1><p>Anleitung</p></header>
 <nav class="toc" aria-label="Inhalt"><div>
-  <a href="#ueberblick">Überblick</a><a href="#karte">Karte</a><a href="#finden">Suchen</a><a href="#clipsuche">Clips suchen</a><a href="#stream">Stream ansehen</a><a href="#player">Clip-Player</a><a href="#entdecken">Entdecken</a><a href="#mehr">LIVE · Teilen · Handy</a><a href="#mods">Für Mods</a><a href="#automatik">Automatik</a><a href="#faq">Fragen</a><a href="#spick">Spickzettel</a>
+  <a href="#ueberblick">Überblick</a><a href="#karte">Karte</a><a href="#finden">Suchen</a><a href="#clipsuche">Clips suchen</a><a href="#stream">Stream ansehen</a><a href="#player">Clip-Player</a><a href="#vod">Ganzer Stream</a><a href="#entdecken">Entdecken</a><a href="#mehr">LIVE · Teilen · Handy</a><a href="#mods">Für Mods</a><a href="#automatik">Automatik</a><a href="#faq">Fragen</a><a href="#spick">Spickzettel</a>
 </div></nav>
 <main>
 <a class="back" href="./">← Zurück zur Karte</a>
@@ -297,7 +297,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
   <div class="split">
     <div class="mcard"><div><div class="d"><i></i>Fr., 16. Oktober 2026 · 16:13 <span class="ui-tag r">ROUTE</span></div><h4>☀️ Schönes Wetter genießen in Düsseldorf ☀️</h4><div class="m"><span>5 Std. 33 Min.</span><span>Düsseldorf</span><span>55 Clips</span></div></div><div class="side"><div class="cb"><b></b>IRL</div><div class="thumbm"></div></div></div>
     <ul>
-      <li>Datum und Startzeit, Kennzeichen <span class="ui-tag r">ROUTE</span>, <span class="ui-tag">ORT UNGEFÄHR</span> oder <span class="ui-live">● LIVE</span></li>
+      <li>Datum und Startzeit, Kennzeichen <span class="ui-tag r">ROUTE</span>, <span class="ui-tag">ORT UNGEFÄHR</span> oder <span class="ui-live">● LIVE</span>; <span class="ui-tag" style="color:#ffd36b;border-color:#ffd36b80">📼 VOD</span> heißt: Der ganze Stream ist noch auf Twitch</li>
       <li>Dauer, Ort und Anzahl Clips</li>
       <li>Rechts die <b>Kategorie mit Twitch-Coverbild</b> und das Vorschaubild des Top-Clips</li>
       <li>Am Computer: Maus kurz über einen Stream halten – eine <b>Gedankenblase</b> neben der Liste zeigt die kurze Beschreibung</li>
@@ -340,6 +340,25 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
       <li><b>‹ ›</b> oder Pfeiltasten blättern, <kbd>Esc</kbd> schließt.</li>
       <li><span class="ui-btn">Auf Twitch öffnen ↗</span> oder <kbd>Strg</kbd>+Klick öffnet den Clip bei Twitch.</li>
       <li>Der Player lädt <b>erst nach dem Klick</b> (Datenschutz). Aufrufe zählen ganz normal bei Twitch.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- VoD -->
+<section class="s" id="vod">
+  <p class="kicker">Ganzer Stream (VoD)</p>
+  <h2>Den kompletten Stream ansehen – mit Clip-Zeitleiste</h2>
+  <div class="split">
+    <figure class="figure"><svg viewBox="0 0 240 150" width="100%"><rect width="240" height="150" rx="9" fill="#0d0710" stroke="#f5a9d6"/><text x="9" y="13" font-size="6.5" font-weight="600" fill="#fff" font-family="IBM Plex Sans">📼 So., 25.10.26 · Horror in MADiSON</text><rect x="196" y="6" width="38" height="10" rx="5" fill="#120c16" stroke="#3a2a42"/><text x="215" y="13" text-anchor="middle" font-size="5.5" fill="#fff" font-family="IBM Plex Sans">× Schließen</text><defs><linearGradient id="vg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#3b1d40"/><stop offset="1" stop-color="#9146ff"/></linearGradient></defs><rect x="40" y="20" width="160" height="78" fill="url(#vg)"/><circle cx="120" cy="59" r="12" fill="#ffffff22" stroke="#fff"/><path d="M116 52 l11 7 l-11 7z" fill="#fff"/><rect x="10" y="104" width="220" height="12" rx="3" fill="#2a1330" stroke="#f5a9d633"/><rect x="10" y="104" width="78" height="12" rx="3" fill="#f5a9d630"/><g fill="#f5a9d6"><rect x="18" y="106" width="3" height="8" rx="1"/><rect x="34" y="106" width="3" height="8" rx="1"/><rect x="52" y="106" width="3" height="8" rx="1"/><rect x="104" y="106" width="3" height="8" rx="1"/><rect x="118" y="106" width="3" height="8" rx="1"/><rect x="122" y="106" width="3" height="8" rx="1"/><rect x="150" y="106" width="3" height="8" rx="1"/><rect x="176" y="106" width="3" height="8" rx="1"/><rect x="210" y="106" width="3" height="8" rx="1"/></g><g fill="#ffd36b"><rect x="26" y="106" width="3" height="8" rx="1"/><rect x="138" y="106" width="3" height="8" rx="1"/></g><rect x="70" y="105" width="3" height="10" rx="1" fill="#fff"/><rect x="87" y="102" width="1.5" height="16" fill="#fff"/><text x="10" y="126" font-size="5.6" fill="#fff" font-family="IBM Plex Sans">🎬 Jetzt: Nacktmull erschreckt Naschi</text><text x="230" y="126" text-anchor="end" font-size="5.4" fill="#b7a3bc" font-family="IBM Plex Mono">3:26:55 / 9:47:00 · 23:16</text><rect x="10" y="133" width="220" height="12" rx="3" fill="#1c1420"/><text x="16" y="141" font-size="5.5" fill="#8b7a90" font-family="IBM Plex Sans">… darunter die Karte</text></svg><figcaption>Player über der Karte, darunter die Zeitleiste mit allen Clips</figcaption></figure>
+    <ul>
+      <li>Hat Twitch den Stream noch gespeichert, steht in der Liste <span class="ui-tag" style="color:#ffd36b;border-color:#ffd36b80">📼 VOD</span> und in den Details der Knopf <span class="ui-btn">📼 Ganzen Stream ansehen</span>.</li>
+      <li>Der Player erscheint <b>über der Karte</b>, die Karte rückt nach unten. Am Handy nimmt er den Platz der Karte ein.</li>
+      <li>Darunter die <b>Zeitleiste</b>: Jeder Strich ist ein Clip an seiner Stelle im Stream, <b style="color:#ffd36b">gelb</b> sind die drei beliebtesten. Strich anklicken springt dorthin, ein Klick auf die Leiste an diese Stelle. Maus drüber zeigt Titel und Zeit.</li>
+      <li>Darunter stehen Laufzeit, Uhrzeit im Stream und der Clip, der <b>gerade läuft</b> – liegt er auf der Route, leuchtet sein ▶-Marker auf der Karte auf.</li>
+      <li>In der Clipliste springt <span class="ui-btn" style="color:#ffd36b">📼 1:05:00</span> neben einem Clip direkt an diese Stelle im ganzen Stream.</li>
+      <li><span class="ui-btn">× Schließen</span> oder ein anderer Stream gibt der Karte ihren Platz zurück.</li>
+      <li><b>Nur solange Twitch das VoD hat:</b> Twitch löscht vergangene Streams nach einiger Zeit. Danach verschwinden Knopf und Kennzeichen automatisch – Clips bleiben.</li>
+      <li>Auch hier lädt der Twitch-Player <b>erst nach dem Klick</b> (Datenschutz).</li>
     </ul>
   </div>
 </section>
@@ -562,6 +581,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
     <tr><td><b>Streams eines Tages</b></td><td><i>📅 Kalender</i> → Tag anklicken</td></tr>
     <tr><td><b>Bestimmten Clip finden</b></td><td>Clip-Titel oder Clipper-Namen suchen</td></tr>
     <tr><td><b>Clips zum Stöbern</b></td><td><i>🎲 Zufälliger Clip</i> über der Liste</td></tr>
+    <tr><td><b>Ganzen Stream ansehen</b></td><td>Stream mit <i>📼 VoD</i> öffnen → <i>📼 Ganzen Stream ansehen</i>; Striche auf der Zeitleiste = Clips</td></tr>
     <tr><td><b>Clips in Reihenfolge</b></td><td>Im Stream auf <i>Chronologisch</i> stellen</td></tr>
     <tr><td><b>Zurück zur Liste</b></td><td><i>← Alle Streams</i> – die Position bleibt erhalten</td></tr>
     <tr><td><b>Mehr Liste am Handy</b></td><td>Schieber zwischen Karte und Liste hochziehen oder antippen</td></tr>

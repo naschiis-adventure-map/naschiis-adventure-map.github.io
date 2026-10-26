@@ -1163,6 +1163,44 @@ label{display:block;font:500 11px var(--f-mono);letter-spacing:.08em;text-transf
 .clip-tip .ct-go{display:inline-block;margin-top:6px;font:600 12px var(--f-body);color:var(--accent)}
 .leaflet-tooltip.stop-tip{background:var(--panel);color:var(--fg);border:1px solid var(--accent);border-radius:8px;font:600 12px var(--f-body);padding:4px 9px}
 .tag.route{color:var(--accent);border-color:#f5a9d680}
+.tag.vodtag{color:#ffd36b;border-color:#ffd36b80}
+.tag+.tag.vodtag{margin-left:4px}
+/* VoD-Player über der Karte + Zeitleiste mit den Clips */
+.map-wrap{container-type:size}
+.vodbox{position:absolute;left:0;right:0;top:0;z-index:1001;display:flex;flex-direction:column;background:#0d0710;border-bottom:1px solid var(--line)}
+.vodbox[hidden]{display:none}
+.vod-top{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 12px;font:500 12px var(--f-body);color:var(--fg)}
+.vod-top b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.vod-top a{color:var(--muted);text-decoration:none;font-size:11.5px;white-space:nowrap}
+.vod-top a:hover{color:var(--fg)}
+.vod-x{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:2px 10px;font-size:12px;white-space:nowrap}
+.vod-x:hover{border-color:var(--accent)}
+.vod-frame{--h:min(56.25cqw,56cqh);height:var(--h);width:min(100%,calc(var(--h) * 16 / 9));margin:0 auto;background:#000}
+.vod-frame iframe,.vod-frame>div{width:100%;height:100%;border:0;display:block}
+.vod-tl{padding:9px 14px 9px}
+.vt-bar{position:relative;height:24px;border-radius:6px;background:#2a1330;border:1px solid #f5a9d633;cursor:pointer;touch-action:none}
+.vt-prog{position:absolute;left:0;top:0;bottom:0;width:0;background:#f5a9d630;border-radius:5px 0 0 5px;pointer-events:none}
+.vt-head{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 6px #fff;pointer-events:none;left:0}
+.vt-c{position:absolute;top:3px;bottom:3px;width:7px;margin-left:-3px;border:0;padding:0;border-radius:3px;background:var(--accent);opacity:.8;cursor:pointer;transition:transform .12s,background .12s}
+.vt-c.top{background:#ffd36b;opacity:.95}
+.vt-c:hover,.vt-c:focus-visible,.vt-c.on{opacity:1;background:#fff;transform:scaleY(1.35);z-index:1}
+.vt-tip{position:absolute;bottom:calc(100% + 7px);background:#1c0f21;border:1px solid #f5a9d655;color:var(--fg);padding:3px 8px;border-radius:6px;font:500 11px var(--f-body);white-space:nowrap;pointer-events:none;max-width:280px;overflow:hidden;text-overflow:ellipsis;z-index:3;box-shadow:0 4px 12px #0009}
+.vt-tip[hidden]{display:none}
+.vt-info{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:6px;font:500 11px var(--f-mono);color:var(--muted)}
+.vt-now{color:var(--fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--f-body)}
+.vt-t{flex:none;font-variant-numeric:tabular-nums}
+body.vodon #map{top:var(--vodh,0px)}
+.vodbtn{width:100%;justify-content:center;margin:-4px 0 14px;border-color:#ffd36b80}
+.vodbtn small{color:var(--muted);font-weight:400}
+.clip .vj{flex:none;margin-left:auto;font:500 10.5px var(--f-mono);color:#ffd36b;border:1px solid #ffd36b66;border-radius:999px;padding:2px 8px;white-space:nowrap;cursor:pointer}
+.clip .vj:hover{background:#ffd36b22;border-color:#ffd36b}
+@media (max-width:820px){
+  .vodbox{bottom:0}
+  .vod-frame{--h:min(56.25cqw,calc(100cqh - 92px))}
+  .vod-tl{padding:7px 12px 6px}
+  body.vodon #map{visibility:hidden}
+  .vod-top a{display:none}
+}
 
 /* ---------- Routen: Editor ---------- */
 .ed h2{font:600 22px/1.15 var(--f-display);margin:2px 0 4px}
@@ -1355,6 +1393,7 @@ body.editing .grp-wrap{pointer-events:none}
 <main class="app">
   <section class="map-wrap" aria-label="Karte">
     <div id="map"></div>
+    <div class="vodbox" id="vodbox" hidden aria-label="VoD"></div>
   </section>
 
   <div class="grip" id="grip" role="separator" aria-orientation="horizontal" aria-label="Karte und Liste verschieben" title="Ziehen: Liste hoch oder runter · Tippen: Karte ein-/ausblenden" tabindex="0"><i></i></div>
@@ -1657,7 +1696,8 @@ function animateLine(line){
 var stopMarkers=[];
 function select(id){
   if(state.editing)return;
-  var r=byId(id);if(!r)return;lastCard=id;state.selectedId=id;
+  var r=byId(id);if(!r)return;
+  if(VOD&&VOD.r.id!==id)closeVod();lastCard=id;state.selectedId=id;
   dimAll(id);hideTip(true);
   selGroup.clearLayers();stopMarkers=[];
   clipMarkers={};
@@ -1670,6 +1710,7 @@ function select(id){
   renderDetail(r);showView('detail');renderListSelection();
 }
 function deselect(){
+  closeVod();
   state.selectedId=null;selGroup.clearLayers();
   undimAll();
   fitAll();showView('list');
@@ -1736,7 +1777,7 @@ function renderList(){
     var th=thumbOf(r);
     var side=cardSide(r,th);
     return '<button type="button" class="card'+(side?' has-thumb':'')+'" data-id="'+esc(r.id)+'" aria-pressed="'+(r.id===state.selectedId)+'"><span class="cbody">'+
-      '<div class="d"><span class="dot" style="background:'+r.color+'"></span>'+esc(fmtDateShort(r.date))+' · '+esc(r.start||'')+liveTag(r)+routeTag(r)+'</div>'+
+      '<div class="d"><span class="dot" style="background:'+r.color+'"></span>'+esc(fmtDateShort(r.date))+' · '+esc(r.start||'')+liveTag(r)+routeTag(r)+vodTag(r)+'</div>'+
       '<h3>'+esc(r.title)+'</h3>'+
       '<div class="m mm"><span class="m1">'+esc(fmtDur(r.durationMin))+((r.clips||[]).length?' · '+r.clips.length+(r.clips.length===1?' Clip':' Clips'):'')+(function(){var n=q.length>=2?(r.clips||[]).filter(function(c){return clipMatch(c,q)}).length:0;return n?' · <span class="hl">🎬 '+n+T(' passend',' matching')+'</span>':''})()+'</span>'+(r.location?'<span class="m2" title="'+esc(r.location.name)+'">📍 '+esc(r.location.name)+'</span>':'')+'</div></span>'+side+'</button>';
   }).join(''):'<p class="empty">'+(DATA_LOADED||location.protocol==='file:'?T('Keine Streams gefunden.','No streams found.'):'<span class="loading">'+T('Lade Streams …','Loading streams …')+'</span>')+'</p>';
@@ -1871,6 +1912,7 @@ function renderCats(){
   sel.hidden=!keys.length;
   if(cur&&cnt[cur])sel.value=cur;else{state.cat='';sel.value=''}
 }
+function vodTag(r){return r.vod?'<span class="tag vodtag" title="'+T('Ganzer Stream (VoD) noch auf Twitch','Full stream (VoD) still on Twitch')+'">📼 VoD</span>':''}
 function routeTag(r){if(hasRoute(r))return '<span class="tag route">ROUTE</span>';if(r.location&&r.location.home)return '';return r.location&&!r.location.manual?'<span class="tag">'+T('ORT UNGEFÄHR','APPROX. PLACE')+'</span>':''}
 function renderListSelection(){var cs=document.querySelectorAll('.card');for(var i=0;i<cs.length;i++){cs[i].setAttribute('aria-pressed',cs[i].dataset.id===state.selectedId)}}
 function safeUrl(u){try{var x=new URL(u);return x.protocol==='https:'?x.href:null}catch(e){return null}}
@@ -1880,7 +1922,7 @@ function renderDetail(r){
   var chrono=state.clipSort==='time';
   var LST=chrono?CL.slice().sort(function(a,b){return String(a.moment||a.at||'').localeCompare(String(b.moment||b.at||''))}):CL;
   state.clipList=LST;state.clipStream=r;
-  var clips=LST.map(function(c,i){var u=safeUrl(c.url);if(!u)return'';var meta=c.views!=null?((chrono&&clipTime(c)?clipTime(c)+' · ':'')+c.views.toLocaleString(LOC)+' '+T('Aufrufe','views')+(c.dur?' · '+c.dur+' s':'')+(c.by?' · '+T('von ','by ')+c.by:'')):new URL(u).hostname.replace(/^www\./,'');var sg=slugOf(u),on=sg&&r.clipPos&&r.clipPos[sg];return '<a class="clip'+(i>=10?' more':'')+'" data-ci="'+i+'"'+(on?' data-slug="'+esc(sg)+'" title="'+T('Auf der Karte markiert','Marked on the map')+'"':'')+' href="'+esc(u)+'" target="_blank" rel="noopener noreferrer"'+(i>=10?' hidden':'')+'>'+clipIcon(c)+'<span class="tt">'+esc(c.title||'Clip')+'<small>'+(on?'📍 ':'')+esc(meta)+' ↗</small></span></a>'}).join('')+(CL.length>10?'<button type="button" class="btn ghost" id="moreclips">'+T('Alle '+CL.length+' Clips anzeigen','Show all '+CL.length+' clips')+'</button>':'');
+  var clips=LST.map(function(c,i){var u=safeUrl(c.url);if(!u)return'';var meta=c.views!=null?((chrono&&clipTime(c)?clipTime(c)+' · ':'')+c.views.toLocaleString(LOC)+' '+T('Aufrufe','views')+(c.dur?' · '+c.dur+' s':'')+(c.by?' · '+T('von ','by ')+c.by:'')):new URL(u).hostname.replace(/^www\./,'');var sg=slugOf(u),on=sg&&r.clipPos&&r.clipPos[sg],vo=r.vod?vodOff(c,r):null;return '<a class="clip'+(i>=10?' more':'')+'" data-ci="'+i+'"'+(on?' data-slug="'+esc(sg)+'" title="'+T('Auf der Karte markiert','Marked on the map')+'"':'')+' href="'+esc(u)+'" target="_blank" rel="noopener noreferrer"'+(i>=10?' hidden':'')+'>'+clipIcon(c)+'<span class="tt">'+esc(c.title||'Clip')+'<small>'+(on?'📍 ':'')+esc(meta)+' ↗</small></span>'+(vo!=null?'<span class="vj" data-voff="'+Math.floor(vo)+'" title="'+T('An diese Stelle im ganzen Stream springen','Jump to this moment in the full stream')+'">📼 '+fmtHMS(vo)+'</span>':'')+'</a>'}).join('')+(CL.length>10?'<button type="button" class="btn ghost" id="moreclips">'+T('Alle '+CL.length+' Clips anzeigen','Show all '+CL.length+' clips')+'</button>':'');
   var routeInfo=hasRoute(r)&&!(r.location&&r.location.manual)?'':r.location?'<p class="note routenote">'+(r.location.manual?'⌂ '+esc(r.location.name):r.location.home?'🏰 '+T('Gaming-Stream – Naschii ist zu Hause in ihrer Homebase: ','Gaming stream – Naschii is at home in her base: ')+esc(r.location.name):T('Ort ungefähr, abgeleitet aus dem Streamtitel: ','Approximate place, taken from the stream title: ')+esc(r.location.name))+'</p>':'';
   $('#v-detail').innerHTML=
     '<button type="button" class="back" id="back">'+T('← Alle Streams','← All streams')+'</button>'+
@@ -1888,6 +1930,7 @@ function renderDetail(r){
     '<h2>'+esc(r.title)+'</h2>'+(CL[0]&&CL[0].thumb&&safeUrl(CL[0].thumb)?'<a class="hero-thumb" href="'+esc(safeUrl(CL[0].url))+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(safeUrl(CL[0].thumb))+'" alt="" loading="lazy" onerror="this.parentNode.remove()"><span>▶ Top-Clip: '+esc(CL[0].title)+(CL[0].views!=null?' · '+CL[0].views.toLocaleString(LOC)+' '+T('Aufrufe','views'):'')+'</span></a>':(r.live&&LIVE_ON!==false?'<a class="hero-thumb" data-live="1" href="https://www.twitch.tv/'+CHANNEL+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(livePreview())+'" alt="" onerror="this.parentNode.remove()"><span>● LIVE · '+T('Jetzt auf Twitch ansehen','Watch now on Twitch')+'</span></a>':''))+
     '<div class="facts"><div><b>'+esc(fmtDur(r.durationMin))+'</b><small>'+T('Dauer','Duration')+'</small></div><div><b>'+esc(r.start||'–')+(r.start?'–'+addMin(r.start,r.durationMin):'')+'</b><small>'+T('Uhrzeit','Time')+'</small></div><div><b>'+CL.length.toLocaleString(LOC)+'</b><small>Clips</small></div>'+
     '</div>'+
+    (r.vod?'<button type="button" class="btn vodbtn" id="vodopen">'+vodBtnLabel(r)+'</button>':'')+
     routeInfo+
     (r.desc?'<p class="desc">'+esc(r.desc)+'</p>':'')+
     (stops?'<div class="sec"><h3>'+T('Stationen','Stops')+'</h3><ol class="stops">'+stops+'</ol></div>':'')+
@@ -1975,6 +2018,7 @@ var MODES={
   stop:['📍','Station',T('Klick auf die Route setzt eine nummerierte Station, z. B. „Altstadt“. Den Namen trägst du unten bei den Stationen ein.','Click the route to add a numbered stop, e.g. “Old town”. Enter its name below under stops.')]
 };
 function openEditor(id){
+  closeVod();
   var r=byId(id);if(!r||!canEdit(state.user))return;
   hideTip(true);selGroup.clearLayers();clipMarkers={};
   ed={id:id,r:r,points:(r.points||[]).map(function(x){return x.slice()}),breaks:(r.breaks||[]).slice(),stops:(r.stops||[]).map(function(s){return {lat:s.lat,lng:s.lng,name:s.name||''}}),
@@ -2428,6 +2472,7 @@ function delDraft(did){
 /* ---------- Präsentieren: Entwürfe groß auf der Karte zeigen und durchblättern (z. B. im Stream) ---------- */
 var PRES=null;
 function startPresent(i){
+  closeVod();
   var dl=realDrafts();if(!dl.length)return;
   PRES={list:dl,i:Math.max(0,Math.min(i||0,dl.length-1)),all:false,layer:L.layerGroup().addTo(map)};
   if(edLayer)map.removeLayer(edLayer);
@@ -2572,6 +2617,7 @@ $('#panel').addEventListener('dragstart',function(e){var ec=e.target.closest&&e.
 /* ---------- Clip-Player: Twitch-Player lädt erst nach Klick (Datenschutz) ---------- */
 var PL={list:[],i:0,r:null,random:false};
 function openPlayer(list,i,r,random){
+  vodPause();
   PL={list:list,i:i,r:r,random:!!random};showClip();
   $('#player').hidden=false;document.body.style.overflow='hidden';
   setTimeout(function(){$('#pl-close').focus()},30);
@@ -2608,6 +2654,8 @@ document.addEventListener('keydown',function(e){
 });
 // Klicks auf Clips in der Liste, auf den Top-Clip und in Karten-Vorschauen abfangen (Strg/Mittelklick öffnet weiter Twitch)
 document.addEventListener('click',function(e){
+  var vj=e.target.closest&&e.target.closest('.vj[data-voff]');
+  if(vj){e.preventDefault();e.stopPropagation();var rv=state.clipStream||byId(state.selectedId);if(rv)vodGo(rv,+vj.dataset.voff);return}
   if(e.button!==0||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)return;
   var a=e.target.closest&&e.target.closest('a.clip[data-ci],a.hero-thumb,a.ct-go[data-slug]');if(!a||state.editing)return;
   e.preventDefault();e.stopPropagation();
@@ -2619,6 +2667,125 @@ document.addEventListener('click',function(e){
   if(i<0){list=(r.clips||[]).filter(function(c){return slugOf(c.url)===sg});i=0}
   openPlayer(list,i,r);
 },true);
+
+/* ---------- VoD: ganzer Stream über der Karte, darunter Zeitleiste mit den Clips ----------
+   Der Twitch-Player (und sein Skript) wird erst nach Klick geladen (Datenschutz). */
+var VOD=null,twJs=null;
+function fmtHMS(s){s=Math.max(0,Math.floor(s||0));var h=Math.floor(s/3600),m=Math.floor(s/60)%60,x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0')}
+function twTime(s){s=Math.max(0,Math.floor(s||0));return Math.floor(s/3600)+'h'+(Math.floor(s/60)%60)+'m'+(s%60)+'s'}
+// Stelle eines Clips im VoD in Sekunden: genau über Twitch (off), sonst aus der Uhrzeit geschätzt
+function vodOff(c,r){
+  if(!r||!r.vod)return null;
+  if(c.off!=null)return Math.min(c.off,r.vod.sec||c.off);
+  var w=c.moment||c.at;if(!w)return null;
+  var t=(new Date(w)-new Date(r.vod.start))/1000-(c.moment?0:(c.dur||30));
+  return isFinite(t)&&t>=-60&&t<=(r.vod.sec||0)+60?Math.max(0,Math.min(t,r.vod.sec||t)):null;
+}
+function vodBtnLabel(r){return VOD&&VOD.r===r?'× '+T('VoD schließen','Close VoD'):'📼 '+T('Ganzen Stream ansehen','Watch full stream')+' <small>· VoD · '+fmtHMS(r.vod.sec)+'</small>'}
+function vodSyncBtn(){var b=$('#vodopen');if(b){var r=byId(state.selectedId);if(r&&r.vod)b.innerHTML=vodBtnLabel(r)}}
+function loadTwitchJs(cb){
+  if(window.Twitch&&Twitch.Player)return cb(true);
+  if(!twJs){twJs=[];var s=document.createElement('script');s.src='https://player.twitch.tv/js/embed/v1.js';s.async=true;
+    s.onload=function(){var ok=!!(window.Twitch&&Twitch.Player);twJs.forEach(function(f){f(ok)});twJs=null};
+    s.onerror=function(){twJs.forEach(function(f){f(false)});twJs=null;s.remove()};document.head.appendChild(s)}
+  twJs.push(cb);
+}
+function vodPause(){if(VOD&&VOD.p)try{VOD.p.pause()}catch(e){}}
+function vodGo(r,t){
+  if(!r||!r.vod)return;
+  if(VOD&&VOD.r===r){vodSeek(t);return}
+  openVod(r,t);
+}
+function openVod(r,t){
+  closeVod();
+  var v=r.vod,sec=v.sec||1,box=$('#vodbox');
+  var list=(r.clips||[]).map(function(c){return {c:c,o:vodOff(c,r)}}).filter(function(x){return x.o!=null}).sort(function(a,b){return a.o-b.o});
+  var tops=(r.clips||[]).slice().sort(function(a,b){return (b.views||0)-(a.views||0)}).slice(0,3);
+  VOD={r:r,list:list,sec:sec,p:null,t:t||0,cur:null,timer:null};
+  var ticks=list.map(function(x,i){return '<button type="button" class="vt-c'+(tops.indexOf(x.c)>=0?' top':'')+'" data-vi="'+i+'" style="left:'+(x.o/sec*100).toFixed(3)+'%" aria-label="'+esc((x.c.title||'Clip')+' · '+fmtHMS(x.o))+'"></button>'}).join('');
+  box.innerHTML='<div class="vod-top"><b>📼 '+esc(fmtDateShort(r.date))+' · '+esc(r.title)+'</b><a href="https://www.twitch.tv/videos/'+encodeURIComponent(v.id)+'" id="vod-tw" target="_blank" rel="noopener noreferrer">'+T('Auf Twitch ↗','On Twitch ↗')+'</a><button type="button" class="vod-x" id="vod-x" aria-label="'+T('VoD schließen','Close VoD')+'">× '+T('Schließen','Close')+'</button></div>'+
+    '<div class="vod-frame"><div id="vod-player"></div></div>'+
+    '<div class="vod-tl"><div class="vt-bar" id="vt-bar" role="group" aria-label="'+T('Zeitleiste: Clips im Stream','Timeline: clips in the stream')+'"><div class="vt-prog" id="vt-prog"></div>'+ticks+'<div class="vt-head" id="vt-head"></div><div class="vt-tip" id="vt-tip" hidden></div></div>'+
+    '<div class="vt-info"><span class="vt-now" id="vt-now">'+(list.length?list.length+' '+T('Clips auf der Zeitleiste – antippen zum Hinspringen','clips on the timeline – tap to jump'):T('Keine Clips mit Zeitangabe','No clips with a timestamp'))+'</span><span class="vt-t" id="vt-t">0:00 / '+fmtHMS(sec)+'</span></div></div>';
+  box.hidden=false;document.body.classList.add('vodon');
+  vodLayout();vodSyncBtn();
+  loadTwitchJs(function(ok){
+    if(!VOD||VOD.r!==r)return;
+    if(ok){
+      try{
+        VOD.p=new Twitch.Player('vod-player',{video:'v'+v.id,parent:[location.hostname],width:'100%',height:'100%',autoplay:true,muted:false,time:twTime(VOD.t)});
+        VOD.timer=setInterval(vodTick,500);return;
+      }catch(e){VOD.p=null}
+    }
+    vodFrame(VOD.t);   // Ersatz ohne Skript: einfacher Player, Sprünge laden ihn neu
+  });
+}
+function vodFrame(t){
+  var el=$('#vod-player');if(!el||!VOD)return;VOD.t=t||0;
+  el.innerHTML='<iframe src="https://player.twitch.tv/?video=v'+encodeURIComponent(VOD.r.vod.id)+'&parent='+encodeURIComponent(location.hostname)+'&autoplay=true&muted=false&time='+twTime(VOD.t)+'" allowfullscreen allow="autoplay; fullscreen" title="VoD"></iframe>';
+  vodShow(VOD.t);
+}
+function vodSeek(t){
+  if(!VOD)return;t=Math.max(0,Math.min(t,VOD.sec-1));
+  if(VOD.p){try{VOD.p.seek(t);VOD.p.play()}catch(e){}vodShow(t)}else vodFrame(t);
+}
+function vodTick(){
+  if(!VOD||!VOD.p)return;var t;try{t=VOD.p.getCurrentTime()}catch(e){return}
+  if(typeof t==='number'&&isFinite(t))vodShow(t);
+}
+function vodShow(t){
+  if(!VOD)return;var f=Math.max(0,Math.min(1,t/VOD.sec));
+  var h=$('#vt-head'),pr=$('#vt-prog');if(!h)return;
+  h.style.left=(f*100)+'%';pr.style.width=(f*100)+'%';
+  $('#vt-t').textContent=fmtHMS(t)+' / '+fmtHMS(VOD.sec)+(VOD.r.vod.start?' · '+new Date(+new Date(VOD.r.vod.start)+t*1000).toLocaleTimeString(LOC,{hour:'2-digit',minute:'2-digit'})+T(' Uhr',''):'');
+  var tw=$('#vod-tw');if(tw)tw.href='https://www.twitch.tv/videos/'+encodeURIComponent(VOD.r.vod.id)+'?t='+twTime(t);
+  // Läuft gerade ein Clip-Moment? Dann Markierung, Text und Clip auf der Karte hervorheben
+  var cur=null;for(var i=0;i<VOD.list.length;i++){var x=VOD.list[i];if(t>=x.o-1&&t<=x.o+(x.c.dur||30)+1){cur=i}}
+  if(cur===VOD.cur)return;
+  var old=VOD.cur;VOD.cur=cur;
+  var bs=document.querySelectorAll('.vt-c');if(old!=null&&bs[old])bs[old].classList.remove('on');if(cur!=null&&bs[cur])bs[cur].classList.add('on');
+  vodMark(old,false);vodMark(cur,true);
+  $('#vt-now').textContent=cur!=null?'🎬 '+T('Jetzt: ','Now: ')+(VOD.list[cur].c.title||'Clip'):'';
+}
+function vodMark(i,on){
+  if(i==null||!VOD)return;var sg=slugOf(VOD.list[i].c.url),m=sg&&clipMarkers[sg];if(!m)return;
+  var el=m.getElement();if(el&&el.firstChild)el.firstChild.classList.toggle('hot',on);
+}
+function vodLayout(){
+  var box=$('#vodbox');if(!box)return;
+  var h=box.hidden?0:box.getBoundingClientRect().height;
+  $('.map-wrap').style.setProperty('--vodh',h+'px');
+  if(typeof map!=='undefined'&&map)setTimeout(function(){map.invalidateSize()},30);
+}
+function closeVod(){
+  if(!VOD)return;
+  clearInterval(VOD.timer);vodMark(VOD.cur,false);vodPause();
+  VOD=null;var box=$('#vodbox');box.innerHTML='';box.hidden=true;document.body.classList.remove('vodon');
+  vodLayout();vodSyncBtn();
+}
+if(window.ResizeObserver)new ResizeObserver(function(){if(VOD)vodLayout()}).observe($('#vodbox'));
+// Zeitleiste: Klick auf eine Markierung springt zum Clip, Klick auf die Leiste an diese Stelle
+(function(){
+  var box=$('#vodbox');
+  function posT(e){var b=$('#vt-bar').getBoundingClientRect();return Math.max(0,Math.min(1,(e.clientX-b.left)/b.width))*VOD.sec}
+  box.addEventListener('click',function(e){
+    if(!VOD)return;
+    if(e.target.closest('#vod-x')){closeVod();return}
+    var c=e.target.closest('.vt-c');if(c){vodSeek(Math.max(0,VOD.list[+c.dataset.vi].o-2));return}
+    if(e.target.closest('#vt-bar'))vodSeek(posT(e));
+  });
+  box.addEventListener('pointermove',function(e){
+    if(e.pointerType!=='mouse')return;
+    var bar=e.target.closest&&e.target.closest('#vt-bar'),tip=$('#vt-tip');if(!tip)return;
+    if(!bar||!VOD){tip.hidden=true;return}
+    var c=e.target.closest('.vt-c'),t=c?VOD.list[+c.dataset.vi].o:posT(e);
+    tip.textContent=c?(VOD.list[+c.dataset.vi].c.title||'Clip')+' · '+fmtHMS(t):fmtHMS(t);
+    tip.hidden=false;
+    var bw=bar.getBoundingClientRect().width,tw=tip.offsetWidth,x=t/VOD.sec*bw-tw/2;
+    tip.style.left=Math.max(0,Math.min(bw-tw,x))+'px';
+  });
+  box.addEventListener('mouseleave',function(){var tip=$('#vt-tip');if(tip)tip.hidden=true});
+})();
 
 /* ---------- Login ---------- */
 function setUser(u){
@@ -2755,6 +2922,7 @@ document.addEventListener('click',function(e){
     case 'manual-upd':manualUpdate(t);break;
     case 'site-toggle':siteSwitch(t);break;
     case 'logout':setUser(null);toast(T('Abgemeldet.','Logged out.'));break;
+    case 'vodopen':var rv=byId(state.selectedId);if(VOD&&rv&&VOD.r===rv)closeVod();else vodGo(rv,0);break;
     case 'redit':if(canEdit(state.user))openEditor(state.selectedId);break;
   }
 });

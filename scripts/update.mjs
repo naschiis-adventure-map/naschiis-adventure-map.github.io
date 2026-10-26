@@ -67,6 +67,10 @@ function fromBerlin(date, time) {
   }
   return guess;
 }
+function durationSec(s) { // "3h12m5s" -> Sekunden
+  const m = /(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/.exec(s || '') || [];
+  return (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0);
+}
 function durationMin(s) { // "3h12m5s"
   const m = /(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/.exec(s || '') || [];
   return Math.max(1, Math.round((+(m[1] || 0)) * 60 + (+(m[2] || 0)) + (+(m[3] || 0)) / 60));
@@ -142,16 +146,23 @@ for (const v of videos) {
     // Dauer wächst, solange ein Stream noch läuft; nie kürzen, was TwitchTracker schon hatte
     if (r.source !== 'twitchtracker' || dur > r.durationMin) r.durationMin = Math.max(r.durationMin || 0, dur);
     if (r.source !== 'twitchtracker') { r.title = title; if (!r.location) { const l = locate(title); if (l) r.location = l; } }
+    r.vod = { id: v.id, sec: durationSec(v.duration), start: v.created_at };   // VoD ist (noch) abspielbar
     if (JSON.stringify([r.vodId, r.durationMin, r.title]) !== before) updated++;
   } else {
     const b = berlin(start);
     const n = {
       id: `tw-${v.id}`, vodId: v.id, source: 'twitch', title, date: b.date, start: b.time, durationMin: dur,
-      desc: '', points: [], stops: [], clips: [],
+      desc: '', points: [], stops: [], clips: [], vod: { id: v.id, sec: durationSec(v.duration), start: v.created_at },
     };
     const l = locate(title); if (l) n.location = l;
     streams.push(n); added++;
   }
+}
+
+// VoDs, die Twitch inzwischen gelöscht hat, nicht mehr anbieten
+{
+  const vodIds = new Set(videos.map(v => v.id));
+  for (const r of streams) if (r.vod && !vodIds.has(r.vod.id)) delete r.vod;
 }
 
 // Orte nachtragen: Streams ohne Ort bekommen einen, sobald ihr Titel zu einem Eintrag in data/locations.json passt.
@@ -323,6 +334,8 @@ if (clipsMoved) console.log('Clips umgehängt:', clipsMoved);
 for (const s of stored) {
   const a = alive.get(s.id);
   if (!a) continue;
+  // Stelle des Clips im VoD (Sekunden ab Streamstart) für die Zeitleiste unter dem VoD-Player
+  if (s.r.vod && a.video_id === s.r.vod.id && a.vod_offset != null) s.c.off = a.vod_offset; else delete s.c.off;
   if (s.c.views !== a.view_count) { s.c.views = a.view_count; clipsUpd++; }
   if (a.title && s.c.title !== a.title.trim()) s.c.title = a.title.trim();   // umbenannte Clips
   if (a.thumbnail_url) s.c.thumb = a.thumbnail_url;                          // Vorschaubild
