@@ -735,6 +735,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .wr-rec p{margin-top:6px;font:500 13px/1.35 var(--f-body);color:#f6dcee;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .wr-map{height:min(46vh,420px);max-width:860px;margin:18px auto 0;border-radius:16px;overflow:hidden;border:1px solid #f5a9d655}
 .wr-clips{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:20px auto 0;max-width:960px;text-align:left}
+.wr-gap{opacity:.75;border-style:dashed}
+.wr-gap:hover{transform:none;border-color:#f5a9d655}
+.wr-gap .th{display:grid;place-items:center;background:#ffffff0a;font-size:34px}
 .wr-clips.mo{grid-template-columns:repeat(4,minmax(0,1fr));max-width:860px}
 .wr-clip{position:relative;display:block;border:1px solid #f5a9d655;border-radius:14px;overflow:hidden;background:#1c0f21cc;color:#fff;text-decoration:none;transition:transform .15s}
 .wr-clip:hover{transform:translateY(-3px);border-color:var(--accent)}
@@ -3008,8 +3011,13 @@ function wrapSlides(d){
   S.push('<div class="ws" data-wmap="1"><p class="kick">'+T('Unterwegs','On the road')+'</p><h2>'+(d.places.length?d.places.length+(d.places.length===1?T(' Ausflug',' trip'):T(' Orte',' places'))+T(' außerhalb vom Castle',' outside the castle'):T('Ein Jahr im Castle','A year in the castle'))+'</h2>'+
     '<p class="lead">'+d.home+T(' von ',' of ')+d.n+T(' Streams liefen zu Hause in ',' streams came from home in ')+'<b>Nashii´s Castle</b>'+(d.places.length?T(' – und hier ging es raus: ',' – and this is where she went: ')+d.places.map(function(p){return '<b>'+esc(p.l.name)+'</b> ('+p.rs.map(function(r){return esc(fmtDateShort(r.date))}).join(', ')+')'}).join(', '):'')+'.</p><div class="wr-map" id="wr-map"></div></div>');
   S.push('<div class="ws"><p class="kick">'+T('Die meistgesehenen Clips','Most viewed clips')+'</p><h2>'+T('Top-Clips ','Top clips ')+y+'</h2><div class="wr-clips">'+d.topClips.map(wrClip).join('')+'</div></div>');
+  // alle Monate zeigen: Clip des Monats, sonst eine Kachel für Pause oder „keine Clips“
   var mc=d.months.filter(function(m){return m.top});
-  if(mc.length)S.push('<div class="ws"><p class="kick">'+T('Ein Moment pro Monat','One moment per month')+'</p><h2>'+T('Der Clip des Monats','Clip of the month')+'</h2><div class="wr-clips mo">'+mc.map(function(m){return wrClip(m.top).replace('<div class="tx">','<div class="tx"><small style="margin:0 0 3px;color:var(--accent)">'+esc(wrMonth(m.m,true))+'</small>')}).join('')+'</div></div>');
+  if(mc.length)S.push('<div class="ws"><p class="kick">'+T('Ein Moment pro Monat','One moment per month')+'</p><h2>'+T('Der Clip des Monats','Clip of the month')+'</h2><div class="wr-clips mo">'+d.months.map(function(m){
+    var lab='<small style="margin:0 0 3px;color:var(--accent)">'+esc(wrMonth(m.m,true))+'</small>';
+    if(m.top)return wrClip(m.top).replace('<div class="tx">','<div class="tx">'+lab);
+    return '<div class="wr-clip wr-gap"><div class="th"><span>'+(m.n?'🎮':'☀️')+'</span></div><div class="tx">'+lab+'<b>'+(m.n?T('Keine Clips','No clips'):T('Pause','Break'))+'</b><small>'+(m.n?m.n+' Streams · '+T('niemand hat geclippt','nobody clipped'):T('kein Stream in diesem Monat','no streams this month'))+'</small></div></div>';
+  }).join('')+'</div></div>');
   if(d.quotes.length)S.push('<div class="ws"><p class="kick">'+T('Was war da los?','What happened there?')+'</p><h2>'+T('Legendäre Streams','Legendary streams')+'</h2><div class="wr-quotes">'+d.quotes.map(function(r){return '<div class="wr-q"><p>'+esc(r.desc)+'</p><small>'+esc(fmtDateShort(r.date))+' · '+(r.clips||[]).length+' Clips</small></div>'}).join('')+'</div></div>');
   var nc=Object.keys(d.clippers).length;
   S.push('<div class="ws"><p class="kick">'+T('Danke','Thank you')+'</p><h2>'+T('Danke für ','Thanks for ')+y+' 💖</h2><div class="wr-big">'+(nc?'<div>'+wrN(nc)+'<small>'+T('Leute haben geclippt','people made clips')+'</small></div>':'')+'<div>'+wrN(d.clips.length)+'<small>'+T('Momente festgehalten','moments captured')+'</small></div><div>'+wrN(Math.round(d.min/60))+'<small>'+T('Stunden zusammen','hours together')+'</small></div></div>'+
