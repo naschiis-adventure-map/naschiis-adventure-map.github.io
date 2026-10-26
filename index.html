@@ -1286,7 +1286,7 @@ label{display:block;font:500 11px var(--f-mono);letter-spacing:.08em;text-transf
 .vod-top a:hover{color:var(--fg)}
 .vod-x{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:2px 10px;font-size:12px;white-space:nowrap}
 .vod-x:hover{border-color:var(--accent)}
-.vod-frame{--h:min(56.25cqw,56cqh);height:var(--h);width:min(100%,calc(var(--h) * 16 / 9));margin:0 auto;background:#000}
+.vod-frame{--h:min(56.25cqw,var(--vodfh,56cqh));height:var(--h);width:min(100%,calc(var(--h) * 16 / 9));margin:0 auto;background:#000}
 .vod-frame iframe,.vod-frame>div{width:100%;height:100%;border:0;display:block}
 .vod-tl{padding:9px 14px 9px}
 .vt-bar{position:relative;height:24px;border-radius:6px;background:#2a1330;border:1px solid #f5a9d633;cursor:pointer;touch-action:none}
@@ -1301,6 +1301,13 @@ label{display:block;font:500 11px var(--f-mono);letter-spacing:.08em;text-transf
 .vt-now{color:var(--fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--f-body)}
 .vt-t{flex:none;font-variant-numeric:tabular-nums}
 body.vodon #map{top:var(--vodh,0px)}
+/* Schieber zwischen Video und Karte (Computer) */
+.vod-grip{flex:none;height:14px;display:flex;align-items:center;justify-content:center;cursor:row-resize;touch-action:none;user-select:none;-webkit-user-select:none;border-top:1px solid #f5a9d61f}
+.vod-grip i{display:block;width:56px;height:5px;border-radius:999px;background:var(--accent);opacity:.6;box-shadow:0 0 0 3px #f5a9d622;transition:width .15s,opacity .15s}
+.vod-grip:hover i,.vod-grip.drag i,.vod-grip:focus-visible i{opacity:1;width:76px}
+body.vodbig .vod-grip{display:none}
+body.vod-drag,body.vod-drag *{cursor:row-resize!important;user-select:none}
+body.vod-drag .vod-frame iframe{pointer-events:none}
 body.vodbig .vodbox{bottom:0}
 body.vodbig .vod-frame{--h:min(56.25cqw,calc(100cqh - 92px))}
 body.vodbig #map{visibility:hidden}
@@ -1325,6 +1332,7 @@ body.vodbig .vt-info.live-info{margin-bottom:auto}
   body.vodon #map{visibility:hidden}
   .vod-top a{display:none}
   .vod-big{display:none}
+  .vod-grip{display:none}
 }
 
 /* ---------- Routen: Editor ---------- */
@@ -2843,7 +2851,7 @@ function openVod(r,t){
   box.innerHTML='<div class="vod-top"><b>📼 '+esc(fmtDateShort(r.date))+' · '+esc(r.title)+'</b><a href="https://www.twitch.tv/videos/'+encodeURIComponent(v.id)+'" id="vod-tw" target="_blank" rel="noopener noreferrer">'+T('Auf Twitch ↗','On Twitch ↗')+'</a>'+(VOD.home?'':'<button type="button" class="vod-big" id="vod-big" aria-pressed="'+vodBig+'">'+vodBigLabel()+'</button>')+'<button type="button" class="vod-x" id="vod-x" aria-label="'+T('VoD schließen','Close VoD')+'">× '+T('Schließen','Close')+'</button></div>'+
     '<div class="vod-frame"><div id="vod-player"></div></div>'+
     '<div class="vod-tl"><div class="vt-bar" id="vt-bar" role="group" aria-label="'+T('Zeitleiste: Clips im Stream','Timeline: clips in the stream')+'"><div class="vt-prog" id="vt-prog"></div>'+ticks+'<div class="vt-head" id="vt-head"></div><div class="vt-tip" id="vt-tip" hidden></div></div>'+
-    '<div class="vt-info"><span class="vt-now" id="vt-now">'+(list.length?list.length+' '+T('Clips auf der Zeitleiste – antippen zum Hinspringen','clips on the timeline – tap to jump'):T('Keine Clips mit Zeitangabe','No clips with a timestamp'))+'</span><span class="vt-t" id="vt-t">0:00 / '+fmtHMS(sec)+'</span></div></div>';
+    '<div class="vt-info"><span class="vt-now" id="vt-now">'+(list.length?list.length+' '+T('Clips auf der Zeitleiste – antippen zum Hinspringen','clips on the timeline – tap to jump'):T('Keine Clips mit Zeitangabe','No clips with a timestamp'))+'</span><span class="vt-t" id="vt-t">0:00 / '+fmtHMS(sec)+'</span></div></div>'+'<div class="vod-grip" id="vod-grip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="'+T('Video größer oder kleiner ziehen','Drag to resize video')+'" title="'+T('Ziehen: Video größer/kleiner · Doppelklick: zurücksetzen','Drag: resize video · Double-click: reset')+'"><i></i></div>';
   box.hidden=false;document.body.classList.add('vodon');document.body.classList.toggle('vodbig',vodBig||VOD.home);
   vodLayout();vodSyncBtn();
   loadTwitchJs(function(ok){
@@ -2865,7 +2873,7 @@ function openLive(r){
   VOD={r:r,live:true,list:[],sec:1,p:null,t:0,cur:null,timer:null,home:isHomeOnly(r)};
   box.innerHTML='<div class="vod-top"><b><span class="lvdot">●</span> LIVE · '+esc(r.title||'')+'</b><a href="https://www.twitch.tv/'+CHANNEL+'" target="_blank" rel="noopener noreferrer">'+T('Auf Twitch ↗','On Twitch ↗')+'</a>'+(VOD.home?'':'<button type="button" class="vod-big" id="vod-big" aria-pressed="'+vodBig+'">'+vodBigLabel()+'</button>')+'<button type="button" class="vod-x" id="vod-x" aria-label="'+T('Livestream schließen','Close live stream')+'">× '+T('Schließen','Close')+'</button></div>'+
     '<div class="vod-frame"><div id="vod-player"></div></div>'+
-    '<div class="vt-info live-info"><span class="vt-now">'+(r.start?T('Live seit ','Live since ')+esc(r.start)+T(' Uhr',''):'')+(n?' · '+n+' '+T('Clips bisher','clips so far'):'')+'</span><span class="vt-t">'+T('Zum Zurückspulen später das VoD nutzen','Rewind later with the VoD')+'</span></div>';
+    '<div class="vt-info live-info"><span class="vt-now">'+(r.start?T('Live seit ','Live since ')+esc(r.start)+T(' Uhr',''):'')+(n?' · '+n+' '+T('Clips bisher','clips so far'):'')+'</span><span class="vt-t">'+T('Zum Zurückspulen später das VoD nutzen','Rewind later with the VoD')+'</span></div>'+'<div class="vod-grip" id="vod-grip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="'+T('Video größer oder kleiner ziehen','Drag to resize video')+'" title="'+T('Ziehen: Video größer/kleiner · Doppelklick: zurücksetzen','Drag: resize video · Double-click: reset')+'"><i></i></div>';
   box.hidden=false;document.body.classList.add('vodon');document.body.classList.toggle('vodbig',vodBig||VOD.home);
   vodLayout();vodSyncBtn();
   var frame=function(){var el=$('#vod-player');if(el)el.innerHTML='<iframe src="https://player.twitch.tv/?channel='+encodeURIComponent(CHANNEL)+'&parent='+encodeURIComponent(location.hostname)+'&autoplay=true&muted=false" allowfullscreen allow="autoplay; fullscreen" title="Livestream"></iframe>'};
@@ -2955,6 +2963,32 @@ $('#live').addEventListener('click',function(e){
    Vorerst nur für Kanal, Mods und Bearbeiter (Knopf in der Anmeldebox). */
 var WRAP_YEARS=[2025],WRAP_SOON=[2026];   // fertige Rückblicke / angekündigte
 var WR={y:0,i:0,s:[],map:null};
+// Schieber: Höhe des Videos von Hand einstellen (gilt bis zum Neuladen), Doppelklick setzt zurück
+var vodFH=null;
+function vodSetH(h){
+  var mw=$('.map-wrap'),fr=document.querySelector('.vod-frame'),box=$('#vodbox');
+  if(h==null){vodFH=null;mw.style.removeProperty('--vodfh');return}
+  if(!fr||!box)return;
+  var mwH=mw.getBoundingClientRect().height,rest=box.getBoundingClientRect().height-fr.getBoundingClientRect().height,maxW=mw.getBoundingClientRect().width*9/16;
+  h=Math.round(Math.max(140,Math.min(h,mwH-rest-90,maxW)));vodFH=h;mw.style.setProperty('--vodfh',h+'px');
+}
+(function(){
+  var box=$('#vodbox'),y0=0,h0=0,g=null;
+  box.addEventListener('pointerdown',function(e){
+    g=e.target.closest('#vod-grip');if(!g||e.button!==0)return;
+    e.preventDefault();y0=e.clientY;h0=document.querySelector('.vod-frame').getBoundingClientRect().height;
+    g.setPointerCapture(e.pointerId);g.classList.add('drag');document.body.classList.add('vod-drag');
+  });
+  box.addEventListener('pointermove',function(e){if(g&&g.classList.contains('drag'))vodSetH(h0+e.clientY-y0)});
+  var end=function(){if(!g)return;g.classList.remove('drag');document.body.classList.remove('vod-drag');g=null;vodLayout()};
+  box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);
+  box.addEventListener('dblclick',function(e){if(e.target.closest('#vod-grip')){vodSetH(null);vodLayout()}});
+  box.addEventListener('keydown',function(e){
+    if(!e.target.closest('#vod-grip'))return;
+    var fr=document.querySelector('.vod-frame');if(!fr)return;var h=fr.getBoundingClientRect().height;
+    if(e.key==='ArrowUp'){e.preventDefault();vodSetH(h-30);vodLayout()}else if(e.key==='ArrowDown'){e.preventDefault();vodSetH(h+30);vodLayout()}else if(e.key==='Home'){e.preventDefault();vodSetH(null);vodLayout()}
+  });
+})();
 function wrapCalc(y){
   var ys=String(y),rs=state.routes.filter(function(r){return String(r.date).slice(0,4)===ys});
   var d={y:y,rs:rs,n:rs.length,min:0,clips:[],views:0,days:{},cats:{},clippers:{}};
