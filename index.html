@@ -1200,6 +1200,11 @@ body.vodbig .vod-tl{margin-bottom:auto}
 .vod-big[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 .vodbtn{width:100%;justify-content:center;margin:-4px 0 14px;border-color:#ffd36b80}
 .vodbtn small{color:var(--muted);font-weight:400}
+.livebtn{border-color:#e9191699}
+.livebtn:hover{border-color:#e91916}
+.vod-top b .lvdot{color:#ff4d4a}
+.vt-info.live-info{margin:0;padding:7px 14px 8px}
+body.vodbig .vt-info.live-info{margin-bottom:auto}
 .clip .vj{flex:none;margin-left:auto;font:500 10.5px var(--f-mono);color:#ffd36b;border:1px solid #ffd36b66;border-radius:999px;padding:2px 8px;white-space:nowrap;cursor:pointer}
 .clip .vj:hover{background:#ffd36b22;border-color:#ffd36b}
 @media (max-width:820px){
@@ -1936,9 +1941,10 @@ function renderDetail(r){
   $('#v-detail').innerHTML=
     '<button type="button" class="back" id="back">'+T('← Alle Streams','← All streams')+'</button>'+
     '<div class="when"><span class="dot" style="background:'+r.color+'"></span>'+esc(fmtDate(r.date))+catTag(r)+routeTag(r)+'</div>'+
-    '<h2>'+esc(r.title)+'</h2>'+(CL[0]&&CL[0].thumb&&safeUrl(CL[0].thumb)?'<a class="hero-thumb" href="'+esc(safeUrl(CL[0].url))+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(safeUrl(CL[0].thumb))+'" alt="" loading="lazy" onerror="this.parentNode.remove()"><span>▶ Top-Clip: '+esc(CL[0].title)+(CL[0].views!=null?' · '+CL[0].views.toLocaleString(LOC)+' '+T('Aufrufe','views'):'')+'</span></a>':(r.live&&LIVE_ON!==false?'<a class="hero-thumb" data-live="1" href="https://www.twitch.tv/'+CHANNEL+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(livePreview())+'" alt="" onerror="this.parentNode.remove()"><span>● LIVE · '+T('Jetzt auf Twitch ansehen','Watch now on Twitch')+'</span></a>':''))+
+    '<h2>'+esc(r.title)+'</h2>'+(CL[0]&&CL[0].thumb&&safeUrl(CL[0].thumb)?'<a class="hero-thumb" href="'+esc(safeUrl(CL[0].url))+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(safeUrl(CL[0].thumb))+'" alt="" loading="lazy" onerror="this.parentNode.remove()"><span>▶ Top-Clip: '+esc(CL[0].title)+(CL[0].views!=null?' · '+CL[0].views.toLocaleString(LOC)+' '+T('Aufrufe','views'):'')+'</span></a>':(r.live&&LIVE_ON!==false?'<a class="hero-thumb" data-live="1" href="https://www.twitch.tv/'+CHANNEL+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(livePreview())+'" alt="" onerror="this.parentNode.remove()"><span>● LIVE · '+T('Jetzt live ansehen','Watch live now')+'</span></a>':''))+
     '<div class="facts"><div><b>'+esc(fmtDur(r.durationMin))+'</b><small>'+T('Dauer','Duration')+'</small></div><div><b>'+esc(r.start||'–')+(r.start?'–'+addMin(r.start,r.durationMin):'')+'</b><small>'+T('Uhrzeit','Time')+'</small></div><div><b>'+CL.length.toLocaleString(LOC)+'</b><small>Clips</small></div>'+
     '</div>'+
+    (r.live&&LIVE_ON!==false?'<button type="button" class="btn vodbtn livebtn" id="liveopen">'+liveBtnLabel(r)+'</button>':'')+
     (r.vod?'<button type="button" class="btn vodbtn" id="vodopen">'+vodBtnLabel(r)+'</button>':'')+
     routeInfo+
     (r.desc?'<p class="desc">'+esc(r.desc)+'</p>':'')+
@@ -2670,7 +2676,7 @@ document.addEventListener('click',function(e){
   e.preventDefault();e.stopPropagation();
   if(a.classList.contains('clip')){openPlayer(state.clipList,+a.dataset.ci,state.clipStream);return}
   var r=state.clipStream||byId(state.selectedId);if(!r)return;
-  if(a.dataset.live){openPlayer([{live:true,title:r.title,url:'https://www.twitch.tv/'+CHANNEL}],0,r);return}
+  if(a.dataset.live){openLive(r);return}
   var sg=a.classList.contains('ct-go')?a.dataset.slug:slugOf(a.getAttribute('href'));
   var list=state.clipList||r.clips||[],i=list.findIndex(function(c){return slugOf(c.url)===sg});
   if(i<0){list=(r.clips||[]).filter(function(c){return slugOf(c.url)===sg});i=0}
@@ -2692,8 +2698,9 @@ function vodOff(c,r){
   var t=(new Date(w)-new Date(r.vod.start))/1000-(c.moment?0:(c.dur||30));
   return isFinite(t)&&t>=-60&&t<=(r.vod.sec||0)+60?Math.max(0,Math.min(t,r.vod.sec||t)):null;
 }
-function vodBtnLabel(r){return VOD&&VOD.r===r?'× '+T('VoD schließen','Close VoD'):'📼 '+T('Ganzen Stream ansehen','Watch full stream')+' <small>· VoD · '+fmtHMS(r.vod.sec)+'</small>'}
-function vodSyncBtn(){var b=$('#vodopen');if(b){var r=byId(state.selectedId);if(r&&r.vod)b.innerHTML=vodBtnLabel(r)}}
+function vodBtnLabel(r){return VOD&&!VOD.live&&VOD.r===r?'× '+T('VoD schließen','Close VoD'):'📼 '+T('Ganzen Stream ansehen','Watch full stream')+' <small>· VoD · '+fmtHMS(r.vod.sec)+'</small>'}
+function vodSyncBtn(){var r=byId(state.selectedId),b=$('#vodopen'),l=$('#liveopen');if(b&&r&&r.vod)b.innerHTML=vodBtnLabel(r);if(l&&r)l.innerHTML=liveBtnLabel(r)}
+function liveBtnLabel(r){return VOD&&VOD.live&&VOD.r===r?'× '+T('Livestream schließen','Close live stream'):'<span style="color:#ff4d4a">●</span> '+T('Livestream hier ansehen','Watch live stream here')}
 function loadTwitchJs(cb){
   if(window.Twitch&&Twitch.Player)return cb(true);
   if(!twJs){twJs=[];var s=document.createElement('script');s.src='https://player.twitch.tv/js/embed/v1.js';s.async=true;
@@ -2704,7 +2711,7 @@ function loadTwitchJs(cb){
 function vodPause(){if(VOD&&VOD.p)try{VOD.p.pause()}catch(e){}}
 function vodGo(r,t){
   if(!r||!r.vod)return;
-  if(VOD&&VOD.r===r){vodSeek(t);return}
+  if(VOD&&VOD.r===r&&!VOD.live){vodSeek(t);return}
   openVod(r,t);
 }
 function openVod(r,t){
@@ -2733,6 +2740,25 @@ function openVod(r,t){
     vodFrame(VOD.t);   // Ersatz ohne Skript: einfacher Player, Sprünge laden ihn neu
   });
 }
+// Livestream im selben Platz über der Karte (ohne Zeitleiste – live kann man nicht spulen)
+function isHomeOnly(r){return !!(r.location&&r.location.home&&!hasRoute(r)&&!(r.stops||[]).length&&!Object.keys(r.clipPos||{}).length)}
+function openLive(r){
+  closeVod();
+  var box=$('#vodbox'),n=(r.clips||[]).length;
+  VOD={r:r,live:true,list:[],sec:1,p:null,t:0,cur:null,timer:null,home:isHomeOnly(r)};
+  box.innerHTML='<div class="vod-top"><b><span class="lvdot">●</span> LIVE · '+esc(r.title||'')+'</b><a href="https://www.twitch.tv/'+CHANNEL+'" target="_blank" rel="noopener noreferrer">'+T('Auf Twitch ↗','On Twitch ↗')+'</a>'+(VOD.home?'':'<button type="button" class="vod-big" id="vod-big" aria-pressed="'+vodBig+'">'+vodBigLabel()+'</button>')+'<button type="button" class="vod-x" id="vod-x" aria-label="'+T('Livestream schließen','Close live stream')+'">× '+T('Schließen','Close')+'</button></div>'+
+    '<div class="vod-frame"><div id="vod-player"></div></div>'+
+    '<div class="vt-info live-info"><span class="vt-now">'+(r.start?T('Live seit ','Live since ')+esc(r.start)+T(' Uhr',''):'')+(n?' · '+n+' '+T('Clips bisher','clips so far'):'')+'</span><span class="vt-t">'+T('Zum Zurückspulen später das VoD nutzen','Rewind later with the VoD')+'</span></div>';
+  box.hidden=false;document.body.classList.add('vodon');document.body.classList.toggle('vodbig',vodBig||VOD.home);
+  vodLayout();vodSyncBtn();
+  var frame=function(){var el=$('#vod-player');if(el)el.innerHTML='<iframe src="https://player.twitch.tv/?channel='+encodeURIComponent(CHANNEL)+'&parent='+encodeURIComponent(location.hostname)+'&autoplay=true&muted=false" allowfullscreen allow="autoplay; fullscreen" title="Livestream"></iframe>'};
+  loadTwitchJs(function(ok){
+    if(!VOD||VOD.r!==r||!VOD.live)return;
+    if(ok){try{VOD.p=new Twitch.Player('vod-player',{channel:CHANNEL,parent:[location.hostname],width:'100%',height:'100%',autoplay:true,muted:false});return}catch(e){VOD.p=null}}
+    frame();
+  });
+}
+function liveStream(){return state.routes&&state.routes.find(function(x){return x.live})}
 function vodFrame(t){
   var el=$('#vod-player');if(!el||!VOD)return;VOD.t=t||0;
   el.innerHTML='<iframe src="https://player.twitch.tv/?video=v'+encodeURIComponent(VOD.r.vod.id)+'&parent='+encodeURIComponent(location.hostname)+'&autoplay=true&muted=false&time='+twTime(VOD.t)+'" allowfullscreen allow="autoplay; fullscreen" title="VoD"></iframe>';
@@ -2801,6 +2827,13 @@ if(window.ResizeObserver)new ResizeObserver(function(){if(VOD)vodLayout()}).obse
   box.addEventListener('mouseleave',function(){var tip=$('#vt-tip');if(tip)tip.hidden=true});
 })();
 
+$('#live').addEventListener('click',function(e){
+  if(e.button!==0||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey||state.editing||!$('#offline').hidden)return;
+  e.preventDefault();
+  var r=liveStream();
+  if(r){if(state.selectedId!==r.id)select(r.id);openLive(r)}
+  else openLive({id:'live',title:$('#live-t').textContent,clips:[]});
+});
 /* ---------- Login ---------- */
 function setUser(u){
   state.user=u;if(u){store('shm.user',JSON.stringify(u))}else{store('shm.user',null)}
@@ -2936,7 +2969,8 @@ document.addEventListener('click',function(e){
     case 'manual-upd':manualUpdate(t);break;
     case 'site-toggle':siteSwitch(t);break;
     case 'logout':setUser(null);toast(T('Abgemeldet.','Logged out.'));break;
-    case 'vodopen':var rv=byId(state.selectedId);if(VOD&&rv&&VOD.r===rv)closeVod();else vodGo(rv,0);break;
+    case 'liveopen':var rl=byId(state.selectedId);if(VOD&&VOD.live&&rl&&VOD.r===rl)closeVod();else if(rl)openLive(rl);break;
+    case 'vodopen':var rv=byId(state.selectedId);if(VOD&&rv&&VOD.r===rv&&!VOD.live)closeVod();else vodGo(rv,0);break;
     case 'redit':if(canEdit(state.user))openEditor(state.selectedId);break;
   }
 });
@@ -3130,7 +3164,7 @@ document.addEventListener('click',function(e){
         else document.querySelectorAll('img[src*="previews-ttv"]').forEach(function(i){i.src=livePreview()});
         $('#live').hidden=!on;document.querySelector('.hero').classList.toggle('is-live',on);
         if(!on)return;
-        $('#live-t').textContent=T('Jetzt auf Twitch ansehen','Watch now on Twitch');
+        $('#live-t').textContent=T('Jetzt live ansehen','Watch live now');
         // Titel, Kategorie, Laufzeit: optional über decapi.me (kann überlastet sein, dann bleibt der Standardtext)
         var get=function(p){return fetch('https://decapi.me/twitch/'+p+'/'+CHANNEL,{cache:'no-store'}).then(function(x){return x.ok?x.text():''}).then(function(s){return /error|offline|not found|too many/i.test(s)?'':s}).catch(function(){return ''})};
         Promise.all([get('game'),get('title'),get('uptime')]).then(function(v){
