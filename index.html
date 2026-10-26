@@ -763,6 +763,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .wr-dots button{width:9px;height:9px;padding:0;border:0;border-radius:999px;background:#ffffff40;transition:width .25s,background .25s}
 .wr-dots button[aria-current="true"]{width:26px;background:var(--accent)}
 .ab-acts .wr-btn{border-color:#ffd36b80}
+.ab-acts .wr-soon,.ab-acts .wr-soon:disabled{opacity:.6;border-style:dashed;cursor:default}
+.ab-acts .wr-soon small{font-size:10.5px;color:var(--muted)}
 @media (max-width:820px){
   .wr-top .wr-hint{display:none}
   .wr-recs,.wr-clips.mo{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -970,7 +972,7 @@ body.doc .app>.map-wrap{visibility:hidden}
 /* Angemeldete Bearbeiter auf mittleren Bildschirmen: Anmeldekasten als Leiste unter den Zahlen, damit er Titel und Zahlen nicht verdeckt */
 @media (min-width:821px) and (max-width:1749px){
   header.hero .auth:has(.authbox){position:relative;top:auto;right:auto;display:flex;flex-direction:row;justify-content:center;align-items:center;padding:0 12px 12px}
-  header.hero .authbox{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:center;max-width:720px;min-width:0;padding:6px 8px;gap:8px}
+  header.hero .authbox{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:center;max-width:min(960px,100%);min-width:0;padding:6px 8px;gap:8px}
   header.hero .authbox .ab-top{flex:none}
   header.hero .authbox .ab-name{flex:none}
   header.hero .authbox .ab-acts{display:flex;gap:6px;padding:0 0 0 8px;border-top:0;border-left:1px solid #f5a9d633}
@@ -1366,7 +1368,7 @@ body.vodbig .vt-info.live-info{margin-bottom:auto}
 .ab-name>span{overflow:hidden;text-overflow:ellipsis}
 .ab-name .tag{margin:0;flex:none}
 .ab-out{flex:none;font-size:11.5px;padding:3px 8px}
-.ab-acts{display:grid;grid-template-columns:1fr 1fr auto;gap:5px;padding-top:6px;border-top:1px solid #f5a9d633}
+.ab-acts{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding-top:6px;border-top:1px solid #f5a9d633}
 .ab-acts .btn{font-size:11.5px;padding:4px 7px;justify-content:center;text-align:center;white-space:nowrap}
 .ab-acts .site-off-btn{border-color:#ff6b6b88;color:#ffd0d0}
 .ab-acts .site-off-btn:hover:not(:disabled){border-color:#ff6b6b;color:#fff;background:#ff6b6b22}
@@ -2939,7 +2941,7 @@ $('#live').addEventListener('click',function(e){
 });
 /* ---------- Jahresrückblick: Folien im Vollbild, alles aus den Daten berechnet ----------
    Vorerst nur für Kanal, Mods und Bearbeiter (Knopf in der Anmeldebox). */
-var WRAP_YEARS=[2025];
+var WRAP_YEARS=[2025],WRAP_SOON=[2026];   // fertige Rückblicke / angekündigte
 var WR={y:0,i:0,s:[],map:null};
 function wrapCalc(y){
   var ys=String(y),rs=state.routes.filter(function(r){return String(r.date).slice(0,4)===ys});
@@ -3106,7 +3108,8 @@ function renderAuth(){
       (pend?'<button type="button" class="btn '+(off?'site-off-btn':'site-on-btn')+'" disabled>'+(off?T('Geht offline …','Going offline …'):T('Geht online …','Going online …'))+'</button>'
         :SITE_OFF?'<button type="button" class="btn site-on-btn" id="site-toggle" title="'+T('Seite für alle Besucher wieder anzeigen','Show the site to all visitors again')+'">▶ '+T('Online stellen','Put online')+'</button>'
         :'<button type="button" class="btn site-off-btn" id="site-toggle" title="'+T('Besucher sehen dann nur „Zurzeit in Bearbeitung“. Bearbeiter sehen die Seite weiter.','Visitors then only see “Currently under maintenance”. Editors still see the site.')+'">⏻ '+T('Offline nehmen','Take offline')+'</button>')+
-      WRAP_YEARS.map(function(y){return '<button type="button" class="btn wr-btn" data-wrapy="'+y+'" title="'+T('Jahresrückblick – nur für Kanal, Mods und Bearbeiter sichtbar','Year in review – only visible to the channel, mods and editors')+'" aria-label="'+T('Jahresrückblick ','Year in review ')+y+'">🎁 '+y+'</button>'}).join('')+
+      WRAP_YEARS.map(function(y){return '<button type="button" class="btn wr-btn" data-wrapy="'+y+'" title="'+T('Jahresrückblick – nur für Kanal, Mods und Bearbeiter sichtbar','Year in review – only visible to the channel, mods and editors')+'">🎁 '+T('Rückblick ','Review ')+y+'</button>'}).join('')+
+      WRAP_SOON.map(function(y){return '<button type="button" class="btn wr-btn wr-soon" disabled title="'+T('Jahresrückblick '+y+' kommt zum Jahresende','Year in review '+y+' arrives at the end of the year')+'">🎁 '+y+' <small>· Coming soon</small></button>'}).join('')+
       '</div>';
     if(SITE_OFF)h+='<div class="ab-state"><i></i>'+T('Für Besucher offline – nur Bearbeiter sehen die Karte','Offline for visitors – only editors see the map')+'</div>';
   }
