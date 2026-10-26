@@ -1190,6 +1190,14 @@ label{display:block;font:500 11px var(--f-mono);letter-spacing:.08em;text-transf
 .vt-now{color:var(--fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--f-body)}
 .vt-t{flex:none;font-variant-numeric:tabular-nums}
 body.vodon #map{top:var(--vodh,0px)}
+body.vodbig .vodbox{bottom:0}
+body.vodbig .vod-frame{--h:min(56.25cqw,calc(100cqh - 92px))}
+body.vodbig #map{visibility:hidden}
+body.vodbig .vod-frame{margin-top:auto}
+body.vodbig .vod-tl{margin-bottom:auto}
+.vod-big{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:2px 10px;font-size:12px;white-space:nowrap}
+.vod-big:hover{border-color:var(--accent)}
+.vod-big[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 .vodbtn{width:100%;justify-content:center;margin:-4px 0 14px;border-color:#ffd36b80}
 .vodbtn small{color:var(--muted);font-weight:400}
 .clip .vj{flex:none;margin-left:auto;font:500 10.5px var(--f-mono);color:#ffd36b;border:1px solid #ffd36b66;border-radius:999px;padding:2px 8px;white-space:nowrap;cursor:pointer}
@@ -1200,6 +1208,7 @@ body.vodon #map{top:var(--vodh,0px)}
   .vod-tl{padding:7px 12px 6px}
   body.vodon #map{visibility:hidden}
   .vod-top a{display:none}
+  .vod-big{display:none}
 }
 
 /* ---------- Routen: Editor ---------- */
@@ -2670,7 +2679,9 @@ document.addEventListener('click',function(e){
 
 /* ---------- VoD: ganzer Stream über der Karte, darunter Zeitleiste mit den Clips ----------
    Der Twitch-Player (und sein Skript) wird erst nach Klick geladen (Datenschutz). */
-var VOD=null,twJs=null;
+var VOD=null,twJs=null,vodBig=false;   // vodBig: Karte ausgeblendet, VoD groß (gilt bis zum Neuladen)
+function vodBigLabel(){return vodBig?'🗺️ '+T('Karte einblenden','Show map'):'⛶ '+T('Karte ausblenden','Hide map')}
+function setVodBig(on){vodBig=on;document.body.classList.toggle('vodbig',on&&!!VOD);var b=$('#vod-big');if(b){b.setAttribute('aria-pressed',on);b.textContent=vodBigLabel()}vodLayout()}
 function fmtHMS(s){s=Math.max(0,Math.floor(s||0));var h=Math.floor(s/3600),m=Math.floor(s/60)%60,x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0')}
 function twTime(s){s=Math.max(0,Math.floor(s||0));return Math.floor(s/3600)+'h'+(Math.floor(s/60)%60)+'m'+(s%60)+'s'}
 // Stelle eines Clips im VoD in Sekunden: genau über Twitch (off), sonst aus der Uhrzeit geschätzt
@@ -2703,11 +2714,11 @@ function openVod(r,t){
   var tops=(r.clips||[]).slice().sort(function(a,b){return (b.views||0)-(a.views||0)}).slice(0,3);
   VOD={r:r,list:list,sec:sec,p:null,t:t||0,cur:null,timer:null};
   var ticks=list.map(function(x,i){return '<button type="button" class="vt-c'+(tops.indexOf(x.c)>=0?' top':'')+'" data-vi="'+i+'" style="left:'+(x.o/sec*100).toFixed(3)+'%" aria-label="'+esc((x.c.title||'Clip')+' · '+fmtHMS(x.o))+'"></button>'}).join('');
-  box.innerHTML='<div class="vod-top"><b>📼 '+esc(fmtDateShort(r.date))+' · '+esc(r.title)+'</b><a href="https://www.twitch.tv/videos/'+encodeURIComponent(v.id)+'" id="vod-tw" target="_blank" rel="noopener noreferrer">'+T('Auf Twitch ↗','On Twitch ↗')+'</a><button type="button" class="vod-x" id="vod-x" aria-label="'+T('VoD schließen','Close VoD')+'">× '+T('Schließen','Close')+'</button></div>'+
+  box.innerHTML='<div class="vod-top"><b>📼 '+esc(fmtDateShort(r.date))+' · '+esc(r.title)+'</b><a href="https://www.twitch.tv/videos/'+encodeURIComponent(v.id)+'" id="vod-tw" target="_blank" rel="noopener noreferrer">'+T('Auf Twitch ↗','On Twitch ↗')+'</a><button type="button" class="vod-big" id="vod-big" aria-pressed="'+vodBig+'">'+vodBigLabel()+'</button><button type="button" class="vod-x" id="vod-x" aria-label="'+T('VoD schließen','Close VoD')+'">× '+T('Schließen','Close')+'</button></div>'+
     '<div class="vod-frame"><div id="vod-player"></div></div>'+
     '<div class="vod-tl"><div class="vt-bar" id="vt-bar" role="group" aria-label="'+T('Zeitleiste: Clips im Stream','Timeline: clips in the stream')+'"><div class="vt-prog" id="vt-prog"></div>'+ticks+'<div class="vt-head" id="vt-head"></div><div class="vt-tip" id="vt-tip" hidden></div></div>'+
     '<div class="vt-info"><span class="vt-now" id="vt-now">'+(list.length?list.length+' '+T('Clips auf der Zeitleiste – antippen zum Hinspringen','clips on the timeline – tap to jump'):T('Keine Clips mit Zeitangabe','No clips with a timestamp'))+'</span><span class="vt-t" id="vt-t">0:00 / '+fmtHMS(sec)+'</span></div></div>';
-  box.hidden=false;document.body.classList.add('vodon');
+  box.hidden=false;document.body.classList.add('vodon');document.body.classList.toggle('vodbig',vodBig);
   vodLayout();vodSyncBtn();
   loadTwitchJs(function(ok){
     if(!VOD||VOD.r!==r)return;
@@ -2760,7 +2771,7 @@ function vodLayout(){
 function closeVod(){
   if(!VOD)return;
   clearInterval(VOD.timer);vodMark(VOD.cur,false);vodPause();
-  VOD=null;var box=$('#vodbox');box.innerHTML='';box.hidden=true;document.body.classList.remove('vodon');
+  VOD=null;var box=$('#vodbox');box.innerHTML='';box.hidden=true;document.body.classList.remove('vodon','vodbig');
   vodLayout();vodSyncBtn();
 }
 if(window.ResizeObserver)new ResizeObserver(function(){if(VOD)vodLayout()}).observe($('#vodbox'));
@@ -2771,6 +2782,7 @@ if(window.ResizeObserver)new ResizeObserver(function(){if(VOD)vodLayout()}).obse
   box.addEventListener('click',function(e){
     if(!VOD)return;
     if(e.target.closest('#vod-x')){closeVod();return}
+    if(e.target.closest('#vod-big')){setVodBig(!vodBig);return}
     var c=e.target.closest('.vt-c');if(c){vodSeek(Math.max(0,VOD.list[+c.dataset.vi].o-2));return}
     if(e.target.closest('#vt-bar'))vodSeek(posT(e));
   });
