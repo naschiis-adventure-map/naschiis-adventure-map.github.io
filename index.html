@@ -1063,6 +1063,14 @@ body.rm .bauble,body.rm .tw,body.rm .nose,body.rm .stall .bulb,body.rm .chimney 
 @keyframes kwClimb{from{transform:translateX(-2px) rotate(-4deg)}to{transform:translateX(2px) rotate(4deg)}}
 .kw-say{position:fixed;bottom:auto;max-width:min(280px,calc(100vw - 24px))}
 .kw-say.below::after{bottom:auto;top:-7px}
+
+.kw-bod.zoom{animation:kwWalk .09s ease-in-out infinite alternate}
+.kw-bod.limp{animation:kwLimp .6s ease-in-out infinite}
+@keyframes kwLimp{0%,100%{transform:rotate(0) translateY(0)}30%{transform:rotate(9deg) translateY(2px)}60%{transform:rotate(-2deg) translateY(-1px)}}
+.kw-dust{position:absolute;font-size:16px;pointer-events:none;animation:kwDust .7s ease-out forwards}
+@keyframes kwDust{from{opacity:.9}to{opacity:0;margin-top:-8px;font-size:24px}}
+.kw-bod.disguise>*{visibility:hidden}
+.kw-bod.disguise::after{content:'🥐';position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--kw,64px) * .62);line-height:1}
 </style>
 <style>
 /* Layout: Kopfzeile mit Kennzahlen, links Routenliste/Detail, rechts die Karte; auf dem Handy Karte oben, Liste darunter. */
@@ -3790,7 +3798,7 @@ async function kevinGo(force){
   if(!layer||KW.busy)return;
   if(!force&&(document.hidden||SEASON.off||!$('#wrap').hidden||state.editing||!$('#player').hidden||!$('#docview').hidden))return kwPlan();
   var venue=kwPick();if(!venue)return kwPlan();
-  KW.busy=true;KW.abort=false;KW.venue=venue;
+  KW.busy=true;KW.abort=false;KW.react=false;KW.clicks=0;KW.venue=venue;
   var clip=layer.querySelector('.kw-clip'),pos=layer.querySelector('.kw-pos'),flip=layer.querySelector('.kw-flip'),bod=layer.querySelector('.kw-bod'),prop=layer.querySelector('.kw-prop'),fx=layer.querySelector('.kw-fx');
   var stopWatch=function(){};
   try{
@@ -3800,7 +3808,7 @@ async function kevinGo(force){
       var el=venue==='hero'?$('header.hero'):document.querySelector('.frame.foot'),r=el.getBoundingClientRect();
       kw=venue==='foot'?(mobile?40:50):(mobile?46:62);var kh=kw*.62,y=r.bottom-kh-3,zone=venue==='foot'?(mobile?.18:.14):(mobile?.16:.19);
       var fl=Math.random()<.5;start={x:fl?r.left-kw-10:r.right+10,y:y};stop={x:fl?r.left+r.width*R(.02,zone-.04):r.right-kw-r.width*R(.02,zone-.04),y:y};
-      clipR={l:r.left,t:r.top,w:r.width,h:r.height};
+      clipR={l:r.left,t:r.top-90,w:r.width,h:r.height+90};
       if(venue==='foot')ctx.foot=1;
     }else if(venue==='rail'){
       var rl=document.querySelector('.frame.rail').getBoundingClientRect(),cards=document.querySelectorAll('#kevin-rail button'),card=cards[Math.floor(Math.random()*cards.length)],cr=card.getBoundingClientRect();
@@ -3860,16 +3868,63 @@ async function kevinGo(force){
     if(act==='flee')fx.textContent='💦';
     if(!prop.textContent&&o.extra&&Math.random()<.5&&mode!=='peek')prop.textContent=o.extra;
     var kr=pos.getBoundingClientRect();
-    if(!KW.abort){var cl=kwCtxLine(ctx),line=cl&&(Math.random()<.7||mode==='climb'||mode==='peek'||mode==='castle')?cl:kwLines(act);
+    if(!KW.abort&&!KW.react){var cl=kwCtxLine(ctx),line=cl&&(Math.random()<.7||mode==='climb'||mode==='peek'||mode==='castle')?cl:kwLines(act);
       await kwSay(line,kr.left+kr.width*.55,kr.top,kr.height,act==='flee'?2800:null)}
-    if(KW.abort&&!KW.silent){fx.textContent='💦';kr=pos.getBoundingClientRect();await kwSay(LANG==='en'?'Hey! Hands off, I’m fluffy and fragile!':'Hey! Finger weg, ich bin flauschig empfindlich!',kr.left+kr.width*.55,kr.top,kr.height,1600);act='flee'}
     $('#kw-say').classList.remove('on');prop.classList.remove('sip');
-    // Abgang
-    var back=mode==='castle'?{x:stop.x+(stop.x-start.x)*4,y:stop.y}:start;
-    if(mode==='climb')flip.style.transform='rotate(90deg)';else flip.style.transform='scaleX('+(mode==='castle'?dir:-dir)+')';
-    var c1=act==='flee'||KW.abort?'run':act==='sneak'?'sneak':mode==='climb'?'climb':mode==='peek'?'':'walk';if(c1)bod.classList.add(c1);
-    if(reduceMotion||KW.silent){await pos.animate([{opacity:1},{opacity:0}],{duration:250,fill:'forwards'}).finished}
-    else await kwMove(pos,rel(stop),rel(back),Math.hypot(back.x-stop.x,back.y-stop.y)*(act==='flee'||KW.abort?7:speed));
+    var at=rel(stop),done=false,tf=function(p){return 'translate('+p.x+'px,'+p.y+'px)'};
+    if(KW.react&&!KW.abort&&!reduceMotion)done=await kwReact();
+    if(!done){
+      // normaler Abgang
+      var back=mode==='castle'?rel({x:stop.x+(stop.x-start.x)*4,y:stop.y}):rel(start);
+      if(mode==='climb')flip.style.transform='rotate(90deg)';else flip.style.transform='scaleX('+(back.x>=at.x?1:-1)+')';
+      var c1=act==='flee'?'run':act==='sneak'?'sneak':mode==='climb'?'climb':mode==='peek'?'':'walk';bod.className='kw-bod';if(c1)bod.classList.add(c1);
+      if(reduceMotion||KW.silent){await pos.animate([{opacity:1},{opacity:0}],{duration:250,fill:'forwards'}).finished}
+      else await kwMove(pos,at,back,Math.hypot(back.x-at.x,back.y-at.y)*(act==='flee'?7:speed));
+    }
+    // ---- Reaktionen aufs Anklicken ----
+    async function kwReact(){
+      var en=LANG==='en',P=function(a){return a[Math.floor(Math.random()*a.length)]};
+      var say=function(t,ms){var r=pos.getBoundingClientRect();return kwSay(t,r.left+r.width*.55,r.top,r.height,ms)};
+      var cw=clipR.w,ch=clipR.h;
+      var arc=function(nx,ny,hgt,ms){var a=at,b={x:nx,y:ny},top=Math.min(a.y,b.y)-hgt,kf=[0,.25,.5,.75,1].map(function(t){return {transform:tf({x:a.x+(b.x-a.x)*t,y:(1-t)*(1-t)*a.y+2*(1-t)*t*top+t*t*b.y})}});
+        return pos.animate(kf,{duration:ms,easing:'linear',fill:'forwards'}).finished.then(function(){at=b;pos.style.transform=tf(at)})};
+      var dust=function(on){if(!on){clearInterval(KW.dust);return}KW.dust=setInterval(function(){var r=pos.getBoundingClientRect(),d=document.createElement('span');d.className='kw-dust';d.textContent='💨';d.style.left=(r.left-clipR.l+(KW.dx>0?-6:r.width-10))+'px';d.style.top=(r.top-clipR.t+r.height-18)+'px';d.style.transform='scaleX('+(KW.dx>0?-1:1)+')';clip.appendChild(d);setTimeout(function(){d.remove()},700)},90)};
+      var zoomOff=async function(line){ // im Affenzahn davon
+        if(mode==='climb'){flip.style.transform='rotate(90deg)';bod.className='kw-bod run';fx.textContent='💨';if(line)await say(line,1100);await kwMove(pos,at,{x:at.x,y:ch+20},Math.max(200,(ch-at.y))*2.5);return true}
+        var tx=at.x<cw/2?-kw-30:cw+30;KW.dx=tx>at.x?1:-1;flip.style.transform='scaleX('+KW.dx+')';bod.className='kw-bod zoom';fx.textContent='💨';
+        if(line)await say(line,1100);
+        dust(true);await kwMove(pos,at,{x:tx,y:at.y},Math.abs(tx-at.x)*2.4);dust(false);return true};
+      var lines=en?["Hey! Hands off, I’m fluffy and fragile!","Caught?! Never!","No autographs today!","That’ll be 5 channel points!","I’m not the Kevin you’re looking for.","Touching only with a sub!","Paws off, I’m freshly baked!","You never saw me. NEVER."]
+                  :["Hey! Finger weg, ich bin flauschig empfindlich!","Erwischt?! Niemals!","Heute keine Autogramme!","Das kostet 5 Kanalpunkte!","Ich bin nicht der Kevin, den du suchst.","Anfassen nur mit Sub!","Pfoten weg, ich bin frisch gebacken!","Du hast mich nie gesehen. NIE."];
+      var bye=en?["See ya, sucker!","Byeee!","Catch me if you can!","Turbo croissant, activate!"]:["Tschüssikowski!","Und weg!","Fang mich doch!","Turbo-Croissant, aktiviert!"];
+      var types=mode==='climb'?['jump','zoom','tantrum','croissant']:['jump','zoom','dodge','croissant','faint','tantrum'];
+      var t=P(types);bod.className='kw-bod';
+      if(t==='jump'){fx.textContent='❗';await arc(at.x,at.y,mode==='peek'?30:Math.min(70,ch*.5),520);fx.textContent='';await say(P(lines),1800);return zoomOff(P(bye))}
+      if(t==='zoom'){fx.textContent='😱';await say(P(lines),1500);return zoomOff(P(bye))}
+      if(t==='dodge'){
+        for(var n=0;n<3;n++){
+          var side=at.x<cw/2?1:-1,nx=Math.max(4,Math.min(cw-kw-4,at.x+side*R(40,70)));flip.style.transform='scaleX('+side+')';
+          var c0=KW.clicks;await arc(nx,at.y,26,380);await say(n===0?(en?'Missed!':'Daneben!'):n===1?(en?'Again?! Missed again!':'Schon wieder?! Wieder daneben!'):(en?'Okay, okay, I’m leaving!':'Okay, okay, ich geh ja schon!'),n<2?1600:1000);
+          if(n===2||KW.clicks===c0)break;
+        }
+        if(KW.clicks>1)return zoomOff(P(bye));
+        return false}
+      if(t==='croissant'){
+        bod.classList.add('disguise');await say(en?'I’m just a perfectly normal croissant. Move along.':'Ich bin nur ein ganz normales Croissant. Weitergehen.',2400);
+        bod.classList.remove('disguise');bod.className='kw-bod sneak';fx.textContent='🤫';
+        if(mode==='climb')return zoomOff('');
+        var tx=at.x<cw/2?-kw-30:cw+30;flip.style.transform='scaleX('+(tx>at.x?1:-1)+')';await kwMove(pos,at,{x:tx,y:at.y},Math.abs(tx-at.x)*30);return true}
+      if(t==='faint'){
+        await bod.animate([{transform:'rotate(0)'},{transform:'rotate(-82deg) translateY(4px)'}],{duration:320,easing:'ease-in',fill:'forwards'}).finished;
+        fx.textContent='😵';await say(en?'Ouch! I’m calling my lawyer!':'Aua! Ich ruf meinen Anwalt!',1900);fx.textContent='🩹';
+        await bod.animate([{transform:'rotate(-82deg) translateY(4px)'},{transform:'rotate(0)'}],{duration:500,easing:'ease-out',fill:'forwards'}).finished;
+        bod.className='kw-bod limp';var tx2=at.x<cw/2?-kw-30:cw+30;flip.style.transform='scaleX('+(tx2>at.x?1:-1)+')';
+        await kwMove(pos,at,{x:tx2,y:at.y},Math.abs(tx2-at.x)*34);return true}
+      if(t==='tantrum'){
+        fx.textContent='💢';await bod.animate([{transform:'translateX(0)'},{transform:'translateX(-5px) rotate(-6deg)'},{transform:'translateX(5px) rotate(6deg)'},{transform:'translateX(-5px) rotate(-6deg)'},{transform:'translateX(5px) rotate(6deg)'},{transform:'translateX(0)'}],{duration:600}).finished;
+        await say(P(lines),1800);return zoomOff(en?'Hmpf!':'Pff!')}
+      return false;
+    }
   }catch(e){if(KW.fast)console.warn('Kevin:',e&&e.message)}
   stopWatch();$('#kw-say').classList.remove('on');layer.hidden=true;KW.busy=false;KW.silent=false;kwPlan();
 }
@@ -3878,7 +3933,7 @@ function kwPlan(ms){clearTimeout(KW.timer);KW.timer=setTimeout(function(){kevinG
   var layer=document.createElement('div');layer.className='kw-layer';layer.id='kevin-walker';layer.hidden=true;layer.setAttribute('aria-hidden','true');
   layer.innerHTML='<div class="kw-clip"><div class="kw-pos"><div class="kw-flip"><div class="kw-bod"><img src="kevin.png" alt=""><span class="kw-hat"></span><span class="kw-eye"></span><span class="kw-acc"></span><span class="kw-prop"></span><span class="kw-fx"></span></div></div></div></div><div class="kw-say" id="kw-say"></div>';
   document.body.appendChild(layer);
-  layer.querySelector('.kw-bod').addEventListener('click',function(){if(KW.busy&&!KW.abort){KW.abort=true;if(KW.wake)KW.wake();if(KW.anim)try{KW.anim.finish()}catch(e){}}});
+  layer.querySelector('.kw-bod').addEventListener('click',function(e){e.stopPropagation();if(!KW.busy||KW.abort)return;KW.clicks=(KW.clicks||0)+1;if(!KW.react){KW.react=true;if(KW.wake)KW.wake();if(KW.anim)try{KW.anim.finish()}catch(x){}}});
   window.addEventListener('resize',function(){if(KW.busy){KW.abort=true;KW.silent=true;if(KW.wake)KW.wake()}});
   kwPlan(KW.fast?1500:9000);
 })();
