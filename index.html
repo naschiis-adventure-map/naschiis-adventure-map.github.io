@@ -3756,9 +3756,10 @@ function kwSay(text,ax,ay,kh,ms){
 }
 function kwMove(pos,a,b,ms){
   var tf=function(p){return 'translate('+p.x+'px,'+p.y+'px)'};
-  if(reduceMotion||ms<=0){pos.style.transform=tf(b);return Promise.resolve()}
+  if(reduceMotion||ms<=0){pos.style.transform=tf(b);KW.at=b;return Promise.resolve()}
   var an=pos.animate([{transform:tf(a)},{transform:tf(b)}],{duration:ms,easing:'linear',fill:'forwards'});KW.anim=an;
-  return an.finished.then(function(){pos.style.transform=tf(b);an.cancel()}).catch(function(){pos.style.transform=tf(b)});
+  // beim Anklicken wird die Bewegung angehalten: Kevin bleibt genau dort stehen (KW.at setzt der Klick)
+  return an.finished.then(function(){pos.style.transform=tf(b);KW.at=b;an.cancel();KW.anim=null}).catch(function(){KW.anim=null});
 }
 function kwVisible(el){if(!el)return null;var r=el.getBoundingClientRect();return r.width>40&&r.height>30&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth?r:null}
 // Wo kann Kevin gerade auftauchen?
@@ -3798,7 +3799,7 @@ async function kevinGo(force){
   if(!layer||KW.busy)return;
   if(!force&&(document.hidden||SEASON.off||!$('#wrap').hidden||state.editing||!$('#player').hidden||!$('#docview').hidden))return kwPlan();
   var venue=kwPick();if(!venue)return kwPlan();
-  KW.busy=true;KW.abort=false;KW.react=false;KW.clicks=0;KW.venue=venue;
+  KW.busy=true;KW.abort=false;KW.react=false;KW.reacting=false;KW.reacted=false;KW.clicks=0;KW.at=null;KW.venue=venue;
   var clip=layer.querySelector('.kw-clip'),pos=layer.querySelector('.kw-pos'),flip=layer.querySelector('.kw-flip'),bod=layer.querySelector('.kw-bod'),prop=layer.querySelector('.kw-prop'),fx=layer.querySelector('.kw-fx');
   var stopWatch=function(){};
   try{
@@ -3856,7 +3857,7 @@ async function kevinGo(force){
     await kwMove(pos,rel(start),rel(stop),dist*speed);
     bod.className='kw-bod';
     if(mode==='climb')flip.style.transform='rotate(0)';
-    if(!KW.abort&&act==='stumble'&&!reduceMotion){
+    if(!KW.abort&&!KW.react&&act==='stumble'&&!reduceMotion){
       await bod.animate([{transform:'rotate(0)'},{transform:'rotate(78deg) translateY(4px)'}],{duration:260,easing:'ease-in',fill:'forwards'}).finished;
       fx.textContent='💫';await kwSleep(900);fx.textContent='';
       await bod.animate([{transform:'rotate(78deg) translateY(4px)'},{transform:'rotate(0)'}],{duration:420,easing:'ease-out',fill:'forwards'}).finished;
@@ -3871,8 +3872,11 @@ async function kevinGo(force){
     if(!KW.abort&&!KW.react){var cl=kwCtxLine(ctx),line=cl&&(Math.random()<.7||mode==='climb'||mode==='peek'||mode==='castle')?cl:kwLines(act);
       await kwSay(line,kr.left+kr.width*.55,kr.top,kr.height,act==='flee'?2800:null)}
     $('#kw-say').classList.remove('on');prop.classList.remove('sip');
-    var at=rel(stop),done=false,tf=function(p){return 'translate('+p.x+'px,'+p.y+'px)'};
-    if(KW.react&&!KW.abort&&!reduceMotion)done=await kwReact();
+    var at=KW.at||rel(stop),done=false,tf=function(p){return 'translate('+p.x+'px,'+p.y+'px)'};
+    var doReact=async function(){KW.reacting=true;KW.reacted=true;at=KW.at||at;fx.textContent='';prop.textContent='';bod.className='kw-bod';
+      if(reduceMotion){var r=pos.getBoundingClientRect();await kwSay(LANG==='en'?'Hey! Hands off!':'Hey! Finger weg!',r.left+r.width*.55,r.top,r.height,1500);await pos.animate([{opacity:1},{opacity:0}],{duration:250,fill:'forwards'}).finished;return true}
+      return kwReact()};
+    if(KW.react&&!KW.abort)done=await doReact();
     if(!done){
       // normaler Abgang
       var back=mode==='castle'?rel({x:stop.x+(stop.x-start.x)*4,y:stop.y}):rel(start);
@@ -3880,6 +3884,8 @@ async function kevinGo(force){
       var c1=act==='flee'?'run':act==='sneak'?'sneak':mode==='climb'?'climb':mode==='peek'?'':'walk';bod.className='kw-bod';if(c1)bod.classList.add(c1);
       if(reduceMotion||KW.silent){await pos.animate([{opacity:1},{opacity:0}],{duration:250,fill:'forwards'}).finished}
       else await kwMove(pos,at,back,Math.hypot(back.x-at.x,back.y-at.y)*(act==='flee'?7:speed));
+      // beim Weggehen angeklickt? Dann reagiert er auch jetzt noch
+      if(KW.react&&!KW.reacted&&!KW.abort){at=KW.at||at;await doReact()}
     }
     // ---- Reaktionen aufs Anklicken ----
     async function kwReact(){
@@ -3933,7 +3939,14 @@ function kwPlan(ms){clearTimeout(KW.timer);KW.timer=setTimeout(function(){kevinG
   var layer=document.createElement('div');layer.className='kw-layer';layer.id='kevin-walker';layer.hidden=true;layer.setAttribute('aria-hidden','true');
   layer.innerHTML='<div class="kw-clip"><div class="kw-pos"><div class="kw-flip"><div class="kw-bod"><img src="kevin.png" alt=""><span class="kw-hat"></span><span class="kw-eye"></span><span class="kw-acc"></span><span class="kw-prop"></span><span class="kw-fx"></span></div></div></div></div><div class="kw-say" id="kw-say"></div>';
   document.body.appendChild(layer);
-  layer.querySelector('.kw-bod').addEventListener('click',function(e){e.stopPropagation();if(!KW.busy||KW.abort)return;KW.clicks=(KW.clicks||0)+1;if(!KW.react){KW.react=true;if(KW.wake)KW.wake();if(KW.anim)try{KW.anim.finish()}catch(x){}}});
+  layer.querySelector('.kw-bod').addEventListener('click',function(e){
+    e.stopPropagation();if(!KW.busy||KW.abort)return;KW.clicks=(KW.clicks||0)+1;
+    if(KW.reacting||KW.react)return;
+    KW.react=true;
+    // laufende Bewegung genau an der aktuellen Stelle anhalten
+    if(KW.anim){try{var pos=layer.querySelector('.kw-pos'),m=new DOMMatrix(getComputedStyle(pos).transform);KW.at={x:m.m41,y:m.m42};pos.style.transform='translate('+m.m41+'px,'+m.m42+'px)';KW.anim.cancel()}catch(x){}}
+    if(KW.wake)KW.wake();
+  });
   window.addEventListener('resize',function(){if(KW.busy){KW.abort=true;KW.silent=true;if(KW.wake)KW.wake()}});
   kwPlan(KW.fast?1500:9000);
 })();
