@@ -1001,6 +1001,30 @@ body.s-advent .castle .sd1::before{content:'🎅'}body.s-advent .castle .sd2::be
 body.s-advent .castle .sd5::before{content:'🦌'}body.s-advent .castle .sd6::before{content:'🎄🎁'}body.s-advent .castle .sd7::before{content:'⛄'}body.s-advent .castle .sd8::before{content:'🧝'}body.s-advent .castle .sd9::before{content:'🍪🥛'}
 body.s-advent .castle .sd4{left:30px;top:-14px;font-size:18px;animation:aTw 1.2s ease-in-out infinite alternate}
 body.s-advent .castle .sd3{font-size:24px;top:40px}
+
+/* Schalter „Bewegung reduzieren“ (wie die System-Einstellung) */
+body.rm .wr-bg{animation:none}
+body.rm .ws{animation:none}
+body.rm .wr-cat .bar i{transition:none}
+body.rm .fx .p{animation:none;top:var(--y)}
+body.rm .fx .p i{animation:none;transform:rotate(var(--r))}
+body.rm .fx .bat,body.rm .fx .gull{animation:none;left:var(--x);top:var(--y)}
+body.rm .fx .gull svg,body.rm .fx .sun,body.rm .fx .lights{animation:none}
+body.rm.s-halloween .kevin-rail b::after,body.rm .castle .sbats i{animation:none}
+body.rm .scn .it,body.rm .g-water{animation:none!important}
+body.rm .a-sleigh{display:none}
+body.rm .fog,body.rm .moon,body.rm .spider,body.rm .spider::before,body.rm .eyes,body.rm .flash,body.rm .bub{animation:none!important}
+body.rm .flash,body.rm .bub{display:none}
+body.rm .spider::before{height:var(--len,40px)}
+body.rm .eyes{opacity:1}
+body.rm .ice::after,body.rm .skater,body.rm .skater svg,body.rm .sball,body.rm .steam i{animation:none!important}
+body.rm .sball,body.rm .steam{display:none}
+body.rm .bauble,body.rm .tw,body.rm .nose,body.rm .stall .bulb,body.rm .chimney .santa{animation:none!important}
+.mbtn{position:absolute;top:12px;left:126px;z-index:2;width:30px;height:28px;display:grid;place-items:center;padding:0;border:1px solid #f5a9d655;border-radius:999px;background:#1c0f21cc;backdrop-filter:blur(4px);font-size:13px;line-height:1;color:#f6dcee;cursor:pointer}
+.mbtn:hover{border-color:var(--accent)}
+.mbtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.mbtn:disabled{cursor:default;opacity:.8}
+@media (max-width:820px){header.hero .mbtn{top:7px;left:108px;width:26px;height:24px;font-size:12px}}
 </style>
 <style>
 /* Layout: Kopfzeile mit Kennzahlen, links Routenliste/Detail, rechts die Karte; auf dem Handy Karte oben, Liste darunter. */
@@ -1724,7 +1748,7 @@ body.editing .grp-wrap{pointer-events:none}
     <p class="upd" id="upd"></p></div>
   </div>
   <div class="auth" id="auth"></div>
-  <button type="button" class="sbtn" id="season-btn" aria-pressed="true"></button>
+  <button type="button" class="sbtn" id="season-btn" aria-pressed="true"></button><button type="button" class="mbtn" id="motion-btn" aria-pressed="false">⏸</button>
   <div class="lang" role="group" aria-label="Sprache / Language"><button type="button" data-lang="de">DE</button><button type="button" data-lang="en">EN</button></div>
 </header>
 
@@ -1805,7 +1829,16 @@ var CONFIG = {
   saveUrl: 'https://script.google.com/macros/s/AKfycbw2QhWqc9sGsgp2ECcqRYHY712jVzE7abmuRmn3RshwUS0rsWCg5LpM4hpjm0e2fFzq/exec'                                       // Web-App-Adresse des Google Apps Script (speichert Routen)
 };
 var PALETTE = ['#f5a9d6','#7fd7ff','#c792ea','#ffb3a7','#9be8c8','#ffd27a'];
-var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+var SYS_RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+var reduceMotion = SYS_RM || (function(){try{return localStorage.getItem('shm.motion')==='off'}catch(e){return false}})();
+// Schalter neben der Jahreszeiten-Deko: Bewegung auf der Seite anhalten (wird gemerkt)
+function applyMotion(){
+  document.body.classList.toggle('rm',reduceMotion&&!SYS_RM);
+  var b=document.getElementById('motion-btn');if(!b)return;
+  b.setAttribute('aria-pressed',reduceMotion);b.textContent=reduceMotion?'▶':'⏸';
+  var t=SYS_RM?T('Bewegung ist in deinem System reduziert','Motion is reduced in your system settings'):reduceMotion?T('Bewegung wieder einschalten','Turn motion back on'):T('Bewegung reduzieren','Reduce motion');
+  b.title=t;b.setAttribute('aria-label',t);b.disabled=SYS_RM;
+}
 
 /* ---------- Streams von naschiitaschii ----------
    Startdaten (werden beim Laden durch data/streams.json ersetzt): Streams ab 01.01.2025, Zeiten Europe/Berlin.
@@ -3496,7 +3529,7 @@ function halloweenScene(kind,mobile,W,S,it,R){
   }
   if(kind==='hero'){
     h+='<span class="flash" style="--dl:-'+R(0,10).toFixed(0)+'s"></span>';
-    h+='<span class="moon" style="'+(mobile?'left:40%;top:5px;--s:26px':'right:15%;top:6px;--s:62px')+'"></span>';
+    h+='<span class="moon" style="'+(mobile?'left:47%;top:5px;--s:26px':'right:15%;top:6px;--s:62px')+'"></span>';
     h+=web('','left:0;top:0',mobile?50:84)+web('tr','right:0;top:0',mobile?50:84);
     h+=spider(mobile?'30%':'24%',mobile?34:62,7,1)+(mobile?'':spider('77%',46,9,4,13));
     if(!mobile){
@@ -3587,6 +3620,8 @@ function applySeason(){
   var rail=document.querySelector('.frame.rail');if(rail&&!mobile){seasonFx(rail,9,mobile);seasonScene(rail,'rail',mobile)}
   var foot=document.querySelector('.frame.foot');if(foot){seasonFx(foot,mobile?4:9,mobile);seasonScene(foot,'foot',mobile)}
 }
+$('#motion-btn').addEventListener('click',function(){reduceMotion=!reduceMotion;try{if(reduceMotion)localStorage.setItem('shm.motion','off');else localStorage.removeItem('shm.motion')}catch(e){}applyMotion()});
+applyMotion();
 $('#season-btn').addEventListener('click',function(){SEASON.off=!SEASON.off;store('shm.season',SEASON.off?'off':null);applySeason()});
 // Fenstergröße: Fallhöhe anpassen; nur beim Wechsel Handy/Computer neu aufbauen
 (function(){var t=null,w=innerWidth;window.addEventListener('resize',function(){clearTimeout(t);t=setTimeout(function(){
