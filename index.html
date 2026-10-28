@@ -1025,6 +1025,36 @@ body.rm .bauble,body.rm .tw,body.rm .nose,body.rm .stall .bulb,body.rm .chimney 
 .mbtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .mbtn:disabled{cursor:default;opacity:.8}
 @media (max-width:820px){header.hero .mbtn{top:7px;left:108px;width:26px;height:24px;font-size:12px}}
+/* ---------- Kevin, das Croissant, läuft durch die Kopfleiste (mit Jahreszeiten-Outfit) ---------- */
+.hero .auth,.hero .lang,.hero .sbtn,.hero .mbtn{z-index:4}
+.kw{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden;border-radius:inherit}
+.kw[hidden]{display:none}
+.kw-pos{position:absolute;left:0;bottom:3px;width:var(--kw,64px);height:calc(var(--kw,64px) * .62)}
+.kw-flip{width:100%;height:100%;transform-origin:50% 100%}
+.kw-bod{position:relative;width:100%;height:100%;transform-origin:60% 100%;pointer-events:auto;cursor:pointer}
+.kw-bod img{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 4px #000a)}
+.kw-bod.walk{animation:kwWalk .42s ease-in-out infinite alternate}
+.kw-bod.run{animation:kwWalk .2s ease-in-out infinite alternate}
+.kw-bod.sneak{animation:kwSneak .7s ease-in-out infinite alternate}
+@keyframes kwWalk{from{transform:rotate(-5deg) translateY(0)}to{transform:rotate(5deg) translateY(-3px)}}
+@keyframes kwSneak{from{transform:rotate(-2deg) scaleY(.94)}to{transform:rotate(2deg) scaleY(.9)}}
+.kw-hat,.kw-acc,.kw-prop,.kw-fx,.kw-eye{position:absolute;line-height:1;pointer-events:none}
+.kw-hat{left:36%;top:-34%;width:58%;height:auto}
+.kw-hat svg{width:100%;height:auto;display:block;filter:drop-shadow(0 1px 1px #0008)}
+.kw-hat.crown{top:-22%;left:30%;width:auto;font-size:calc(var(--kw,64px) * .19);white-space:nowrap}
+.kw-eye{left:44%;top:12%;font-size:calc(var(--kw,64px) * .26)}
+.kw-acc{left:26%;top:60%;font-size:calc(var(--kw,64px) * .26);transform:rotate(-8deg)}
+.kw-prop{left:78%;top:18%;font-size:calc(var(--kw,64px) * .3);transform-origin:20% 90%;transition:transform .3s}
+.kw-prop.sip{animation:kwSip 1.6s ease-in-out 2}
+@keyframes kwSip{0%,100%{transform:rotate(0)}40%,60%{transform:rotate(-38deg) translate(-6px,-4px)}}
+.kw-fx{left:40%;top:-55%;font-size:calc(var(--kw,64px) * .3)}
+.kw-bubbles i{position:absolute;width:7px;height:7px;border-radius:50%;border:1.5px solid #d9f3ffcc;background:#ffffff22;animation:kwBub 2.2s ease-out forwards}
+@keyframes kwBub{from{transform:translate(0,0) scale(.4);opacity:1}to{transform:translate(var(--bx),-46px) scale(1.3);opacity:0}}
+.kw-say{position:absolute;bottom:calc(var(--kw,64px) * .62 + 14px);max-width:min(280px,70%);padding:7px 11px;border-radius:14px;background:#fff;color:#2a1330;font:600 12.5px/1.35 var(--f-body);box-shadow:0 6px 18px #0009;pointer-events:none;opacity:0;transform:translateY(6px) scale(.96);transition:opacity .25s,transform .25s;text-wrap:pretty}
+.kw-say.on{opacity:1;transform:none}
+.kw-say::after{content:'';position:absolute;bottom:-7px;left:var(--tx,24px);width:14px;height:14px;background:#fff;transform:rotate(45deg);border-radius:2px}
+.kw-say small{display:block;font:500 10px var(--f-mono);color:#7d2a63;letter-spacing:.06em;margin-bottom:2px}
+@media (max-width:820px){.kw-say{font-size:11.5px;max-width:78%}}
 </style>
 <style>
 /* Layout: Kopfzeile mit Kennzahlen, links Routenliste/Detail, rechts die Karte; auf dem Handy Karte oben, Liste darunter. */
@@ -3629,6 +3659,140 @@ $('#season-btn').addEventListener('click',function(){SEASON.off=!SEASON.off;stor
   document.querySelectorAll('.fx').forEach(function(x){x.style.setProperty('--fall',x.parentNode.getBoundingClientRect().height+'px')});
 },300)})})();
 applySeason();
+
+/* ---------- Kevin auf der Flucht: taucht ab und zu in der Kopfleiste auf, macht Quatsch und sagt freche Sprüche ---------- */
+var KW={busy:false,timer:null,abort:false,last:'',wake:null,fast:/[?&]kevin\b/.test(location.search)};
+var KW_HAT={
+  santa:'<svg viewBox="0 0 40 30"><path d="M4 26Q12 3 28 5q8 2 10 13l-8-4q-8-2-10 12z" fill="#d6283a"/><rect x="2" y="22" width="24" height="7" rx="3.5" fill="#fff"/><circle cx="37" cy="19" r="3.8" fill="#fff"/></svg>',
+  witch:'<svg viewBox="0 0 44 34"><ellipse cx="22" cy="29" rx="21" ry="4.5" fill="#2a1638"/><path d="M12 28Q18 14 20 3q7-2 15 7-6 0-8 6l3 12z" fill="#3b1f52"/><rect x="13" y="22.5" width="18" height="4" fill="#ff8a1a"/><circle cx="27" cy="24.5" r="1.6" fill="#ffd36b"/></svg>',
+  beanieW:'<svg viewBox="0 0 40 28"><path d="M5 22Q5 5 20 5t15 17z" fill="#4f8fe8"/><path d="M9 12h22M7 17h26" stroke="#7fb0f5" stroke-width="2"/><rect x="3" y="19" width="34" height="7" rx="3" fill="#2f6fc8"/><circle cx="20" cy="4.5" r="4.5" fill="#fff"/></svg>',
+  beanieA:'<svg viewBox="0 0 40 28"><path d="M5 22Q5 5 20 5t15 17z" fill="#e0782c"/><path d="M9 12h22M7 17h26" stroke="#f3a25e" stroke-width="2"/><rect x="3" y="19" width="34" height="7" rx="3" fill="#b5541c"/><circle cx="20" cy="4.5" r="4.5" fill="#f6d39a"/></svg>'
+};
+function kwOutfit(){
+  var s=SEASON.off?'':SEASON.name;
+  return {
+    autumn:{hat:KW_HAT.beanieA,acc:'🧣',drink:'☕',hot:1},
+    halloween:{hat:KW_HAT.witch,acc:'',drink:'🧃',hot:0,extra:'🍬'},
+    winter:{hat:KW_HAT.beanieW,acc:'🧣',drink:'☕',hot:1},
+    advent:{hat:KW_HAT.santa,acc:'🧣',drink:'☕',hot:1,extra:'🎁'},
+    spring:{crown:'🌸🌼🌸',drink:'🧃',hot:0,extra:'🌷'},
+    summer:{eye:'🕶️',drink:'🍹',hot:0,extra:'🍦'}
+  }[s]||{drink:'☕',hot:1};
+}
+// Sprüche: feste plus welche aus Stream- und Clip-Titeln (ohne Namen, ohne Befehle, nichts Derbes)
+var KW_BAD=/sex|nackt|arsch|fick|titt|brust|porn|drog|junk|kokain|koks|weed|joint|kiff|rausch|alkohol|sauf|besoffen|bier|wein|wodka|schnaps|crack|dealer|meth|pille|kotz|schei|hure|nutte|nazi|hitler|tot\b|töt|mord|blut|waffe|behindert|spast|schwuchtel|nigg|zigeun|fett|dick|hässlich|@|http|!/i;
+function kwData(){
+  var rs=(state.routes||[]).slice().sort(function(a,b){return (b.date+b.start).localeCompare(a.date+a.start)}),names={};
+  rs.forEach(function(r){(r.clips||[]).forEach(function(c){if(c.by&&c.by.length>2)names[c.by.toLowerCase()]=1})});
+  var okT=function(t){t=String(t||'').trim();if(t.length<6||t.length>48||KW_BAD.test(t))return false;var l=t.toLowerCase();for(var n in names)if(l.indexOf(n)>=0)return false;return true};
+  var clips=[];rs.slice(0,40).forEach(function(r){(r.clips||[]).forEach(function(c){if((c.views||0)>=2&&okT(c.title))clips.push({c:c,r:r})})});
+  var titles=rs.slice(0,25).map(function(r){return String(r.title||'').replace(/[|│┃].*$/,'').replace(/!\w+/g,'').replace(/\s+/g,' ').trim()}).filter(okT);
+  var last=rs.find(function(r){return !r.live})||rs[0];
+  return {clips:clips,titles:titles,last:last,n:rs.length,hours:Math.round(rs.reduce(function(s,r){return s+(r.durationMin||0)},0)/60)};
+}
+function kwLines(act){
+  var en=LANG==='en',d=kwData(),P=function(a){return a[Math.floor(Math.random()*a.length)]};
+  var place=(typeof KEVIN!=='undefined'&&KEVIN.length)?P(KEVIN).short:'Las Vegas';
+  var L=en?[
+    "Psst! I'm not Kevin. I'm… Gerald.","On the run since Polaris. The crumbs always give me away.","New life plan: become a bread roll. Sounds more respectable.","If anyone asks: you never saw me.","I'm not lost. I'm on a journey of self-discovery.","Las Vegas was a misunderstanding. No comment without my lawyer.","A croissant has feelings too. Mostly butter.","I'm fluffier than everyone in chat. Fact.","Naschii is looking for me? Tell her I'm in "+place+".","Do you know how far this map is with legs THIS short?!"
+  ]:[
+    "Psst! Ich bin nicht Kevin. Ich bin… Gerd.","Seit Polaris auf der Flucht. Die Krümel verraten mich jedes Mal.","Neuer Lebensplan: Ich werd Brötchen. Klingt seriöser.","Wenn jemand fragt: Ihr habt mich nie gesehen.","Ich bin nicht verloren. Ich bin auf Selbstfindungsreise.","Las Vegas war ein Missverständnis. Ohne Anwalt sag ich nix.","Ein Croissant hat auch Gefühle. Meistens Butter.","Ich bin flauschiger als der ganze Chat zusammen. Fakt.","Naschii sucht mich? Sag ihr, ich bin in "+place+".","Wisst ihr, wie groß diese Karte ist – mit SO kurzen Beinchen?!"
+  ];
+  if(d.n)L.push(en?d.n+" streams and nobody came looking for me. Thanks a lot.":d.n+" Streams und keiner hat nach mir gesucht. Danke auch.");
+  if(d.hours)L.push(en?"Naschii streamed "+d.hours.toLocaleString(LOC)+" hours. I lost three crumbs in that time.":"Naschii war "+d.hours.toLocaleString(LOC)+" Stunden live. Ich hab in der Zeit drei Krümel verloren.");
+  if(d.last&&(d.last.clips||[]).length)L.push(en?(d.last.clips.length)+" clips in the last stream – and I'm in none of them. Outrageous.":(d.last.clips.length)+" Clips im letzten Stream – und ich bin in keinem drin. Frechheit.");
+  if(d.clips.length){
+    var c=P(d.clips).c.title,c2=P(d.clips).c.title;
+    L.push(en?"“"+c+"”? I was there. Well… almost.":"„"+c+"“? Da war ich dabei. Also… fast.");
+    L.push(en?"My favourite clip: “"+c2+"”. Watched it 47 times. Secretly.":"Mein Lieblingsclip: „"+c2+"“. 47 Mal geguckt. Heimlich.");
+    L.push(en?"One more “"+c+"” and I'm fleeing to "+place+".":"Noch einmal „"+c+"“ und ich flieh nach "+place+".");
+  }
+  if(d.titles.length){var t=P(d.titles);L.push(en?"Heard there was chaos at “"+t+"”. And me? Hiding in a bush.":"Hab gehört, bei „"+t+"“ war ordentlich was los. Und ich? Saß im Gebüsch.")}
+  var S={
+    autumn:en?["Leaves are great. Nobody sees me in here.","Me and the squirrels? We have a deal.","Pumpkin spice? I AM pumpkin spice."]:["Laub ist super. Da sieht mich keiner.","Ich und die Eichhörnchen? Wir haben einen Deal.","Kürbis-Latte? Ich BIN Kürbis-Latte."],
+    halloween:en?["This isn't a costume. I'm a real horror croissant.","Trick or treat, or I'll leave crumbs!","Boo! …was that scary? Be honest."]:["Das ist kein Kostüm. Ich bin ein echtes Gruselcroissant.","Süßes, sonst gibt's Krümel!","Buh! …war das gruselig? Sag ehrlich."],
+    winter:en?["Cold? I'm filled… with air.","Snowball fight? Count me out, I'm too soft.","Ice rink? With MY legs? Absolutely not."]:["Kalt? Ich bin doch gefüllt… mit Luft.","Schneeballschlacht? Ich bin raus, ich bin zu weich.","Eisbahn? Mit MEINEN Beinchen? Niemals."],
+    advent:en?["Dear Santa, all I want is: not to be found.","Cookies are my second cousins. Don't eat them!","Is the Santa hat too much? …No. It's perfect."]:["Lieber Weihnachtsmann, ich wünsch mir: nicht gefunden werden.","Plätzchen sind meine Cousins zweiten Grades. Esst sie nicht!","Ist die Mütze zu viel? …Nein. Sie ist perfekt."],
+    spring:en?["The bees think I'm a flower. I let them.","Spring cleaning? I'd rather stay crumbly."]:["Die Bienen halten mich für eine Blume. Ich lass sie.","Frühjahrsputz? Ich bleib lieber krümelig."],
+    summer:en?["Sunscreen? I only get golden brown anyway.","A holiday from being lost. I deserve it."]:["Sonnencreme? Ich werd doch eh nur goldbraun.","Urlaub vom Verlorensein. Gönn ich mir."]
+  }[SEASON.off?'':SEASON.name];
+  if(S)L=L.concat(S,S);   // Jahreszeiten-Sprüche etwas häufiger
+  var A={
+    stumble:en?["I did that on purpose.","Who put that curb there?!","…nobody saw that, right?"]:["Hab ich mit Absicht gemacht.","Wer hat da den Bordstein hingebaut?!","…das hat keiner gesehen, oder?"],
+    drink:en?["Short break. Fugitives need fuel too.","Ahh. Now I can run for another 3 metres."]:["Kurze Pause. Auch Flüchtige brauchen Treibstoff.","Ahh. Jetzt schaff ich wieder drei Meter."],
+    flee:en?["They're after me! Bye!","No time! They found my crumbs!"]:["Die sind hinter mir her! Tschüss!","Keine Zeit! Die haben meine Krümel gefunden!"],
+    bubbles:en?["These aren't soap bubbles. They're smoke screens.","Bubble camouflage. Very professional."]:["Das sind keine Seifenblasen. Das sind Tarnwolken.","Blasen-Tarnung. Sehr professionell."],
+    sneak:en?["I'm invisible. Completely invisible.","Tiptoe… tiptoe…"]:["Ich bin unsichtbar. Komplett unsichtbar.","Schleich… schleich…"]
+  }[act];
+  if(A&&Math.random()<.5)L=A;
+  var pick=P(L),tries=0;while(pick===KW.last&&tries++<5)pick=P(L);KW.last=pick;return pick;
+}
+function kwSleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function kwSay(text,x,W,ms){
+  var b=$('#kw-say');b.innerHTML='<small>KEVIN</small>'+esc(text);
+  b.style.left='0px';var bw=b.offsetWidth,kw=parseFloat(getComputedStyle($('#kevin-walker')).getPropertyValue('--kw'))||64;
+  var left=Math.max(6,Math.min(W-bw-6,x+kw*.55-bw/2));b.style.left=left+'px';b.style.setProperty('--tx',Math.max(10,Math.min(bw-24,x+kw*.55-left-7))+'px');
+  b.classList.add('on');return new Promise(function(r){KW.wake=r;setTimeout(r,ms||Math.min(6500,2200+text.length*45))}).then(function(){KW.wake=null;b.classList.remove('on')});
+}
+function kwMove(pos,from,to,ms){
+  if(reduceMotion){pos.style.transform='translateX('+to+'px)';return Promise.resolve()}
+  var a=pos.animate([{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],{duration:ms,easing:'linear',fill:'forwards'});
+  return a.finished.then(function(){pos.style.transform='translateX('+to+'px)';a.cancel()}).catch(function(){});
+}
+async function kevinGo(force){
+  var box=$('#kevin-walker');
+  if(!box||KW.busy)return;
+  if(!force&&(document.hidden||SEASON.off||!$('#wrap').hidden||state.editing||!$('#player').hidden))return kwPlan();
+  KW.busy=true;KW.abort=false;
+  try{
+    var hero=box.parentNode,W=hero.getBoundingClientRect().width,mobile=innerWidth<=820,kw=mobile?46:62;
+    box.style.setProperty('--kw',kw+'px');box.hidden=false;
+    var o=kwOutfit(),hat=box.querySelector('.kw-hat');
+    hat.className='kw-hat'+(o.crown?' crown':'');hat.innerHTML=o.hat||o.crown||'';
+    box.querySelector('.kw-eye').textContent=o.eye||'';box.querySelector('.kw-acc').textContent=o.acc||'';
+    var prop=box.querySelector('.kw-prop'),fx=box.querySelector('.kw-fx'),bod=box.querySelector('.kw-bod'),flip=box.querySelector('.kw-flip'),pos=box.querySelector('.kw-pos');
+    prop.textContent='';fx.textContent='';bod.className='kw-bod';pos.style.opacity='1';
+    var acts=['walk','stumble','drink','flee','bubbles','sneak'],act=acts[Math.floor(Math.random()*acts.length)];
+    var fromLeft=Math.random()<.5,zone=mobile?.16:.19;
+    var start=fromLeft?-kw-10:W+10,stop=fromLeft?W*(.02+Math.random()*(zone-.06)):W-kw-W*(.02+Math.random()*(zone-.06));
+    var dir=fromLeft?1:-1;flip.style.transform='scaleX('+(fromLeft?1:-1)+')';
+    if(reduceMotion){pos.style.transform='translateX('+stop+'px)';pos.style.opacity='0';pos.animate([{opacity:0},{opacity:1}],{duration:300,fill:'forwards'});pos.style.opacity='1'}
+    var speed=(act==='flee'?7:act==='sneak'?38:20)*(mobile?.8:1); // ms pro Pixel
+    bod.classList.add(act==='flee'?'run':act==='sneak'?'sneak':'walk');
+    await kwMove(pos,start,stop,Math.abs(stop-start)*speed);
+    bod.className='kw-bod';
+    if(act==='stumble'&&!reduceMotion){
+      await bod.animate([{transform:'rotate(0)'},{transform:'rotate(78deg) translateY(4px)'}],{duration:260,easing:'ease-in',fill:'forwards'}).finished;
+      fx.textContent='💫';await kwSleep(900);fx.textContent='';
+      await bod.animate([{transform:'rotate(78deg) translateY(4px)'},{transform:'rotate(0)'}],{duration:420,easing:'ease-out',fill:'forwards'}).finished;
+    }
+    if(act==='drink'){prop.textContent=o.drink;if(o.hot)prop.innerHTML=o.drink+'<span class="steam" style="left:2px;top:-18px"><i style="--x:2px"></i><i style="--x:6px;--dl:-.8s"></i></span>';if(!reduceMotion)prop.classList.add('sip')}
+    if(act==='bubbles'&&!reduceMotion){fx.innerHTML='';var bb=document.createElement('span');bb.className='kw-fx kw-bubbles';bb.style.cssText='left:78%;top:10%';box.querySelector('.kw-bod').appendChild(bb);
+      for(var i=0;i<7;i++){(function(i){setTimeout(function(){var e=document.createElement('i');e.style.setProperty('--bx',(Math.random()*30-6)*dir+'px');bb.appendChild(e);setTimeout(function(){e.remove()},2300)},i*280)})(i)}
+      setTimeout(function(){bb.remove()},4500)}
+    if(act==='flee')fx.textContent='💦';
+    if(!prop.textContent&&o.extra&&Math.random()<.5)prop.textContent=o.extra;
+    var x=stop;
+    if(!KW.abort)await kwSay(kwLines(act),x,W,act==='flee'?2600:null);
+    if(KW.abort){fx.textContent='💦';await kwSay(LANG==='en'?'Hey! Hands off, I’m fluffy and fragile!':'Hey! Finger weg, ich bin flauschig empfindlich!',x,W,1600);act='flee'}
+    prop.classList.remove('sip');
+    // Abgang: zurück, wo er herkam (oder bei Flucht ganz schnell)
+    flip.style.transform='scaleX('+(fromLeft?-1:1)+')';
+    bod.classList.add(act==='flee'?'run':act==='sneak'?'sneak':'walk');
+    if(reduceMotion){await pos.animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'}).finished}
+    else await kwMove(pos,stop,start,Math.abs(stop-start)*(act==='flee'||KW.abort?7:speed));
+  }catch(e){}
+  box.hidden=true;KW.busy=false;kwPlan();
+}
+function kwPlan(ms){clearTimeout(KW.timer);KW.timer=setTimeout(function(){kevinGo()},ms||(KW.fast?4000:30000+Math.random()*35000))}
+(function(){
+  var hero=document.querySelector('header.hero');if(!hero)return;
+  var box=document.createElement('div');box.className='kw';box.id='kevin-walker';box.hidden=true;box.setAttribute('aria-hidden','true');
+  box.innerHTML='<div class="kw-say" id="kw-say"></div><div class="kw-pos"><div class="kw-flip"><div class="kw-bod"><img src="kevin.png" alt=""><span class="kw-hat"></span><span class="kw-eye"></span><span class="kw-acc"></span><span class="kw-prop"></span><span class="kw-fx"></span></div></div></div>';
+  hero.appendChild(box);
+  box.querySelector('.kw-bod').addEventListener('click',function(){if(KW.busy&&!KW.abort){KW.abort=true;if(KW.wake)KW.wake()}});
+  kwPlan(KW.fast?1500:9000);
+})();
 
 /* ---------- Login ---------- */
 function setUser(u){
