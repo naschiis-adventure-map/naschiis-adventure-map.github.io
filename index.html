@@ -976,6 +976,31 @@ body.s-halloween #map.z-near .castle .sfog{display:block}
 @keyframes steam{0%{transform:translate(0,0) scale(.6);opacity:0}25%{opacity:.8}100%{transform:translate(4px,-18px) scale(1.4);opacity:0}}
 .lean{transform:rotate(-14deg)!important}
 @media (prefers-reduced-motion:reduce){.ice::after,.skater,.skater svg,.sball,.steam i{animation:none!important}.sball,.steam{display:none}}
+/* ---------- Advent: Christbaumkugeln, Weihnachtsmarkt, Weihnachtsmann, Wichtel, Geschenke ---------- */
+.bauble{position:absolute;top:0;transform-origin:50% 0;animation:aSwing var(--d,3.4s) ease-in-out var(--dl,0s) infinite alternate;display:flex;flex-direction:column;align-items:center}
+.bauble::before{content:'';width:1px;height:var(--len,24px);background:#f6e7b6aa}
+.bauble b{display:block;width:var(--s,14px);height:var(--s,14px);border-radius:50%;margin-top:3px;position:relative;
+  background:radial-gradient(circle at 35% 30%,#fff 0 8%,var(--c) 30%,color-mix(in srgb,var(--c) 55%,#000) 100%);box-shadow:0 0 8px color-mix(in srgb,var(--c) 70%,transparent)}
+.bauble b::before{content:'';position:absolute;left:50%;top:-4px;width:6px;height:5px;margin-left:-3px;border-radius:2px;background:linear-gradient(#f7e08a,#c79a2b)}
+.bauble.star b{background:none;box-shadow:none;width:auto;height:auto;font-size:var(--s,14px);line-height:1;filter:drop-shadow(0 0 6px #ffd36b)}
+.bauble.star b::before{display:none}
+@keyframes aSwing{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+.tw{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--c);box-shadow:0 0 5px var(--c);animation:aTw 1.2s ease-in-out var(--dl,0s) infinite alternate}
+@keyframes aTw{from{opacity:.25}to{opacity:1}}
+.nose{position:absolute;width:5px;height:5px;border-radius:50%;background:#ff2b2b;box-shadow:0 0 6px #ff2b2b,0 0 12px #ff5b5b;animation:aTw .9s ease-in-out infinite alternate}
+.stall{position:absolute}.stall svg{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 4px #0008)}
+.stall .bulb{animation:aTw 1s ease-in-out infinite alternate}.stall .bulb:nth-child(2n){animation-delay:-.5s}
+.chimney{position:absolute;width:30px;height:38px}
+.chimney svg{width:100%;height:100%;display:block}
+.chimney .santa{position:absolute;left:3px;top:-14px;font-size:22px;animation:aPeek 5s ease-in-out infinite}
+@keyframes aPeek{0%,20%{transform:translateY(16px)}35%,75%{transform:translateY(0)}90%,100%{transform:translateY(16px)}}
+@media (prefers-reduced-motion:reduce){.bauble,.tw,.nose,.stall .bulb,.chimney .santa{animation:none!important}}
+/* Castle im Advent */
+body.s-advent #map .castle img{filter:drop-shadow(0 0 10px #ffd36bcc) drop-shadow(0 4px 8px #000b)}
+body.s-advent .castle .sd1::before{content:'🎅'}body.s-advent .castle .sd2::before{content:'🎁🎁🎁'}body.s-advent .castle .sd3::before{content:'🎄'}body.s-advent .castle .sd4::before{content:'⭐'}
+body.s-advent .castle .sd5::before{content:'🦌'}body.s-advent .castle .sd6::before{content:'🎄🎁'}body.s-advent .castle .sd7::before{content:'⛄'}body.s-advent .castle .sd8::before{content:'🧝'}body.s-advent .castle .sd9::before{content:'🍪🥛'}
+body.s-advent .castle .sd4{left:30px;top:-14px;font-size:18px;animation:aTw 1.2s ease-in-out infinite alternate}
+body.s-advent .castle .sd3{font-size:24px;top:40px}
 </style>
 <style>
 /* Layout: Kopfzeile mit Kennzahlen, links Routenliste/Detail, rechts die Karte; auf dem Handy Karte oben, Liste darunter. */
@@ -3356,7 +3381,8 @@ function seasonFx(frame,n,mobile){
   if(s==='winter'||s==='advent')n=Math.round(n*1.8);
   if(falling)for(var i=0;i<n;i++){
     var d=R(9,19),st='--x:'+R(-3,97).toFixed(1)+'%;--y:'+R(5,85).toFixed(0)+'%;--d:'+d.toFixed(1)+'s;--dl:-'+R(0,d).toFixed(1)+'s;--dx:'+R(-50,50).toFixed(0)+'px;--sw:'+R(1.6,3.2).toFixed(1)+'s;--r:'+R(0,360).toFixed(0)+'deg;';
-    if(s==='winter'||s==='advent'){var z=R(3,7);h+='<span class="p snow" style="'+st+'--s:'+z.toFixed(1)+'px;--o:'+R(.55,.95).toFixed(2)+'"><i></i></span>'}
+    if(s==='advent'&&Math.random()<.09){h+='<span class="p" style="'+st+'--s:'+R(14,18).toFixed(0)+'px"><i>'+(Math.random()<.7?'🎁':'⭐')+'</i></span>'}
+    else if(s==='winter'||s==='advent'){var z=R(3,7);h+='<span class="p snow" style="'+st+'--s:'+z.toFixed(1)+'px;--o:'+R(.55,.95).toFixed(2)+'"><i></i></span>'}
     else if(s==='spring'){h+='<span class="p" style="'+st+'--s:'+R(9,14).toFixed(0)+'px"><i style="background-image:url(&quot;data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="9" ry="5.5" fill="'+(Math.random()<.5?'#ffc4dd':'#fff0f6')+'"/></svg>')+'&quot;)"></i></span>'}
     else if(s==='halloween'&&Math.random()<.22){h+='<span class="p" style="'+st+'--s:'+R(14,19).toFixed(0)+'px"><i>🎃</i></span>'}
     else{h+='<span class="p" style="'+st+'--s:'+R(16,27).toFixed(0)+'px"><i style="background-image:'+leafSvg(Math.random()<.55,LEAF[Math.floor(Math.random()*LEAF.length)]).replace(/"/g,'&quot;')+'"></i></span>'}
@@ -3384,10 +3410,55 @@ function icicles(W,mobile,dense){var h='<span class="ice-top"></span>',n=Math.ro
   for(var i=0;i<n;i++){var x=(i+R(.1,.9))/n*100;h+='<span class="ice" style="left:'+x.toFixed(2)+'%;--w:'+R(5,11).toFixed(0)+'px;--h:'+R(7,mobile?16:26).toFixed(0)+'px;--d:'+R(4,9).toFixed(1)+'s;--dl:-'+R(0,9).toFixed(1)+'s"></span>'}
   return h}
 function steam(pos){return '<span class="steam" style="'+pos+'"><i style="--x:2px"></i><i style="--x:6px;--dl:-.8s"></i><i style="--x:4px;--dl:-1.6s"></i></span>'}
+var STALL='<svg viewBox="0 0 70 58"><path d="M3 22 35 4l32 18z" fill="#7a3b1e"/><path d="M3 22 35 4l32 18-4 2L35 8 7 24z" fill="#fff"/><path d="M8 22h54v30H8z" fill="#9b5a2c"/><path d="M8 22h54v4H8z" fill="#6e3a18"/><rect x="14" y="30" width="42" height="14" rx="2" fill="#2a1408"/><rect x="11" y="44" width="48" height="6" fill="#c98b4a"/><rect x="20" y="13" width="30" height="7" rx="1.5" fill="#fff4dc"/><text x="35" y="18.6" text-anchor="middle" font-size="5.2" font-family="sans-serif" font-weight="700" fill="#b3261e">GLÜHWEIN</text><g class="bulbs">'+
+  [10,18,26,34,42,50,58].map(function(x,i){return '<circle class="bulb" cx="'+x+'" cy="'+(24.5+(i%2))+'" r="1.8" fill="'+['#ff5d6c','#ffd36b','#6fd3ff'][i%3]+'"/>'}).join('')+
+  '</g><path d="M24 38h6v6h-6zM38 37h6v7h-6z" fill="#d64545"/><path d="M30 39h2v3h-2zM44 39h2v3h-2z" fill="none" stroke="#d64545" stroke-width="1"/><path d="M26 34q1-3 2 0M40 33q1-3 2 0" stroke="#fff" stroke-opacity=".7" fill="none"/></svg>';
+var CHIMNEY='<svg viewBox="0 0 30 38"><rect x="2" y="6" width="26" height="32" fill="#a33a2a"/><g stroke="#6e2216" stroke-width="1"><path d="M2 14h26M2 22h26M2 30h26M10 6v8M20 14v8M10 22v8M20 30v8"/></g><rect x="0" y="2" width="30" height="6" rx="1" fill="#8a2f22"/><path d="M0 3q15-6 30 0v2H0z" fill="#fff"/></svg>';
+var CANE='<svg viewBox="0 0 16 36" width="100%" height="100%"><path d="M11 34V11a4.5 4.5 0 0 0-9 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M11 34V11a4.5 4.5 0 0 0-9 0" fill="none" stroke="#e23a3a" stroke-width="4" stroke-dasharray="3 3" stroke-linecap="round"/></svg>';
+function baubles(n,W,mobile,R){var h='',C=['#e8343e','#ffd36b','#4fb3ff','#c06bff','#5fd38d','#ff8ad1'];
+  for(var i=0;i<n;i++){var x=((i+R(.15,.85))/n*100).toFixed(1),star=Math.random()<.22;
+    h+='<span class="bauble'+(star?' star':'')+'" style="left:'+x+'%;--len:'+R(mobile?6:10,mobile?18:34).toFixed(0)+'px;--d:'+R(2.6,4.4).toFixed(1)+'s;--dl:-'+R(0,4).toFixed(1)+'s;--s:'+R(mobile?9:11,mobile?13:17).toFixed(0)+'px;--c:'+C[i%C.length]+'"><b>'+(star?'⭐':'')+'</b></span>'}
+  return h}
+function adventScene(kind,mobile,W,S,it,R){
+  var h='';
+  if(kind==='rail'){
+    h+=baubles(3,W,false,R)+'<span class="chimney" style="left:20px;top:62px"><span class="santa">🎅</span>'+CHIMNEY+'</span>'+steam('left:26px;top:30px');
+    h+=it('🎁',4,4,16,'')+it('🎁',8,16,12,'');
+    return h;
+  }
+  if(kind==='foot'){
+    h+='<span class="it a-walk" style="left:3%;bottom:2px;font-size:'+S(18)+'px;--w:'+Math.round(W*.06)+'px;--d:9s">🧝🎁</span>';
+    h+='<span class="it a-walk" style="left:1%;bottom:2px;font-size:'+S(16)+'px;--w:'+Math.round(W*.05)+'px;--d:11s;--dl:-5s">🧝</span>';
+    h+='<span class="it" style="left:13.5%;bottom:3px;width:'+S(10)+'px;height:'+S(24)+'px">'+CANE+'</span>';
+    h+=it('🎅',-1.5,3,S(24),'a-bob')+it('🎁',-5,2,S(16),'')+it('🎁',-6.6,2,S(13),'')+it('🦌',-10,3,S(22),'')+'<span class="nose" style="right:calc(6.2% + '+S(16)+'px);bottom:'+S(15)+'px"></span>';
+    return h;
+  }
+  h+=baubles(mobile?6:16,W,mobile,R);
+  h+='<span class="it a-sleigh" style="top:12px;--dl:-'+R(0,20).toFixed(0)+'s">🦌🦌🛷🎅</span>';
+  if(mobile){
+    h+=it('🎄',13,6,30,'')+it('⭐',15.2,36,10,'a-flick')+it('🎅',21,3,22,'a-bob');
+    h+=it('🎁',-2,2,16,'')+it('🎁',-6,2,13,'')+it('🕯️',-10,4,16,'a-flick');
+    return h;
+  }
+  // großer Christbaum mit Lichtern, Stern und Geschenkeberg
+  h+=it('🎄',12.4,4,46,'')+it('⭐',13.9,48,16,'a-flick');
+  [[13.2,14,'#ff5d6c'],[14.6,20,'#ffd36b'],[13.6,26,'#6fd3ff'],[14.9,32,'#ff8ad1'],[13.9,38,'#ffd36b'],[12.9,22,'#5fd38d']].forEach(function(t,i){h+='<span class="tw" style="left:'+t[0]+'%;bottom:'+t[1]+'px;--c:'+t[2]+';--dl:-'+(i*.3)+'s"></span>'});
+  h+=it('🎁',11.2,2,20,'')+it('🎁',15.8,2,22,'')+it('🎁',16.4,20,15,'')+it('🧸',17.9,3,18,'');
+  h+=it('🎅',19.6,3,32,'a-bob')+'<span class="it a-walk" style="left:22.6%;bottom:3px;font-size:18px;--w:30px;--d:6s">🧝🎁</span>';
+  // rechts: Weihnachtsmarkt-Hütte, Rudolph, Adventskranz, Plätzchen, Zuckerstangen
+  h+='<span class="stall" style="right:1.5%;bottom:4px;width:78px;height:64px">'+STALL+'</span>';
+  h+=it('🦌',-8.2,4,28,'')+'<span class="nose" style="right:calc(8.2% + 23px);bottom:21px"></span>';
+  var lit=Math.max(1,adventLit(new Date()));
+  h+='<span class="wreath" style="right:14.5%;bottom:4px;width:84px;transform:translateX(50%)"></span>';
+  for(var k=0;k<4;k++)h+=it('🕯️',-14.5+(k-1.5)*1.6,9,21,k<lit?'a-flick':'unlit','transform:translateX(50%);--dl:-'+(k*.3)+'s');
+  h+=it('🍪',-19.5,3,16,'')+it('🍪',-21,2,14,'')+it('🥛',-22.6,3,16,'');
+  h+='<span class="it" style="right:24.6%;bottom:3px;width:11px;height:26px">'+CANE+'</span>';
+  return h;
+}
 function winterScene(kind,mobile,W,S,it,R,advent){
   var h=icicles(W,mobile,kind==='rail');
   if(kind==='rail'){
-    h+=it('🛷',30,4,20,'lean')+it('☕',4,26,15,'')+steam('left:8px;bottom:42px');
+    if(!advent)h+=it('🛷',30,4,20,'lean')+it('☕',4,26,15,'')+steam('left:8px;bottom:42px');
     return h;
   }
   if(kind==='foot'){
@@ -3410,8 +3481,6 @@ function winterScene(kind,mobile,W,S,it,R,advent){
     h+='<span class="skater" style="right:calc(3% + '+(rw-40)+'px);--w:'+(rw-50)+'px;--d:13s;--s:22px">'+skaterSvg('#e8457b','#ffd36b')+'</span>';
     h+='<span class="skater" style="right:calc(3% + '+(rw-70)+'px);--w:'+(rw-80)+'px;--d:17s;--dl:-6s;--s:20px">'+skaterSvg('#4f8fe8','#ff7a7a')+'</span>';
     h+=it('🛷',-20,4,20,'lean')+it('☕',-22.5,4,16,'')+steam('right:calc(22.5% - 2px);bottom:22px');
-  }else{
-    h+=it('🛷',-36,4,18,'lean')+it('☕',-34,4,15,'')+steam('right:calc(34% - 2px);bottom:21px');
   }
   return h;
 }
@@ -3467,9 +3536,10 @@ function seasonScene(frame,kind,mobile){
   var S=function(px){return Math.round(px*big)};
   if(hw)h+=halloweenScene(kind,mobile,W,S,it,R);
   if(winter)h+=winterScene(kind,mobile,W,S,it,R,s==='advent');
+  if(s==='advent')h+=adventScene(kind,mobile,W,S,it,R);
   if(kind==='rail'){
     if(autumn)h+=it('🐿️',8,0,22,'a-bob','top:48px;bottom:auto')+it('🌰',58,0,13,'a-dig','--d:6s;top:62px;bottom:auto')+it('🍄',6,4,18,'');
-    if(winter)h+=it('⛄',4,4,26,'')+(s==='advent'?it('🎄',30,4,24,'')+it('🎁',18,2,13,''):it('🌲',34,4,20,''));
+    if(winter)h+=s==='advent'?'':it('⛄',4,4,26,'')+it('🌲',34,4,20,'');
     if(s==='spring')h+=it('🐝',10,0,16,'a-fly','--d:5s;top:30px;bottom:auto')+it('🦋',40,0,16,'a-fly','--d:7s;--dl:-2s;top:70px;bottom:auto')+it('🌷',8,6,16,'a-sway')+it('🌼',40,4,14,'a-sway','--dl:-1s');
     if(s==='summer')h+=it('🌴',2,4,30,'a-sway')+it('🦀',40,2,14,'a-walk','--w:10px;--d:3s');
   }else{
@@ -3480,17 +3550,8 @@ function seasonScene(frame,kind,mobile){
       if(!foot&&!mobile)h+=it('🍄',-20,2,16,'')+it('🍂',22,2,18,'');
     }
     if(winter){
-      if(!foot)h+=it('⛄',1.5,4,S(28),'')+it('🌲',mobile?7:5.5,4,S(24),'')+it('🌲',mobile?11:8.5,4,S(18),'');
-      if(!foot&&!mobile&&s==='advent')h+=it('🦌',-3,4,24,'')+it('⛸️',-9,4,16,'')+it('🌲',-14,4,20,'');
-    }
-    if(s==='advent'){
-      // Weihnachtsbaum mit Geschenken, Adventskranz mit brennenden Kerzen, Plätzchen
-      h+=it('🎄',mobile?18:14,6,S(34),'')+it('⭐',mobile?20.6:15.6,S(40),S(12),'a-flick')+it('🎁',mobile?22:17.8,3,S(15),'')+it('🎁',mobile?14.5:12,2,S(13),'');
-      var lit=Math.max(1,adventLit(new Date())),cx=mobile?-18:-20,ww=S(84);
-      h+='<span class="wreath" style="right:'+(-cx)+'%;bottom:4px;width:'+ww+'px;transform:translateX(50%)"></span>';
-      for(var k=0;k<4;k++)h+=it('🕯️',cx+(k-1.5)*(mobile?4.2:(kind==='foot'?2.6:1.6)),9,S(21),k<lit?'a-flick':'unlit','transform:translateX(50%);--dl:-'+(k*.3)+'s');
-      h+=it('🍪',mobile?-28:-27,3,S(15),'')+it('🍪',mobile?-31:-29,2,S(13),'')+it('🥛',mobile?-33:-31,3,S(14),'');
-      if(kind==='hero')h+='<span class="it a-sleigh" style="top:12px;--dl:-'+R(0,20).toFixed(0)+'s">🦌🦌🛷🎅</span>';
+      var tr=s==='advent'?'🎄':'🌲';
+      if(!foot)h+=it('⛄',1.5,4,S(28),'')+(mobile&&s==='advent'?'':it(tr,mobile?7:5.5,4,S(24),'')+it(tr,mobile?11:8.5,4,S(18),''));
     }
     if(s==='spring'){
       h+=it('🐝',4,S(26),S(16),'a-fly','--d:5s')+it('🦋',12,S(34),S(17),'a-fly','--d:7s;--dl:-3s')+it('🐣',1.5,4,S(20),'a-bob')+it('💐',8,3,S(20),'');
