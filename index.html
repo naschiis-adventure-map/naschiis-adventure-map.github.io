@@ -1055,6 +1055,14 @@ body.rm .bauble,body.rm .tw,body.rm .nose,body.rm .stall .bulb,body.rm .chimney 
 .kw-say::after{content:'';position:absolute;bottom:-7px;left:var(--tx,24px);width:14px;height:14px;background:#fff;transform:rotate(45deg);border-radius:2px}
 .kw-say small{display:block;font:500 10px var(--f-mono);color:#7d2a63;letter-spacing:.06em;margin-bottom:2px}
 @media (max-width:820px){.kw-say{font-size:11.5px;max-width:78%}}
+.kw-layer{position:fixed;inset:0;z-index:1500;pointer-events:none}
+.kw-layer[hidden]{display:none}
+.kw-clip{position:absolute}
+.kw-pos{position:absolute;left:0;top:0;bottom:auto;width:var(--kw,64px);height:calc(var(--kw,64px) * .62)}
+.kw-bod.climb{animation:kwClimb .3s ease-in-out infinite alternate}
+@keyframes kwClimb{from{transform:translateX(-2px) rotate(-4deg)}to{transform:translateX(2px) rotate(4deg)}}
+.kw-say{position:fixed;bottom:auto;max-width:min(280px,calc(100vw - 24px))}
+.kw-say.below::after{bottom:auto;top:-7px}
 </style>
 <style>
 /* Layout: Kopfzeile mit Kennzahlen, links Routenliste/Detail, rechts die Karte; auf dem Handy Karte oben, Liste darunter. */
@@ -3728,69 +3736,150 @@ function kwLines(act){
   var pick=P(L),tries=0;while(pick===KW.last&&tries++<5)pick=P(L);KW.last=pick;return pick;
 }
 function kwSleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
-function kwSay(text,x,W,ms){
-  var b=$('#kw-say');b.innerHTML='<small>KEVIN</small>'+esc(text);
-  b.style.left='0px';var bw=b.offsetWidth,kw=parseFloat(getComputedStyle($('#kevin-walker')).getPropertyValue('--kw'))||64;
-  var left=Math.max(6,Math.min(W-bw-6,x+kw*.55-bw/2));b.style.left=left+'px';b.style.setProperty('--tx',Math.max(10,Math.min(bw-24,x+kw*.55-left-7))+'px');
-  b.classList.add('on');return new Promise(function(r){KW.wake=r;setTimeout(r,ms||Math.min(6500,2200+text.length*45))}).then(function(){KW.wake=null;b.classList.remove('on')});
+// Sprechblase über (oder unter) Kevin, immer im sichtbaren Bereich
+function kwSay(text,ax,ay,kh,ms){
+  var b=$('#kw-say');b.innerHTML='<small>KEVIN</small>'+esc(text);b.classList.remove('below');
+  b.style.left='0px';b.style.top='-999px';var bw=b.offsetWidth,bh=b.offsetHeight;
+  var left=Math.max(8,Math.min(innerWidth-bw-8,ax-bw/2)),top=ay-bh-12;
+  if(top<8){top=ay+kh+12;b.classList.add('below')}
+  b.style.left=left+'px';b.style.top=top+'px';b.style.setProperty('--tx',Math.max(10,Math.min(bw-24,ax-left-7))+'px');
+  b.classList.add('on');
+  return new Promise(function(r){KW.wake=r;setTimeout(r,ms||Math.min(6500,2200+text.length*45))}).then(function(){KW.wake=null;b.classList.remove('on')});
 }
-function kwMove(pos,from,to,ms){
-  if(reduceMotion){pos.style.transform='translateX('+to+'px)';return Promise.resolve()}
-  var a=pos.animate([{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],{duration:ms,easing:'linear',fill:'forwards'});
-  return a.finished.then(function(){pos.style.transform='translateX('+to+'px)';a.cancel()}).catch(function(){});
+function kwMove(pos,a,b,ms){
+  var tf=function(p){return 'translate('+p.x+'px,'+p.y+'px)'};
+  if(reduceMotion||ms<=0){pos.style.transform=tf(b);return Promise.resolve()}
+  var an=pos.animate([{transform:tf(a)},{transform:tf(b)}],{duration:ms,easing:'linear',fill:'forwards'});KW.anim=an;
+  return an.finished.then(function(){pos.style.transform=tf(b);an.cancel()}).catch(function(){pos.style.transform=tf(b)});
+}
+function kwVisible(el){if(!el)return null;var r=el.getBoundingClientRect();return r.width>40&&r.height>30&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth?r:null}
+// Wo kann Kevin gerade auftauchen?
+function kwVenues(){
+  var v=[],mobile=innerWidth<=820;
+  if(kwVisible($('header.hero')))v.push(['hero',3]);
+  if(kwVisible(document.querySelector('.frame.foot')))v.push(['foot',2]);
+  if(!mobile&&kwVisible(document.querySelector('.frame.rail'))&&document.querySelectorAll('#kevin-rail button').length)v.push(['rail',2]);
+  var mw=document.querySelector('.map-wrap');if(!document.body.classList.contains('vodon')&&!document.body.classList.contains('mapc')&&typeof map!=='undefined'&&map&&kwVisible(mw)&&mw.getBoundingClientRect().height>140)v.push(['map',3]);
+  if(!$('#v-list').hidden&&kwCards().length)v.push(['list',3]);
+  return v;
+}
+function kwCards(){var pr=$('#panel').getBoundingClientRect();return [].slice.call(document.querySelectorAll('#list .card')).filter(function(c){var r=c.getBoundingClientRect();return r.top>=pr.top+40&&r.bottom<=pr.bottom-10&&r.height>40})}
+var KW_ORDER=['hero','list','map','rail','foot'],KW_I=0;
+function kwPick(){
+  var v=kwVenues();if(!v.length)return null;
+  var fv=(location.search.match(/[?&]kevin=(\w+)/)||[])[1];if(fv&&v.some(function(x){return x[0]===fv}))return fv;
+  if(KW.fast){for(var k=0;k<KW_ORDER.length;k++){var n=KW_ORDER[(KW_I++)%KW_ORDER.length];if(v.some(function(x){return x[0]===n}))return n}}
+  var sum=v.reduce(function(s,x){return s+x[1]},0),r=Math.random()*sum;for(var i=0;i<v.length;i++){r-=v[i][1];if(r<=0)return v[i][0]}return v[0][0];
+}
+// Sprüche passend zum Ort
+function kwCtxLine(ctx){
+  var en=LANG==='en',P=function(a){return a[Math.floor(Math.random()*a.length)]};
+  if(ctx.stream){var r=ctx.stream,n=(r.clips||[]).length,h=fmtDur(r.durationMin||0),d=fmtDateShort(r.date),t=String(r.title||'').replace(/[|│┃].*$/,'').replace(/!\w+/g,'').trim();
+    var A=en?[h+" live and nobody looked for me?",n?n+" clips in this stream. Not a single one with me.":"Zero clips in this one. Even I wasn't filmed.","The stream on "+d+"? I was hiding under the sofa.",(r.location&&!r.location.home?"I almost caught up in "+r.location.name+". Almost.":"Castle stream. I could smell the snacks from outside.")]
+      :[h+" live und keiner hat mich gesucht?",n?n+" Clips in diesem Stream. Und kein einziger mit mir.":"Null Clips hier. Nicht mal ich wurde gefilmt.","Der Stream vom "+d+"? Da lag ich unterm Sofa.",(r.location&&!r.location.home?"In "+r.location.name+" hätte ich sie fast eingeholt. Fast.":"Castle-Stream. Ich konnte die Snacks bis draußen riechen.")];
+    if(t&&t.length<44&&!KW_BAD.test(t))A.push(en?"“"+t+"” – was I there? No comment.":"„"+t+"“ – war ich dabei? Kein Kommentar.");
+    return P(A)}
+  if(ctx.place){var p=ctx.place;return P(en?[p+"? Never been there. …Okay, once.","Who put my picture up for "+p+"?! Fake news.","I'm only passing through "+p+". Officially."]:[p+"? Da war ich nie. …Okay, einmal.","Wer hat mein Bild bei "+p+" aufgehängt?! Fake News.","Ich bin in "+p+" nur auf der Durchreise. Offiziell."])}
+  if(ctx.castle)return P(en?["Get away from the castle before Naschii spots me!","The castle? Too many cameras. I'm out.","Home sweet… nope. Running."]:["Bloß weg vom Castle, bevor Naschii mich sieht!","Das Castle? Zu viele Kameras. Ich bin raus.","Home sweet… nee. Weiterlaufen."]);
+  if(ctx.mapPlace)return P(en?["Just checking out "+ctx.mapPlace+". For a new life.","Maybe I'll settle in "+ctx.mapPlace+". Nobody knows me there."]:["Ich schau mir mal "+ctx.mapPlace+" an. Für ein neues Leben.","Vielleicht zieh ich nach "+ctx.mapPlace+". Da kennt mich keiner."]);
+  if(ctx.foot)return P(en?["Down here nobody looks. Perfect.","Footer life. Quiet, cheap, no clips."]:["Hier unten guckt nie jemand hin. Perfekt.","Fußleisten-Leben. Ruhig, billig, keine Clips."]);
+  return null;
 }
 async function kevinGo(force){
-  var box=$('#kevin-walker');
-  if(!box||KW.busy)return;
-  if(!force&&(document.hidden||SEASON.off||!$('#wrap').hidden||state.editing||!$('#player').hidden))return kwPlan();
-  KW.busy=true;KW.abort=false;
+  var layer=$('#kevin-walker');
+  if(!layer||KW.busy)return;
+  if(!force&&(document.hidden||SEASON.off||!$('#wrap').hidden||state.editing||!$('#player').hidden||!$('#docview').hidden))return kwPlan();
+  var venue=kwPick();if(!venue)return kwPlan();
+  KW.busy=true;KW.abort=false;KW.venue=venue;
+  var clip=layer.querySelector('.kw-clip'),pos=layer.querySelector('.kw-pos'),flip=layer.querySelector('.kw-flip'),bod=layer.querySelector('.kw-bod'),prop=layer.querySelector('.kw-prop'),fx=layer.querySelector('.kw-fx');
+  var stopWatch=function(){};
   try{
-    var hero=box.parentNode,W=hero.getBoundingClientRect().width,mobile=innerWidth<=820,kw=mobile?46:62;
-    box.style.setProperty('--kw',kw+'px');box.hidden=false;
-    var o=kwOutfit(),hat=box.querySelector('.kw-hat');
+    var mobile=innerWidth<=820,kw,start,stop,ctx={},acts=['walk','stumble','drink','flee','bubbles','sneak'],mode='walk',clipR=null;
+    var R=function(a,b){return a+Math.random()*(b-a)};
+    if(venue==='hero'||venue==='foot'){
+      var el=venue==='hero'?$('header.hero'):document.querySelector('.frame.foot'),r=el.getBoundingClientRect();
+      kw=venue==='foot'?(mobile?40:50):(mobile?46:62);var kh=kw*.62,y=r.bottom-kh-3,zone=venue==='foot'?(mobile?.18:.14):(mobile?.16:.19);
+      var fl=Math.random()<.5;start={x:fl?r.left-kw-10:r.right+10,y:y};stop={x:fl?r.left+r.width*R(.02,zone-.04):r.right-kw-r.width*R(.02,zone-.04),y:y};
+      clipR={l:r.left,t:r.top,w:r.width,h:r.height};
+      if(venue==='foot')ctx.foot=1;
+    }else if(venue==='rail'){
+      var rl=document.querySelector('.frame.rail').getBoundingClientRect(),cards=document.querySelectorAll('#kevin-rail button'),card=cards[Math.floor(Math.random()*cards.length)],cr=card.getBoundingClientRect();
+      kw=46;var x0=rl.left+(rl.width-kw)/2;start={x:x0,y:rl.bottom+4};stop={x:x0,y:Math.max(rl.top+8,cr.top-kw*.62+6)};
+      clipR={l:rl.left,t:rl.top,w:rl.width,h:rl.height};mode='climb';acts=['climb'];
+      var ki=+card.dataset.kevin,kk=(typeof KEVIN!=='undefined')&&KEVIN[ki];ctx.place=kk?(LANG==='en'&&kk.sen?kk.sen:kk.short):'';
+    }else if(venue==='map'){
+      var mr=document.querySelector('.map-wrap').getBoundingClientRect();kw=mobile?48:58;var mkh=kw*.62;
+      var target=null,inside=function(ll){var p=map.latLngToContainerPoint(ll);return p.x>kw&&p.x<mr.width-kw&&p.y>mkh+30&&p.y<mr.height-20?p:null};
+      var hp=inside([HOME.lat,HOME.lng]);
+      if(hp&&Math.random()<.6){target=hp;ctx.castle=1}
+      else{var vis=(typeof KEVIN!=='undefined'?KEVIN:[]).map(function(k){return {k:k,p:inside([k.lat,k.lng])}}).filter(function(x){return x.p});
+        if(vis.length){var pk=vis[Math.floor(Math.random()*vis.length)];target=pk.p;ctx.mapPlace=LANG==='en'&&pk.k.sen?pk.k.sen:pk.k.short}}
+      if(!target)target={x:mr.width*R(.3,.7),y:mr.height*R(.45,.8)};
+      var ty=target.y-mkh+4,tx=target.x-kw/2,fromL=tx>mr.width/2?false:true;
+      if(ctx.castle){ // vom Castle weg: erscheint dort und rennt zum Rand
+        start={x:mr.left+tx+(fromL?-kw*.2:kw*.2),y:mr.top+ty};stop={x:mr.left+tx+(fromL?kw*1.4:-kw*1.4),y:mr.top+ty};mode='castle';
+      }else{start={x:fromL?mr.left-kw-10:mr.right+10,y:mr.top+ty};stop={x:mr.left+tx,y:mr.top+ty}}
+      clipR={l:mr.left,t:mr.top,w:mr.width,h:mr.height};
+    }else{ // list: lugt hinter einer Stream-Karte hervor
+      var cs=kwCards(),c=cs[Math.floor(Math.random()*cs.length)],rc=c.getBoundingClientRect();kw=mobile?44:52;var lkh=kw*.62;
+      ctx.stream=byId(c.dataset.id);mode='peek';acts=['peek'];
+      clipR={l:rc.left,t:rc.top,w:rc.width,h:rc.height};
+      var py=rc.top+rc.height-lkh-4;start={x:rc.right+2,y:py};stop={x:rc.right-kw*.78,y:py};
+      var pn=$('#panel'),st0=pn.scrollTop,onScroll=function(){if(Math.abs(pn.scrollTop-st0)>15){KW.abort=true;KW.silent=true;if(KW.wake)KW.wake();if(KW.anim)try{KW.anim.finish()}catch(e){}}};pn.addEventListener('scroll',onScroll);stopWatch=function(){pn.removeEventListener('scroll',onScroll)};
+    }
+    if(venue==='map'){var mv=function(){KW.abort=true;KW.silent=true;if(KW.wake)KW.wake()};map.once('movestart',mv);var sw0=stopWatch;stopWatch=function(){sw0();map.off('movestart',mv)}}
+    // Einstellen: Ausschnitt, Größe, Outfit
+    clip.style.cssText='left:'+clipR.l+'px;top:'+clipR.t+'px;width:'+clipR.w+'px;height:'+clipR.h+'px;overflow:hidden';
+    var rel=function(p){return {x:p.x-clipR.l,y:p.y-clipR.t}};
+    layer.style.setProperty('--kw',kw+'px');layer.hidden=false;
+    var o=kwOutfit(),hat=layer.querySelector('.kw-hat');
     hat.className='kw-hat'+(o.crown?' crown':'');hat.innerHTML=o.hat||o.crown||'';
-    box.querySelector('.kw-eye').textContent=o.eye||'';box.querySelector('.kw-acc').textContent=o.acc||'';
-    var prop=box.querySelector('.kw-prop'),fx=box.querySelector('.kw-fx'),bod=box.querySelector('.kw-bod'),flip=box.querySelector('.kw-flip'),pos=box.querySelector('.kw-pos');
-    prop.textContent='';fx.textContent='';bod.className='kw-bod';pos.style.opacity='1';
-    var acts=['walk','stumble','drink','flee','bubbles','sneak'],act=acts[Math.floor(Math.random()*acts.length)];
-    var fromLeft=Math.random()<.5,zone=mobile?.16:.19;
-    var start=fromLeft?-kw-10:W+10,stop=fromLeft?W*(.02+Math.random()*(zone-.06)):W-kw-W*(.02+Math.random()*(zone-.06));
-    var dir=fromLeft?1:-1;flip.style.transform='scaleX('+(fromLeft?1:-1)+')';
-    if(reduceMotion){pos.style.transform='translateX('+stop+'px)';pos.style.opacity='0';pos.animate([{opacity:0},{opacity:1}],{duration:300,fill:'forwards'});pos.style.opacity='1'}
-    var speed=(act==='flee'?7:act==='sneak'?38:20)*(mobile?.8:1); // ms pro Pixel
-    bod.classList.add(act==='flee'?'run':act==='sneak'?'sneak':'walk');
-    await kwMove(pos,start,stop,Math.abs(stop-start)*speed);
+    layer.querySelector('.kw-eye').textContent=o.eye||'';layer.querySelector('.kw-acc').textContent=o.acc||'';
+    prop.textContent='';prop.className='kw-prop';fx.textContent='';bod.className='kw-bod';pos.style.opacity='1';
+    var act=acts[Math.floor(Math.random()*acts.length)];
+    var dir=stop.x>=start.x?1:-1;
+    if(mode==='climb'){flip.style.transform='rotate(-90deg)';dir=1}else flip.style.transform='scaleX('+dir+')';
+    var dist=Math.hypot(stop.x-start.x,stop.y-start.y),speed=(act==='flee'?7:act==='sneak'?38:mode==='climb'?16:mode==='peek'?30:20)*(mobile?.8:1);
+    if(mode==='castle'){speed=9;act='flee'}
+    pos.style.transform='translate('+rel(start).x+'px,'+rel(start).y+'px)';
+    if(reduceMotion){pos.style.transform='translate('+rel(stop).x+'px,'+rel(stop).y+'px)';pos.animate([{opacity:0},{opacity:1}],{duration:300})}
+    if(mode==='castle'){fx.textContent='💦';bod.classList.add('run')}
+    else{var c0=act==='flee'?'run':act==='sneak'?'sneak':mode==='climb'?'climb':mode==='peek'?'':'walk';if(c0)bod.classList.add(c0)}
+    await kwMove(pos,rel(start),rel(stop),dist*speed);
     bod.className='kw-bod';
-    if(act==='stumble'&&!reduceMotion){
+    if(mode==='climb')flip.style.transform='rotate(0)';
+    if(!KW.abort&&act==='stumble'&&!reduceMotion){
       await bod.animate([{transform:'rotate(0)'},{transform:'rotate(78deg) translateY(4px)'}],{duration:260,easing:'ease-in',fill:'forwards'}).finished;
       fx.textContent='💫';await kwSleep(900);fx.textContent='';
       await bod.animate([{transform:'rotate(78deg) translateY(4px)'},{transform:'rotate(0)'}],{duration:420,easing:'ease-out',fill:'forwards'}).finished;
     }
     if(act==='drink'){prop.textContent=o.drink;if(o.hot)prop.innerHTML=o.drink+'<span class="steam" style="left:2px;top:-18px"><i style="--x:2px"></i><i style="--x:6px;--dl:-.8s"></i></span>';if(!reduceMotion)prop.classList.add('sip')}
-    if(act==='bubbles'&&!reduceMotion){fx.innerHTML='';var bb=document.createElement('span');bb.className='kw-fx kw-bubbles';bb.style.cssText='left:78%;top:10%';box.querySelector('.kw-bod').appendChild(bb);
+    if(act==='bubbles'&&!reduceMotion){var bb=document.createElement('span');bb.className='kw-fx kw-bubbles';bb.style.cssText='left:78%;top:10%';bod.appendChild(bb);
       for(var i=0;i<7;i++){(function(i){setTimeout(function(){var e=document.createElement('i');e.style.setProperty('--bx',(Math.random()*30-6)*dir+'px');bb.appendChild(e);setTimeout(function(){e.remove()},2300)},i*280)})(i)}
       setTimeout(function(){bb.remove()},4500)}
     if(act==='flee')fx.textContent='💦';
-    if(!prop.textContent&&o.extra&&Math.random()<.5)prop.textContent=o.extra;
-    var x=stop;
-    if(!KW.abort)await kwSay(kwLines(act),x,W,act==='flee'?2600:null);
-    if(KW.abort){fx.textContent='💦';await kwSay(LANG==='en'?'Hey! Hands off, I’m fluffy and fragile!':'Hey! Finger weg, ich bin flauschig empfindlich!',x,W,1600);act='flee'}
-    prop.classList.remove('sip');
-    // Abgang: zurück, wo er herkam (oder bei Flucht ganz schnell)
-    flip.style.transform='scaleX('+(fromLeft?-1:1)+')';
-    bod.classList.add(act==='flee'?'run':act==='sneak'?'sneak':'walk');
-    if(reduceMotion){await pos.animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'}).finished}
-    else await kwMove(pos,stop,start,Math.abs(stop-start)*(act==='flee'||KW.abort?7:speed));
-  }catch(e){}
-  box.hidden=true;KW.busy=false;kwPlan();
+    if(!prop.textContent&&o.extra&&Math.random()<.5&&mode!=='peek')prop.textContent=o.extra;
+    var kr=pos.getBoundingClientRect();
+    if(!KW.abort){var cl=kwCtxLine(ctx),line=cl&&(Math.random()<.7||mode==='climb'||mode==='peek'||mode==='castle')?cl:kwLines(act);
+      await kwSay(line,kr.left+kr.width*.55,kr.top,kr.height,act==='flee'?2800:null)}
+    if(KW.abort&&!KW.silent){fx.textContent='💦';kr=pos.getBoundingClientRect();await kwSay(LANG==='en'?'Hey! Hands off, I’m fluffy and fragile!':'Hey! Finger weg, ich bin flauschig empfindlich!',kr.left+kr.width*.55,kr.top,kr.height,1600);act='flee'}
+    $('#kw-say').classList.remove('on');prop.classList.remove('sip');
+    // Abgang
+    var back=mode==='castle'?{x:stop.x+(stop.x-start.x)*4,y:stop.y}:start;
+    if(mode==='climb')flip.style.transform='rotate(90deg)';else flip.style.transform='scaleX('+(mode==='castle'?dir:-dir)+')';
+    var c1=act==='flee'||KW.abort?'run':act==='sneak'?'sneak':mode==='climb'?'climb':mode==='peek'?'':'walk';if(c1)bod.classList.add(c1);
+    if(reduceMotion||KW.silent){await pos.animate([{opacity:1},{opacity:0}],{duration:250,fill:'forwards'}).finished}
+    else await kwMove(pos,rel(stop),rel(back),Math.hypot(back.x-stop.x,back.y-stop.y)*(act==='flee'||KW.abort?7:speed));
+  }catch(e){if(KW.fast)console.warn('Kevin:',e&&e.message)}
+  stopWatch();$('#kw-say').classList.remove('on');layer.hidden=true;KW.busy=false;KW.silent=false;kwPlan();
 }
-function kwPlan(ms){clearTimeout(KW.timer);KW.timer=setTimeout(function(){kevinGo()},ms||(KW.fast?4000:30000+Math.random()*35000))}
+function kwPlan(ms){clearTimeout(KW.timer);KW.timer=setTimeout(function(){kevinGo()},ms||(KW.fast?3500:30000+Math.random()*35000))}
 (function(){
-  var hero=document.querySelector('header.hero');if(!hero)return;
-  var box=document.createElement('div');box.className='kw';box.id='kevin-walker';box.hidden=true;box.setAttribute('aria-hidden','true');
-  box.innerHTML='<div class="kw-say" id="kw-say"></div><div class="kw-pos"><div class="kw-flip"><div class="kw-bod"><img src="kevin.png" alt=""><span class="kw-hat"></span><span class="kw-eye"></span><span class="kw-acc"></span><span class="kw-prop"></span><span class="kw-fx"></span></div></div></div>';
-  hero.appendChild(box);
-  box.querySelector('.kw-bod').addEventListener('click',function(){if(KW.busy&&!KW.abort){KW.abort=true;if(KW.wake)KW.wake()}});
+  var layer=document.createElement('div');layer.className='kw-layer';layer.id='kevin-walker';layer.hidden=true;layer.setAttribute('aria-hidden','true');
+  layer.innerHTML='<div class="kw-clip"><div class="kw-pos"><div class="kw-flip"><div class="kw-bod"><img src="kevin.png" alt=""><span class="kw-hat"></span><span class="kw-eye"></span><span class="kw-acc"></span><span class="kw-prop"></span><span class="kw-fx"></span></div></div></div></div><div class="kw-say" id="kw-say"></div>';
+  document.body.appendChild(layer);
+  layer.querySelector('.kw-bod').addEventListener('click',function(){if(KW.busy&&!KW.abort){KW.abort=true;if(KW.wake)KW.wake();if(KW.anim)try{KW.anim.finish()}catch(e){}}});
+  window.addEventListener('resize',function(){if(KW.busy){KW.abort=true;KW.silent=true;if(KW.wake)KW.wake()}});
   kwPlan(KW.fast?1500:9000);
 })();
 
