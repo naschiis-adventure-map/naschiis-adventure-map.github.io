@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded',function(){
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href]');if(!a||e.ctrlKey||e.metaKey||e.shiftKey)return;
 var h=a.getAttribute('href');
 if(h==='./'||h==='index.html'){e.preventDefault();window.parent.closeDoc()}
-else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.parent.openDoc(h.replace('.html',''))}});})();
+else if(h==='anleitung.html'||h==='datenschutz.html'||h==='changelog.html'){e.preventDefault();window.parent.openDoc(h.replace('.html',''))}});})();
 </script>
 <style>.embed body>header,.embed .back,.embed .foot a[href="./"]{display:none!important}.embed main{padding-top:16px}
 .embed nav.toc div{max-width:none;align-items:center;padding:0 12px;height:52px}
@@ -210,7 +210,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
       <div class="s-f"><b class="co" style="left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;font-size:10px">10</b></div>
     </div>
     <div class="legend">
-      <div><b class="co">1</b><span><b>Header:</b> Profilbild (Klick öffnet Twitch), Gesamtzahlen, LIVE-Anzeige und „Automatisch aktualisiert“. Oben links <span class="ui-btn">DE | EN</span>.</span></div>
+      <div><b class="co">1</b><span><b>Header:</b> Profilbild (Klick öffnet Twitch), Gesamtzahlen, LIVE-Anzeige und „Automatisch aktualisiert“. Oben links <span class="ui-btn">DE | EN</span>, daneben die Knöpfe für Jahreszeiten-Deko und ⏸ Bewegung.</span></div>
       <div><b class="co">2</b><span><span class="ui-btn t">Mit Twitch anmelden</span> – nur zum Bearbeiten nötig (Naschii, Mods und Berechtigte).</span></div>
       <div><b class="co">3</b><span><b>Suche, Filter, Sortierung</b>, darunter <span class="ui-btn">📅 Kalender</span>, <span class="ui-btn">🎲 Zufälliger Clip</span> und die Trefferzahl.</span></div>
       <div><b class="co">4</b><span><b>Stream-Karten:</b> ein Klick öffnet die Details.</span></div>
@@ -219,7 +219,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
       <div><b class="co">7</b><span><b>Routen &amp; Clips:</b> rosa Linie, Play-Marker auf der Strecke.</span></div>
       <div><b class="co">8</b><span><b>Rahmen</b> mit Collage aus Clip-Vorschaubildern.</span></div>
       <div><b class="co">9</b><span><span class="ui-btn p">↑ Nach oben</span> erscheint beim Scrollen und springt an den Listenanfang.</span></div>
-      <div><b class="co">10</b><span><b>Fußleiste:</b> Anleitung und Datenschutz öffnen sich im Kartenbereich, die Liste bleibt stehen. Impressum führt zur Kanalinfo auf Twitch.</span></div>
+      <div><b class="co">10</b><span><b>Fußleiste:</b> Anleitung, Datenschutz und Changelog (was neu ist) öffnen sich im Kartenbereich, die Liste bleibt stehen. Impressum führt zur Kanalinfo auf Twitch.</span></div>
     </div>
   </figure>
 </section>
@@ -315,7 +315,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
     <div class="card"><h3>Die Details</h3><ul>
       <li><b>Top-Clip</b> groß mit Bild – Klick spielt ihn direkt auf der Seite ab</li>
       <li><b>Fakten:</b> Dauer, Uhrzeit von–bis, Anzahl Clips</li>
-      <li><b>Was wurde gemacht?</b> – kurze Beschreibung, wenn Mods sie eingetragen haben</li>
+      <li><b>Was wurde gemacht?</b> – kurze, augenzwinkernde Beschreibung des Streams (Mods können sie im Editor ändern)</li>
       <li><b>Ort</b> („Ort ungefähr“ oder ⌂ von Hand gesetzt) und nummerierte <b>Stationen</b> der Route – Klick auf eine Station zoomt dorthin</li>
       <li><span class="ui-btn">← Alle Streams</span> (bleibt beim Scrollen oben sichtbar) führt genau an die Stelle in der Liste zurück, an der du warst; der zuletzt angesehene Stream leuchtet kurz rosa auf</li>
     </ul></div>
@@ -396,7 +396,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
       <li><b>Frühling</b>: Kirschblüten, Blumenwiese, Bienen, Schmetterlinge, Küken, Hase</li>
       <li><b>Sommer</b>: See mit Enten, Segelboot und Schwimmer, Strand mit Liegestuhl, Sonnenschirm und Palmen, Möwen</li></ul>
       <p style="margin-top:8px">Karte, Liste und Rückblick bleiben ungestört. Auch Kevin taucht ab und zu im passenden Outfit auf – in Kopf- und Fußleiste, Seitenleiste, auf der Karte oder in der Liste (siehe „Wer ist Kevin?“). Der kleine Knopf neben <span class="ui-btn">DE | EN</span> schaltet die Deko – und Kevins Auftritte – aus oder an, der Knopf <span class="ui-btn">⏸</span> daneben hält alle Bewegungen auf der Seite an (<span class="ui-btn">▶</span> startet sie wieder) – beides wird gemerkt. Ist „Bewegung reduzieren“ schon im System eingestellt, ist alles von vornherein still. Vorschau: <code>?saison=winter</code> (oder <code>herbst</code>, <code>halloween</code>, <code>advent</code>, <code>fruehling</code>, <code>sommer</code>) an die Adresse hängen.</p></div>
-    <div class="card"><h3>🌍 Deutsch / English</h3><p>Oben links <span class="ui-btn">DE | EN</span>. Die Sprache wird nach dem Browser gewählt und gemerkt. Stream- und Clip-Titel bleiben im Original; Anleitung und Datenschutz gibt es nur auf Deutsch.</p></div>
+    <div class="card"><h3>🌍 Deutsch / English</h3><p>Oben links <span class="ui-btn">DE | EN</span>. Die Sprache wird nach dem Browser gewählt und gemerkt. Stream- und Clip-Titel bleiben im Original; Anleitung, Datenschutz und Changelog gibt es nur auf Deutsch.</p></div>
   </div>
 </section>
 
@@ -493,17 +493,17 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
       <li><span class="ui-btn">⌂ Auf Karte setzen</span> und auf die Karte klicken – der Marker lässt sich verschieben.</li>
       <li>Speichern.</li>
     </ol><p style="margin-top:8px;font-size:14px">Der eigene Ort ersetzt den automatisch erkannten („Ort ungefähr“). Nur einen neuen Namen eintragen = automatischen Ort umbenennen. <b>×</b> = zurück zum automatischen Ort.</p></div>
-    <div class="card"><h3>⟳ Daten aktualisieren</h3><ul>
+    <div class="card"><h3>⟳ Aktualisieren</h3><ul>
       <li>Nach dem Login im Anmeldekasten – auf großen Bildschirmen oben rechts, sonst als Leiste unten im Header – nur für Kanalbetreiber, Mods und Berechtigte</li>
       <li>Stößt sofort dasselbe Update an wie der 15-Minuten-Takt</li>
       <li>Nach 1–2 Minuten holt die Seite die neuen Daten selbst und meldet „Daten aktualisiert“ oder „Keine neuen Daten“</li>
       <li>Höchstens ein Klick alle 2 Minuten</li>
       <li>Für den Normalfall nicht nötig – die Automatik läuft von selbst</li>
     </ul></div>
-    <div class="card"><h3>🎁 Jahresrückblick</h3><ul><li>Knopf <span class="ui-btn">🎁 Rückblick 2025</span> in der Anmeldebox (daneben schon angekündigt: <i>🎁 2026 · Coming soon</i>) – <b>nur für Kanal, Mods und Bearbeiter</b> sichtbar, Besucher sehen ihn nicht</li><li>Folien im Vollbild: Zahlen, Kalender, Kategorien, Rekorde, Ausflüge auf der Karte, Top-Clips, Clip des Monats, legendäre Streams, Danke</li><li>Alles wird aus den Daten berechnet; Clips lassen sich direkt abspielen</li><li>Blättern mit ‹ ›, Pfeiltasten oder Wischen, <kbd>Esc</kbd> schließt</li><li>Noch im Test – später auch für 2026</li></ul></div>
+    <div class="card"><h3>🎁 Jahresrückblick</h3><ul><li>Knopf <span class="ui-btn">🎁 Rückblick 2025</span> in der Anmeldebox (daneben schon angekündigt: <i>🎁 2026 · Coming soon</i>) – <b>nur für Kanal, Mods und Bearbeiter</b> sichtbar, Besucher sehen ihn nicht</li><li>Folien im Vollbild vor einer Collage aus den Clip-Bildern des Jahres: Zahlen, Kalender, Kategorien, Rekorde, Ausflüge auf der Karte, Top-Clips, Clip des Monats (mit „Pause“ für Monate ohne Stream), legendäre Streams, Danke</li><li>Alles wird aus den Daten berechnet; Clips lassen sich direkt abspielen</li><li>Blättern mit ‹ ›, Pfeiltasten oder Wischen, <kbd>Esc</kbd> schließt</li><li>Noch im Test – später auch für 2026</li></ul></div>
     <div class="card"><h3>⏻ Seite offline nehmen</h3><ul>
-      <li>Im Anmeldekasten neben <i>Daten aktualisieren</i> – nur für Kanalbetreiber, Mods und Berechtigte</li>
-      <li>Zur Sicherheit zweimal klicken („Sicher? Nochmal klicken“)</li>
+      <li>Im Anmeldekasten neben <i>⟳ Aktualisieren</i> – nur für Kanalbetreiber, Mods und Berechtigte</li>
+      <li>Zur Sicherheit zweimal klicken („Sicher? Nochmal“)</li>
       <li>Nach ca. 1–2 Minuten sehen alle Besucher nur noch <b>„Zurzeit in Bearbeitung“</b> – Karte, Liste und Zahlen sind ausgeblendet</li>
       <li>Header mit Anmeldung sowie Fußleiste mit Impressum und Datenschutz bleiben sichtbar – so kann man sich jederzeit anmelden und die Seite wieder einschalten</li>
       <li>Angemeldete Bearbeiter sehen die Karte weiter normal, mit rotem Hinweis „Für Besucher offline“</li>
@@ -530,7 +530,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
   <div class="card"><table>
     <tr><th style="width:22%">Wann</th><th>Was</th></tr>
     <tr><td><b>alle 2 Min.</b></td><td>Die geöffnete Seite prüft, ob Naschii live ist, und zeigt dann die rote <span class="ui-live">● LIVE</span>-Anzeige mit Kategorie, Titel und Laufzeit.</td></tr>
-    <tr><td><b>alle 15 Min.</b></td><td>Neuer oder laufender Stream wird erfasst, neue Clips der letzten 30 Tage kommen dazu, alle Clips werden auf Löschung, neue Titel und Aufrufe geprüft.</td></tr>
+    <tr><td><b>alle 15 Min.</b></td><td>Neuer oder laufender Stream wird erfasst, neue Clips der letzten 30 Tage kommen dazu, alle Clips werden auf Löschung, neue Titel und Aufrufe geprüft, und es wird nachgesehen, welche VoDs Twitch noch bereithält.</td></tr>
     <tr><td><b>nach Streamende</b></td><td>Die Dauer steht fest. Kategorie, Ort und Vorschaubild werden gesetzt.</td></tr>
     <tr><td><b>bei neuen Zahlen</b></td><td>Header-Zahlen, „Automatisch aktualisiert“-Zeit und das Teilen-Vorschaubild für Discord, WhatsApp &amp; Co. werden erneuert.</td></tr>
     <tr><td><b>montags früh</b></td><td>Die Clip-Collage im Rahmen wird neu gemischt und als ein einziges Bild gespeichert. Von Hand: GitHub → Actions → „Collage erneuern“ → <i>Run workflow</i>.</td></tr>
@@ -544,7 +544,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
     <div class="card"><h3>🗓 Zeitraum</h3><ul><li>Gezeigt werden alle Streams <b>ab 01.01.2025</b> – ab da gibt es auch Clips</li><li>Ältere Streams werden nicht übernommen, auch nicht bei Updates</li><li>Zuschauer- und Followerzahlen werden bewusst <b>nicht</b> erfasst</li></ul></div>
     <div class="card"><h3>🎬 Clips</h3><ul><li>Neue Clips kommen dazu, <b>gelöschte</b> verschwinden</li><li>Umbenannte Titel, Aufrufe und Kategorie werden nachgezogen</li><li><b>Zuordnung</b> zum Stream über die Uhrzeit; später geclippte VOD-Clips zum letzten Stream davor</li><li>Doppelte Einträge werden aussortiert</li></ul></div>
     <div class="card"><h3>📍 Orte</h3><ul><li>Aus dem <b>Streamtitel</b> erkannt (rund <span id="n-locs">100</span> Orte bekannt)</li><li>Oder aus <b>Clip-Titeln</b>, z. B. „Tanz in Venedig“</li><li>Neue Orte gelten <b>rückwirkend</b></li><li>Streams am selben Ort werden zur Ortsblase gebündelt</li></ul></div>
-    <div class="card"><h3>✨ Seite &amp; Anzeige</h3><ul><li>Header-Zahlen, Profilbild, Stand-Zeitpunkt</li><li>LIVE-Anzeige (alle 2 Min.)</li><li>Teilen-Vorschaubild</li><li>Kategorie-Coverbilder von Twitch, auch für neue Spiele</li><li>Clip-Collage im Rahmen (wöchentlich)</li></ul></div>
+    <div class="card"><h3>✨ Seite &amp; Anzeige</h3><ul><li>Header-Zahlen, Profilbild, Stand-Zeitpunkt</li><li>LIVE-Anzeige (alle 2 Min.)</li><li>Teilen-Vorschaubild</li><li>Kategorie-Coverbilder von Twitch, auch für neue Spiele</li><li>Clip-Collage im Rahmen (wöchentlich)</li><li>Jahreszeiten-Deko nach Datum</li></ul></div>
     <div class="card"><h3>🗺 Routen</h3><ul><li>Gespeicherte Route nach <b>1–2 Min.</b> für alle sichtbar</li><li><b>Rechteprüfung</b> automatisch per Twitch</li><li>Auch Beschreibung und eigener Ort</li><li>Routen bleiben bei jedem Update erhalten</li></ul></div>
   </div>
 
@@ -604,11 +604,13 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
     <tr><td><b>Alte Route zurück</b></td><td>Route bearbeiten → 🛟 <i>Vorherige Route</i> → Laden → Speichern</td></tr>
     <tr><td><b>Route aus Datei</b></td><td>Route zeichnen → <i>📂 Route importieren</i> → GPX/KML/KMZ wählen</td></tr>
     <tr><td><b>Update erzwingen</b></td><td>anmelden → <i>⟳ Aktualisieren</i></td></tr>
+    <tr><td><b>Deko oder Bewegung aus</b></td><td>Knöpfe neben <i>DE | EN</i>: Jahreszeiten-Symbol bzw. <i>⏸</i></td></tr>
+    <tr><td><b>Was ist neu?</b></td><td><i>Changelog</i> unten in der Fußleiste</td></tr>
     <tr><td><b>Seite offline / online</b></td><td>anmelden → <i>⏻ Offline nehmen</i> (2× klicken) bzw. <i>▶ Online stellen</i></td></tr>
   </table></div>
 </section>
 
-<div class="foot"><a href="./">← Zur Karte</a><a href="https://www.twitch.tv/naschiitaschii/about" target="_blank" rel="noopener noreferrer">Impressum</a><a href="datenschutz.html">Datenschutz</a><span>Stand: <span id="n-upd">Oktober 2026</span></span></div>
+<div class="foot"><a href="./">← Zur Karte</a><a href="https://www.twitch.tv/naschiitaschii/about" target="_blank" rel="noopener noreferrer">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="changelog.html">Changelog</a><span>Stand: <span id="n-upd">Oktober 2026</span></span></div>
 </main>
 <script>
 // Kalender-Beispiel mit Beispieldaten

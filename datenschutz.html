@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded',function(){
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href]');if(!a||e.ctrlKey||e.metaKey||e.shiftKey)return;
 var h=a.getAttribute('href');
 if(h==='./'||h==='index.html'){e.preventDefault();window.parent.closeDoc()}
-else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.parent.openDoc(h.replace('.html',''))}});})();
+else if(h==='anleitung.html'||h==='datenschutz.html'||h==='changelog.html'){e.preventDefault();window.parent.openDoc(h.replace('.html',''))}});})();
 </script>
 <style>.embed body>header,.embed .back,.embed .foot a[href="./"]{display:none!important}.embed main{padding-top:16px}
 .embed nav.toc div{max-width:none;align-items:center;padding:0 12px;height:52px}
@@ -82,7 +82,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
 <table>
 <tr><th>Anbieter</th><th>Wofür</th></tr>
 <tr><td>OpenStreetMap Foundation, Vereinigtes Königreich (<a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">Datenschutz</a>)</td><td>Kartenkacheln der Straßenkarte</td></tr>
-<tr><td>Twitch Interactive, Inc., USA (<a href="https://www.twitch.tv/p/de-de/legal/privacy-notice/" target="_blank" rel="noopener noreferrer">Datenschutz</a>)</td><td>Vorschaubilder der Clips, Kategorie-Bilder, Profilbild, Prüfung ob gerade ein Livestream läuft</td></tr>
+<tr><td>Twitch Interactive, Inc., USA (<a href="https://www.twitch.tv/p/de-de/legal/privacy-notice/" target="_blank" rel="noopener noreferrer">Datenschutz</a>)</td><td>Vorschaubilder der Clips (auch für die Collage im Jahresrückblick), Kategorie-Bilder, Profilbild, Prüfung ob gerade ein Livestream läuft (Livebild)</td></tr>
 <tr><td>OpenStreetMap Foundation – Nominatim (<a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">Datenschutz</a>)</td><td>nur für Bearbeiter beim Import einer Route: Der Mittelpunkt der Route wird gesendet, um einen Ortsnamen vorzuschlagen</td></tr>
 <tr><td>decapi.me (Drittanbieter-Dienst für Twitch-Daten)</td><td>nur während eines Livestreams: Titel, Kategorie und Laufzeit für die LIVE-Anzeige</td></tr>
 </table>
@@ -106,7 +106,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
 <p>Rechtsgrundlage ist deine Einwilligung durch die Anmeldung bzw. die Durchführung der von dir gewünschten Bearbeitung (Art. 6 Abs. 1 lit. a und b DSGVO).</p>
 
 <h2>6. Gespeicherte Inhalte</h2>
-<p>Streams, Clips und Routen liegen als öffentliche Datendateien im Repository der Seite auf GitHub und werden automatisch alle 15 Minuten über die Twitch-Schnittstelle aktualisiert.</p>
+<p>Streams, Clips, Routen, Orte und Stream-Beschreibungen liegen als öffentliche Datendateien im Repository der Seite auf GitHub. Streams und Clips werden automatisch alle 15 Minuten über die Twitch-Schnittstelle aktualisiert. Personenbezogen sind darin nur die öffentlichen Twitch-Namen der Clip-Ersteller (siehe Punkt 4).</p>
 
 <h2>7. Speicher in deinem Browser</h2>
 <p>Die Seite nutzt keine Cookies. Sie speichert wenige Angaben im lokalen Speicher deines Browsers (localStorage/sessionStorage); diese verlassen dein Gerät nicht von selbst:</p>
@@ -119,11 +119,12 @@ else if(h==='anleitung.html'||h==='datenschutz.html'){e.preventDefault();window.
 <li><code>shm.state</code> – kurzzeitig während der Twitch-Anmeldung (Schutz vor Fälschung)</li>
 </ul>
 <p>Du kannst diese Angaben jederzeit über die Browser-Einstellungen („Websitedaten löschen“) entfernen. Rechtsgrundlage: § 25 Abs. 2 Nr. 2 TDDDG (technisch erforderlich für die von dir gewünschte Funktion).</p>
+<p>Die Jahreszeiten-Deko und Kevins Auftritte laufen komplett in deinem Browser; dafür werden keine Daten gesendet. Kevins Sprüche nutzen nur die ohnehin öffentlichen Stream- und Clip-Titel.</p>
 
 <h2>8. Deine Rechte</h2>
 <p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen (Art. 21). Eine Einwilligung kannst du jederzeit widerrufen, etwa durch Abmelden. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77 DSGVO).</p>
 
-<p class="small" style="margin-top:32px">Stand: Oktober 2026</p>
+<p class="small" style="margin-top:32px">Stand: 29. Oktober 2026 · <a href="changelog.html">Changelog</a></p>
 <a class="back" href="./">← Zurück zur Karte</a>
 </main>
 </body>

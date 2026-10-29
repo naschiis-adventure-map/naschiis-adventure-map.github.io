@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Changelog · Naschii’s Adventure Map</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{--bg:#120c16;--panel:#1a1220;--line:#3a2a42;--fg:#f4ebf3;--muted:#b7a3bc;--accent:#f5a9d6}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 'IBM Plex Sans',system-ui,sans-serif}
+a{color:var(--accent)}
+header{background:radial-gradient(120% 140% at 50% 0%,#5a2a5e 0%,#3b1d40 45%,#1c0f21 100%);border-bottom:1px solid var(--line);padding:28px 16px 22px;text-align:center}
+header h1{margin:0;font:400 clamp(26px,5vw,38px)/1.1 'Rubik Bubbles',sans-serif;color:var(--accent);-webkit-text-stroke:1.2px #7d2a63;text-shadow:0 3px 0 #7d2a63}
+header p{margin:8px 0 0;font:500 12px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#f6dcee}
+main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+.back{display:inline-block;margin-bottom:18px;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--fg)}
+h2{font:700 22px/1.2 'Barlow Condensed',sans-serif;letter-spacing:.02em;margin:30px 0 8px;color:#fff}
+h3{font:600 15px 'IBM Plex Sans',sans-serif;margin:18px 0 4px;color:#fff}
+p,li{color:#e6d6e6}
+ul{padding-left:20px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 11px 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.small{font-size:13px;color:var(--muted)}
+code{font-family:'IBM Plex Mono',monospace;font-size:13px;background:#251a2b;padding:1px 5px;border-radius:4px}
+</style>
+<script>
+// Eingebettet in der Karte: eigenen Kopf ausblenden, Links an die Karte weitergeben
+(function(){var emb=false;try{emb=window.parent!==window&&!!window.parent.closeDoc}catch(e){}
+if(!emb)return;document.documentElement.classList.add('embed');document.documentElement.dataset.title='Changelog';
+document.addEventListener('DOMContentLoaded',function(){
+  var en=false;try{en=window.parent.LANG==='en'}catch(e){}
+  var back='<a href="./" class="eb-back">← '+(en?'Back to map':'Zur Karte')+'</a><b class="eb-title">'+document.documentElement.dataset.title+'</b>';
+  var toc=document.querySelector('nav.toc div');
+  if(toc){toc.insertAdjacentHTML('afterbegin',back+'<span class="eb-sep"></span>')}
+  else{document.body.insertAdjacentHTML('afterbegin','<nav class="ebar"><div>'+back+'</div></nav>')}
+});
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href]');if(!a||e.ctrlKey||e.metaKey||e.shiftKey)return;
+var h=a.getAttribute('href');
+if(h==='./'||h==='index.html'){e.preventDefault();window.parent.closeDoc()}
+else if(h==='anleitung.html'||h==='datenschutz.html'||h==='changelog.html'){e.preventDefault();window.parent.openDoc(h.replace('.html',''))}});})();
+</script>
+<style>.embed body>header,.embed .back,.embed .foot a[href="./"]{display:none!important}.embed main{padding-top:16px}
+.embed nav.toc div{max-width:none;align-items:center;padding:0 12px;height:52px}
+.ebar{position:sticky;top:0;z-index:10;background:#120c16f0;border-bottom:1px solid #3a2a42}
+.ebar div{display:flex;align-items:center;gap:6px;padding:0 12px;height:52px}
+.eb-back{flex:none;padding:5px 12px!important;border:1px solid #3a2a42!important;border-radius:6px!important;background:#251a2b;color:#f4ebf3!important;text-decoration:none;font:500 13px 'IBM Plex Sans',sans-serif!important;white-space:nowrap}
+.eb-back:hover{border-color:#f5a9d6!important}
+.eb-title{flex:none;margin-left:4px;font:700 17px 'Barlow Condensed',sans-serif;letter-spacing:.02em;color:#fff;white-space:nowrap;margin-right:4px}
+.eb-sep{flex:none;width:1px;height:22px;background:#3a2a42;margin:0 2px}
+/* Gut greifbarer Schieberegler (Chrome, Edge, Safari) */
+::-webkit-scrollbar{width:14px;height:12px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{min-height:90px;border-radius:999px;background:#f5a9d688;border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#f5a9d6cc;background-clip:padding-box}
+::-webkit-scrollbar-thumb:active{background:#f5a9d6;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-color:#f5a9d688 transparent}}
+</style>
+<style>
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:14px 0 6px}
+.stats div{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
+.stats b{display:block;font:700 24px/1.1 'Barlow Condensed',sans-serif;color:var(--accent)}
+.stats small{font:500 10.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.rel{position:relative;margin:26px 0 0;padding:0 0 0 22px;border-left:2px solid var(--line)}
+.rel::before{content:'';position:absolute;left:-8px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px #f5a9d633}
+.rel h2{margin:0 0 2px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.rel h2 .v{font:600 12px 'IBM Plex Mono',monospace;color:#1a0f1f;background:var(--accent);border-radius:999px;padding:1px 9px;letter-spacing:.04em}
+.meta{font:500 12px 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:.03em;margin:0 0 8px}
+.rel ul{margin:6px 0 0;padding-left:0;list-style:none}
+.rel li{position:relative;padding:3px 0 3px 92px;font-size:14.5px}
+.t{position:absolute;left:0;top:5px;width:82px;text-align:center;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:2px 0}
+.t.neu{background:#5fd38d26;color:#8ff0b4;border:1px solid #5fd38d66}
+.t.besser{background:#4fb3ff1f;color:#9fd4ff;border:1px solid #4fb3ff55}
+.t.fix{background:#ffd36b1f;color:#ffe08f;border:1px solid #ffd36b55}
+.t.weg{background:#ff6b6b1f;color:#ffb0b0;border:1px solid #ff6b6b55}
+.t.technik{background:#c06bff1f;color:#dcb0ff;border:1px solid #c06bff55}
+@media (max-width:560px){.rel li{padding-left:0}.t{position:static;display:inline-block;width:auto;padding:1px 6px;margin-right:6px}}
+.foot{margin-top:36px;display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
+.foot a{color:var(--muted)}
+</style>
+</head>
+<body>
+<header><h1>Naschii’s Adventure Map</h1><p>Changelog</p></header>
+<main>
+<a class="back" href="./">← Zurück zur Karte</a>
+<div class="box"><b>Was ist neu?</b> Hier steht, wie die Karte entstanden ist und was sich seitdem geändert hat – neueste Änderungen oben. Die Zeitangaben sind ungefähre Arbeitszeiten laut Änderungsprotokoll. Die automatischen Daten-Updates alle 15 Minuten stehen hier nicht einzeln drin.</div>
+<div class="stats">
+<div><b>14 Tage</b><small>Bauzeit</small></div>
+<div><b>ca. 50 Std.</b><small>Arbeit</small></div>
+<div><b>175</b><small>Änderungen</small></div>
+<div><b>600+</b><small>Daten-Updates</small></div>
+<div><b>0 €</b><small>Kosten</small></div>
+</div>
+<p class="small"><span class="t neu" style="position:static;display:inline-block;width:auto;padding:1px 6px">Neu</span> neue Funktion · <span class="t besser" style="position:static;display:inline-block;width:auto;padding:1px 6px">Verbessert</span> bestehendes besser · <span class="t fix" style="position:static;display:inline-block;width:auto;padding:1px 6px">Behoben</span> Fehler beseitigt · <span class="t weg" style="position:static;display:inline-block;width:auto;padding:1px 6px">Entfernt</span> rausgenommen · <span class="t technik" style="position:static;display:inline-block;width:auto;padding:1px 6px">Technik</span> unter der Haube</p>
+<section class="rel"><h2><span class="v">2.1</span>Changelog und Gesamtprüfung</h2><p class="meta">Do., 29.10.2026 · ca. 1 Std.</p><ul><li><span class="t neu">Neu</span>Diese Seite: Changelog mit der kompletten Baugeschichte, verlinkt in der Fußleiste</li><li><span class="t besser">Verbessert</span>Anleitung und Datenschutzerklärung komplett gegengelesen und auf den aktuellen Stand gebracht</li></ul></section>
+<section class="rel"><h2><span class="v">2.0</span>Jahreszeiten und Kevin auf der Flucht</h2><p class="meta">Mi., 28.10. – Do., 29.10.2026 · abends, ca. 3 Std.</p><ul><li><span class="t neu">Neu</span>Jahreszeiten-Deko schaltet sich nach Datum selbst um: Herbst, Halloween, Winter, Advent, Frühling, Sommer – in Kopf-, Seiten- und Fußleiste und auf der Castle-Insel</li><li><span class="t neu">Neu</span>Herbst: fallende Blätter, Laub am Boden, Eichhörnchen verstecken Nüsse, Igel und Pilze</li><li><span class="t neu">Neu</span>Halloween: Vollmond, Gewitterblitze, Nebel, Friedhof mit aufsteigenden Geistern, Spinnen am Faden, leuchtende Augen, Hexe auf dem Besen, brodelnder Kessel, schwarze Katze, gruseliges Castle</li><li><span class="t neu">Neu</span>Winter: Eiszapfen, die tropfen, Schneeballschlacht, Eisbahn mit Schlittschuhläufern, Schlitten und dampfende Heißgetränke</li><li><span class="t neu">Neu</span>Advent: Lichterkette, Christbaumkugeln, Weihnachtsbaum mit Geschenkeberg, Weihnachtsmann, Wichtel, Glühwein-Hütte, Rudolph, Plätzchen und ein Adventskranz, an dem jeden Sonntag eine Kerze mehr brennt</li><li><span class="t neu">Neu</span>Frühling mit Blumenwiese, Bienen und Hase – Sommer mit See, Enten, Segelboot, Strand und Palmen</li><li><span class="t neu">Neu</span>Knopf neben DE | EN schaltet die Deko aus, Knopf ⏸ hält alle Bewegungen an (beides wird gemerkt); Vorschau über <code>?saison=…</code></li><li><span class="t neu">Neu</span>Kevin auf der Flucht: läuft im Jahreszeiten-Outfit durch Kopf- und Fußleiste, klettert in der Seitenleiste, rennt über die Karte oder lugt hinter Stream-Karten hervor – mit frechen Sprüchen, zum Teil aus echten Stream- und Clip-Titeln</li><li><span class="t neu">Neu</span>Kevin anklicken: Er springt, weicht aus, fällt um, bekommt einen Wutanfall, tarnt sich als normales Croissant oder flitzt im Affenzahn davon</li><li><span class="t fix">Behoben</span>Kevin verschwand beim Anklicken während des Kommens oder Gehens – jetzt bleibt er stehen und reagiert</li></ul></section>
+<section class="rel"><h2><span class="v">1.6</span>Ganze Streams, Livestream und Jahresrückblick</h2><p class="meta">Mo., 26.10. – Di., 27.10.2026 · abends, ca. 4 Std.</p><ul><li><span class="t neu">Neu</span>📼 VoD: Ist ein Stream noch auf Twitch gespeichert, läuft er komplett über der Karte – mit Zeitleiste, auf der jeder Clip ein Strich ist, und Sprung aus der Clipliste</li><li><span class="t neu">Neu</span>Karte unter dem Video ausblenden; bei Castle-Streams ohne Route automatisch; Schieber zwischen Video und Karte</li><li><span class="t neu">Neu</span>Livestream läuft auf Wunsch direkt auf der Seite über der Karte</li><li><span class="t neu">Neu</span>🎁 Jahresrückblick 2025 als Folien im Vollbild (vorerst nur für Kanal, Mods und Bearbeiter), mit Collage aus den Clip-Bildern des Jahres; 2026 ist angekündigt</li><li><span class="t besser">Verbessert</span>Kopf- und Fußleiste am Handy deutlich kompakter</li><li><span class="t besser">Verbessert</span>Anmeldebox kleiner, Knöpfe kürzer beschriftet</li><li><span class="t neu">Neu</span>Beschreibungen für die neuesten Streams</li></ul></section>
+<section class="rel"><h2><span class="v">1.5</span>Entwürfe, Beschreibungen und Feinschliff</h2><p class="meta">Fr., 23.10.2026 · ca. 7 Std.</p><ul><li><span class="t neu">Neu</span>Routen-Entwürfe: bis zu 10 Varianten pro Stream, privat für Bearbeiter, mit Präsentationsmodus für den Stream</li><li><span class="t neu">Neu</span>Automatische Sicherung der bisherigen Route beim Veröffentlichen</li><li><span class="t neu">Neu</span>Kurze, witzige Beschreibungen für 258 Streams, dazu eine Gedankenblase beim Drüberfahren in der Liste</li><li><span class="t neu">Neu</span>Filter „Ohne Route (nur IRL)“ als To-do-Liste für Mods</li><li><span class="t neu">Neu</span>Seite offline nehmen / online stellen für Kanal, Mods und Berechtigte</li><li><span class="t neu">Neu</span>Höchstens 15 Clips pro Route</li><li><span class="t neu">Neu</span>Die Burg steht beim Hineinzoomen auf einer kleinen Insel; Fliege in der Seitenleiste</li><li><span class="t besser">Verbessert</span>„← Alle Streams“ als deutlicher Knopf, kurzes Datum und feste Zeilen in der Streamliste, breitere Liste</li><li><span class="t besser">Verbessert</span>Clips: Beliebteste beim Öffnen, Top 10 wieder zuklappbar, Clip-Treffer folgen der Sortierung</li><li><span class="t besser">Verbessert</span>Import: Teilstücke bleiben getrennt, alte Clips und Stationen werden entfernt</li><li><span class="t besser">Verbessert</span>Just-Chatting-Streams ohne Ort landen im Castle</li><li><span class="t weg">Entfernt</span>Box „Heute vor einem Jahr“ und das alte Stream-Formular aus der Anfangszeit</li><li><span class="t technik">Technik</span>Abläufe auf Node.js 24 umgestellt (Node 20 bekommt keine Sicherheitsupdates mehr)</li></ul></section>
+<section class="rel"><h2><span class="v">1.4</span>Routen-Import, Kevin und das Castle</h2><p class="meta">Do., 22.10.2026 · ca. 14 Std.</p><ul><li><span class="t neu">Neu</span>Routen aus GPX-, KML- oder KMZ-Dateien importieren, mit Ortsvorschlag</li><li><span class="t neu">Neu</span>Editor: Schneiden, Teilstück löschen, Routen mit Lücken; Ortsvorschläge ab 3 Buchstaben</li><li><span class="t neu">Neu</span>Kevin, das verlorene Croissant: Verlustort, Sichtungen und vermutete Aufenthaltsorte auf der Karte, dazu „Wo ist Kevin?“ in der Seitenleiste</li><li><span class="t neu">Neu</span>Homebase Nashii´s Castle: Gaming-Streams ohne Ort landen in Naschiis Burg</li><li><span class="t neu">Neu</span>Streams ohne Clip zeigen ein großes Kategorie-Coverbild</li><li><span class="t besser">Verbessert</span>Kategorien für 108 ältere Streams nachgetragen; Ortsliste erweitert</li><li><span class="t besser">Verbessert</span>Herauszoomen begrenzt, Burg passt sich der Zoomstufe an</li><li><span class="t technik">Technik</span>Veröffentlichung über GitHub Actions; Collage als ein einziges Bild, wöchentlich neu gemischt</li><li><span class="t technik">Technik</span>Kartensoftware (Leaflet) liegt auf der Seite selbst statt bei Cloudflare</li><li><span class="t weg">Entfernt</span>Ungenutzte Google-Maps-Reste im Code</li></ul></section>
+<section class="rel"><h2><span class="v">1.3</span>Handy und Live</h2><p class="meta">Mi., 21.10.2026 · ca. 2 Std.</p><ul><li><span class="t neu">Neu</span>Handy: Schieber zwischen Karte und Liste, schlanker Header</li><li><span class="t neu">Neu</span>Laufender Stream zeigt das aktuelle Livebild, ein Klick spielt den Livestream</li><li><span class="t besser">Verbessert</span>Nur noch Streams ab 01.01.2025</li><li><span class="t weg">Entfernt</span>Zuschauer- und Followerzahlen werden nicht mehr erfasst und angezeigt</li></ul></section>
+<section class="rel"><h2><span class="v">1.2</span>Neue Adresse, Clip-Player und Anleitung</h2><p class="meta">Di., 20.10.2026 · ca. 6 Std.</p><ul><li><span class="t neu">Neu</span>Umzug auf die eigene Adresse naschiis-adventure-map.github.io</li><li><span class="t neu">Neu</span>Clips direkt auf der Seite abspielen, Kalender, Zufälliger Clip, englische Version</li><li><span class="t neu">Neu</span>Suche findet auch Clips (Titel und Clipper) mit eigener Trefferliste</li><li><span class="t neu">Neu</span>Anleitung mit Beispielbildern und Datenschutzerklärung, beide öffnen sich im Kartenbereich</li><li><span class="t neu">Neu</span>Kategorie-Coverbilder von Twitch, Browser-Icon aus Naschiis Profilbild</li><li><span class="t neu">Neu</span>Update-Knopf für Kanal, Mods und Berechtigte</li><li><span class="t besser">Verbessert</span>Schlankerer Header am Computer, Knopf „Nach oben“, größerer Schieberegler</li><li><span class="t technik">Technik</span>Schriften lokal statt von Google Fonts; Bearbeiter-Namen nicht in den öffentlichen Daten</li></ul></section>
+<section class="rel"><h2><span class="v">1.1</span>Automatik und Routen-Editor</h2><p class="meta">So., 19.10.2026 · ca. 8 Std.</p><ul><li><span class="t neu">Neu</span>Laufende Streams werden alle 15 Minuten erfasst, angestoßen von einem Google-Apps-Script-Taktgeber</li><li><span class="t neu">Neu</span>Routen-Editor mit Twitch-Login: Strecke wie in Paint malen, Clips per Drag & Drop platzieren</li><li><span class="t neu">Neu</span>Rahmen rechts und unten mit Clip-Collage und Wolken</li><li><span class="t neu">Neu</span>Clips umschaltbar: Beliebteste / Chronologisch; zurück zur Liste an die vorherige Position</li><li><span class="t besser">Verbessert</span>Clips werden über ihre Position im VoD dem richtigen Stream zugeordnet; fehlende Clips nachgeholt</li></ul></section>
+<section class="rel"><h2><span class="v">1.0</span>Die Karte geht online</h2><p class="meta">Sa., 18.10.2026 · ca. 5 Std.</p><ul><li><span class="t neu">Neu</span>Erste Version: rund 400 Streams mit Clips auf einer Karte, Header im Look des Twitch-Kanals, Titel „Naschii’s Adventure Map“</li><li><span class="t neu">Neu</span>Automatische Aktualisierung über die offizielle Twitch-Schnittstelle</li><li><span class="t neu">Neu</span>Orte als Sammelblasen, Suche, Sortierung, Top 10 Clips pro Stream</li><li><span class="t neu">Neu</span>Vorschaubilder, Kategorien, LIVE-Anzeige, Orte aus Clip-Titeln, Teilen-Vorschaubild</li><li><span class="t neu">Neu</span>Gelöschte Clips verschwinden automatisch, doppelte werden verhindert</li></ul></section>
+<section class="rel"><h2><span class="v">0.1</span>Die Idee</h2><p class="meta">Mitte Oktober 2026 · Planung</p><ul><li><span class="t neu">Neu</span>Idee: eine kostenlose Karte, auf der Naschiis Streams mit Ort, Datum, Dauer und Clips festgehalten werden</li><li><span class="t neu">Neu</span>Erster Prototyp mit Streams aus TwitchTracker, Clips nach Datum zugeordnet</li></ul></section>
+<div class="foot"><a href="./">← Zur Karte</a><a href="anleitung.html">Anleitung</a><a href="https://www.twitch.tv/naschiitaschii/about" target="_blank" rel="noopener noreferrer">Impressum</a><a href="datenschutz.html">Datenschutz</a><span>Stand: 29.10.2026</span></div>
+</main>
+</body>
+</html>

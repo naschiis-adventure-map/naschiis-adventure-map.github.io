@@ -1316,7 +1316,8 @@ body.doc .app>.map-wrap{visibility:hidden}
   .foot-in{gap:3px 10px;padding:7px 10px 8px;font-size:10px;letter-spacing:.03em}
   .foot-in b{flex-basis:100%;font-size:13px}
   .foot-in a{white-space:nowrap}
-  .foot-in #f-src{flex-basis:100%;font-size:9px;opacity:.8}
+  .foot-in #f-src{flex-basis:100%;font-size:9px;opacity:.8;order:2}
+  .foot-in #f-log{order:1}
 }
 /* Kevin, das verlorene Croissant */
 .kevin{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;filter:drop-shadow(0 3px 5px #000a)}
@@ -1844,6 +1845,7 @@ body.editing .grp-wrap{pointer-events:none}
     <a href="datenschutz.html" id="f-ds" data-doc="datenschutz">Datenschutz</a>
     <a href="https://www.twitch.tv/naschiitaschii" target="_blank" rel="noopener noreferrer">twitch.tv/naschiitaschii</a>
     <span id="f-src">Daten: Twitch · Karte: © OpenStreetMap</span>
+    <a href="changelog.html" id="f-log" data-doc="changelog">Changelog</a>
   </div>
 </footer>
 <section class="wrap" id="wrap" hidden role="dialog" aria-modal="true" aria-labelledby="wr-title">
@@ -4173,7 +4175,7 @@ function manualUpdate(btn){
 
 /* ---------- Feste Texte übersetzen + Sprachumschalter ---------- */
 // Anleitung & Datenschutz im Kartenbereich öffnen statt die Seite zu wechseln
-var DOCS={anleitung:['Anleitung','Guide (German)'],datenschutz:['Datenschutzerklärung','Privacy policy (German)']},DOCCUR=null;
+var DOCS={anleitung:['Anleitung','Guide (German)'],datenschutz:['Datenschutzerklärung','Privacy policy (German)'],changelog:['Changelog','Changelog (German)']},DOCCUR=null;
 function openDoc(name,push){
   if(!DOCS[name])return;
   if(document.body.classList.contains('site-off')){location.href=name+'.html';return}
@@ -4256,7 +4258,7 @@ function applyStatic(){
   set('#flt','Filter streams','aria-label');set('#cat','Filter by category','aria-label');set('#srt','Sort streams','aria-label');
   set('#calbtn span','Calendar');set('#rndbtn span','Random clip');
   set('#f-imp','Legal notice');set('#f-imp','Legal notice (German) on naschiitaschii’s Twitch about page','title');
-  set('#f-ds','Privacy (German)');set('#f-help','Guide (German)');set('#grip','Resize map and list','aria-label');set('#grip','Drag: move list up or down · Tap: show/hide map','title');set('#totop span','Top');set('#totop','Back to the top of the list','aria-label');set('#totop','Back to top','title');set('#doc-close span','Back to map');set('#f-src','Data: Twitch · Map: © OpenStreetMap');
+  set('#f-ds','Privacy (German)');set('#f-log','Changelog (German)');set('#f-help','Guide (German)');set('#grip','Resize map and list','aria-label');set('#grip','Drag: move list up or down · Tap: show/hide map','title');set('#totop span','Top');set('#totop','Back to the top of the list','aria-label');set('#totop','Back to top','title');set('#doc-close span','Back to map');set('#f-src','Data: Twitch · Map: © OpenStreetMap');
   set('.avatar','naschiitaschii on Twitch','aria-label');set('#stats','Totals','aria-label');
   set('.map-wrap','Map','aria-label');set('#panel','Streams','aria-label');set('#pl-close','Close','aria-label');
 }
