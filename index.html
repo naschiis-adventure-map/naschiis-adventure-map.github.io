@@ -1992,6 +1992,10 @@ body.editing .grp-wrap{pointer-events:none}
 @media (max-width:820px){#stats:empty{min-height:22px;min-width:330px}}
 
 .list .card{content-visibility:auto;contain-intrinsic-size:auto 132px}
+
+.kevin-rail .homebtn{flex-shrink:0;margin-bottom:8px;border-color:#e7b07a99}
+body.s-halloween .kevin-rail .homebtn{margin-bottom:30px}
+.kevin-rail .homebtn img{width:34px}
 </style>
 
 <header class="hero">
@@ -2268,10 +2272,16 @@ function closeKevinTips(keep){KEVIN.forEach(function(k){if(k.marker&&k.marker!==
 function renderKevinRail(){
   var nav=$('#kevin-rail');if(!nav)return;
   nav.setAttribute('aria-label',T('Wo ist Kevin?','Where is Kevin?'));
-  nav.innerHTML='<b>'+T('Wo ist<br>Kevin?','Where is<br>Kevin?')+'</b>'+KEVIN.map(function(k,i){
+  nav.innerHTML='<button type="button" class="homebtn" data-home title="'+esc(T('Zurück zur Startansicht der Karte','Back to the map start view'))+'" aria-label="'+esc(T('Zurück zur Startansicht der Karte','Back to the map start view'))+'"><img src="castle.webp" alt="" width="34" height="36"><span>'+T('Start','Start')+'</span></button><b>'+T('Wo ist<br>Kevin?','Where is<br>Kevin?')+'</b>'+KEVIN.map(function(k,i){
     return '<button type="button" data-kevin="'+i+'"'+(k.lost?' class="lost"':k.origin?' class="origin"':'')+' title="'+esc(LANG==='en'?k.en:k.name)+'"><img src="kevin.webp" alt="" width="54" height="33"><span>'+esc(LANG==='en'?(k.sen||k.short):k.short)+'</span></button>';
   }).join('');
 }
+// Castle-Knopf über "Wo ist Kevin?": zurück zur Startansicht der Karte
+document.addEventListener('click',function(e){
+  var h=e.target.closest&&e.target.closest('[data-home]');if(!h||!map||state.editing)return;
+  closeKevinTips();hideTip(true);var b=allBounds();if(!b)return;
+  if(reduceMotion)map.fitBounds(b,{padding:[40,40],maxZoom:13,animate:false});else map.flyToBounds(b,{padding:[40,40],maxZoom:13,duration:1.4});
+});
 document.addEventListener('click',function(e){
   var b=e.target.closest&&e.target.closest('[data-kevin]');if(!b)return;
   var k=KEVIN[+b.dataset.kevin];if(!k||!map)return;
@@ -2340,7 +2350,8 @@ function undimAll(){
   Object.keys(lines).forEach(function(k){lines[k].setStyle({opacity:.6})});
   Object.keys(groups).forEach(function(k){groups[k].marker.setOpacity(1)});
 }
-function fitAll(){var pts=[];state.routes.forEach(function(r){if(hasRoute(r))pts=pts.concat(r.points);else if(r.location)pts.push([r.location.lat,r.location.lng])});if(pts.length){map.fitBounds(L.latLngBounds(pts),{padding:[40,40],maxZoom:13,animate:false})}}
+function allBounds(){var pts=[];state.routes.forEach(function(r){if(hasRoute(r))pts=pts.concat(r.points);else if(r.location)pts.push([r.location.lat,r.location.lng])});return pts.length?L.latLngBounds(pts):null}
+function fitAll(){var b=allBounds();if(b)map.fitBounds(b,{padding:[40,40],maxZoom:13,animate:false})}
 function icon(cls,txt,size){return L.divIcon({className:'',html:'<div class="pin '+cls+'" style="width:'+size+'px;height:'+size+'px">'+txt+'</div>',iconSize:[size,size],iconAnchor:[size/2,size/2],popupAnchor:[0,-size/2]})}
 function animateLine(line){
   if(reduceMotion)return;var el=line.getElement&&line.getElement();if(!el||!el.getTotalLength)return;
@@ -4015,7 +4026,7 @@ function kwVenues(){
   var v=[],mobile=innerWidth<=820;
   if(kwVisible($('header.hero')))v.push(['hero',3]);
   if(kwVisible(document.querySelector('.frame.foot')))v.push(['foot',2]);
-  if(!mobile&&kwVisible(document.querySelector('.frame.rail'))&&document.querySelectorAll('#kevin-rail button').length)v.push(['rail',2]);
+  if(!mobile&&kwVisible(document.querySelector('.frame.rail'))&&document.querySelectorAll('#kevin-rail button[data-kevin]').length)v.push(['rail',2]);
   var mw=document.querySelector('.map-wrap');if(!document.body.classList.contains('vodon')&&!document.body.classList.contains('mapc')&&typeof map!=='undefined'&&map&&kwVisible(mw)&&mw.getBoundingClientRect().height>140)v.push(['map',3]);
   if(!$('#v-list').hidden&&kwCards().length)v.push(['list',3]);
   return v;
@@ -4060,7 +4071,7 @@ async function kevinGo(force){
       clipR={l:r.left,t:r.top-90,w:r.width,h:r.height+90};
       if(venue==='foot')ctx.foot=1;
     }else if(venue==='rail'){
-      var rl=document.querySelector('.frame.rail').getBoundingClientRect(),cards=document.querySelectorAll('#kevin-rail button'),card=cards[Math.floor(Math.random()*cards.length)],cr=card.getBoundingClientRect();
+      var rl=document.querySelector('.frame.rail').getBoundingClientRect(),cards=document.querySelectorAll('#kevin-rail button[data-kevin]'),card=cards[Math.floor(Math.random()*cards.length)],cr=card.getBoundingClientRect();
       kw=46;var x0=rl.left+(rl.width-kw)/2;start={x:x0,y:rl.bottom+4};stop={x:x0,y:Math.max(rl.top+8,cr.top-kw*.62+6)};
       clipR={l:rl.left,t:rl.top,w:rl.width,h:rl.height};mode='climb';acts=['climb'];
       var ki=+card.dataset.kevin,kk=(typeof KEVIN!=='undefined')&&KEVIN[ki];ctx.place=kk?(LANG==='en'&&kk.sen?kk.sen:kk.short):'';
