@@ -1990,6 +1990,8 @@ body.editing .grp-wrap{pointer-events:none}
 #stats:empty{min-height:30px;min-width:390px}
 @media (min-width:821px){.hero .upd:empty{min-width:250px}}
 @media (max-width:820px){#stats:empty{min-height:22px;min-width:330px}}
+
+.list .card{content-visibility:auto;contain-intrinsic-size:auto 132px}
 </style>
 
 <header class="hero">
@@ -2303,12 +2305,13 @@ function showGroup(g){
   el.addEventListener('mouseenter',function(){clearTimeout(tipTimer)});el.addEventListener('mouseleave',function(){hideTip()});
 }
 function showInList(name){hideTip(true);listScroll=0;lastCard=null;setQuery(name);if(state.selectedId)deselect();else showView('list')}
+// Linien und Ortsblasen erst sammeln und dann auf einmal in die Karte setzen (weniger Neuberechnungen)
+var drawLayer=null;
 function drawLines(){
-  Object.keys(lines).forEach(function(k){map.removeLayer(lines[k])});lines={};
-  Object.keys(groups).forEach(function(k){map.removeLayer(groups[k].marker)});groups={};hideTip(true);
+  if(drawLayer)map.removeLayer(drawLayer);drawLayer=L.layerGroup();lines={};groups={};hideTip(true);
   state.routes.forEach(function(r){
     if(!hasRoute(r))return;
-    var l=L.polyline(segsOf(r.points,r.breaks),{color:'#f5a9d6',weight:3,opacity:.6,lineCap:'round',lineJoin:'round'}).addTo(map);
+    var l=L.polyline(segsOf(r.points,r.breaks),{color:'#f5a9d6',weight:3,opacity:.6,lineCap:'round',lineJoin:'round'}).addTo(drawLayer);
     l.on('click',function(){if(!state.editing)select(r.id)});
     lines[r.id]=l;
   });
@@ -2318,12 +2321,13 @@ function drawLines(){
     var home=isHome(g.name);
     var m=L.marker([g.lat,g.lng],{keyboard:true,title:g.name+' · '+n+' Streams',riseOnHover:true,
       icon:home?L.divIcon({className:'grp-wrap',html:'<div class="castle"><svg class="isle" viewBox="0 0 180 96" aria-hidden="true"><ellipse cx="90" cy="52" rx="86" ry="40" fill="none" stroke="#5d7a80" stroke-opacity=".45" stroke-width="2" stroke-dasharray="10 7"/><path d="M14 52c4-14 22-24 44-27 14-2 22-8 38-7 20 1 30 7 46 10 16 4 26 12 26 24 0 12-12 20-30 25-16 4-30 3-46 6-18 3-34 1-50-4-18-6-31-14-28-27z" fill="#4b3f2e"/><path d="M28 52c4-11 18-18 36-21 12-2 20-7 33-6 17 1 25 6 38 9 13 3 21 10 20 19-1 9-11 15-26 18-14 3-26 2-40 4-15 2-28 1-41-3-14-5-23-11-20-20z" fill="#2f4628"/><g fill="#3d5a31"><circle cx="40" cy="58" r="6"/><circle cx="49" cy="63" r="5"/><circle cx="136" cy="55" r="6"/><circle cx="146" cy="60" r="4.5"/><circle cx="128" cy="64" r="4"/></g></svg><span class="sd sd2"></span><span class="sd sd3"></span><img src="castle.webp" alt="" width="76" height="80" decoding="async"><span class="sd sd1"></span><span class="sd sd4"></span><span class="sd sd5"></span><span class="sd sd6"></span><span class="sd sd7"></span><span class="sd sd8"></span><span class="sd sd9"></span><span class="sbats"><i>🦇</i><i>🦇</i></span><span class="smoon moon" style="--s:44px"></span><span class="sfog"></span><b>'+n+'</b></div>',iconSize:[76,80],iconAnchor:[38,60]})
-               :L.divIcon({className:'grp-wrap',html:'<div class="grp" style="width:'+g.size+'px;height:'+g.size+'px">'+n+'</div>',iconSize:[g.size,g.size],iconAnchor:[g.size/2,g.size/2]})}).addTo(map);
+               :L.divIcon({className:'grp-wrap',html:'<div class="grp" style="width:'+g.size+'px;height:'+g.size+'px">'+n+'</div>',iconSize:[g.size,g.size],iconAnchor:[g.size/2,g.size/2]})}).addTo(drawLayer);
     if(canHover){m.on('mouseover',function(){showGroup(g)});m.on('mouseout',function(){hideTip()})}
     m.on('click',function(){if(state.editing)return;if(n===1){hideTip(true);select(g.items[0].id)}else showGroup(g)});
     m.on('keypress',function(e){if(e.originalEvent.key==='Enter')showGroup(g)});
     g.marker=m;groups[k]=g;
   });
+  drawLayer.addTo(map);
   map.off('click',hideTipOnMap);map.on('click',hideTipOnMap);
 }
 function hideTipOnMap(){hideTip(true)}
@@ -2466,7 +2470,7 @@ function renderClipHits(q){
   var hs=state.hitSortCur||'new',sb=function(k,l){return '<button type="button" data-hsort="'+k+'" aria-pressed="'+(hs===k)+'">'+l+'</button>'};
   box.innerHTML='<div class="ch-head"><span>🎬 '+h.length.toLocaleString(LOC)+(h.length===1?T(' passender Clip',' matching clip'):T(' passende Clips',' matching clips'))+'</span>'+
     (h.length>1?'<span class="seg ch-seg" role="group" aria-label="'+T('Clip-Treffer sortieren','Sort matching clips')+'">'+sb('new',T('Neueste','Newest'))+sb('old',T('Älteste','Oldest'))+sb('top',T('Beliebteste','Most viewed'))+'</span>':'')+'</div>'+
-    h.slice(0,show).map(function(x,i){var th=x.c.thumb&&safeUrl(x.c.thumb);
+    h.slice(0,show).map(function(x,i){var th=x.c.thumb&&tSz(safeUrl(x.c.thumb),240,136);
       return '<button type="button" class="ch-item" data-hit="'+i+'">'+(th?'<img src="'+esc(th)+'" alt="" loading="lazy" onerror="this.removeAttribute(\'src\')">':'<span class="ph"></span>')+
       '<span><b>'+markQ(x.c.title||'Clip',q)+'</b><small>'+esc([fmtDate(x.r.date),x.c.views!=null?x.c.views.toLocaleString(LOC)+' '+T('Aufrufe','views'):'',x.c.by&&x.c.by.toLowerCase().indexOf(q)>=0?T('von ','by ')+x.c.by:''].filter(Boolean).join(' · '))+'</small></span></button>'}).join('')+
     (h.length>show?'<button type="button" class="ch-more" data-more="1">'+T('Alle '+h.length.toLocaleString(LOC)+' Clips anzeigen','Show all '+h.length.toLocaleString(LOC)+' clips')+'</button>':'');
@@ -2563,7 +2567,9 @@ function randomClip(){
 // Läuft der Stream gerade, zeigt die Karte das aktuelle Twitch-Vorschaubild (wird mit dem LIVE-Check alle 2 Min. erneuert)
 var LIVE_ON=null,LIVE_T=Date.now();
 function livePreview(){return 'https://static-cdn.jtvnw.net/previews-ttv/live_user_'+CHANNEL+'-440x248.jpg?t='+LIVE_T}
-function thumbOf(r){if(r.live&&LIVE_ON!==false)return livePreview();var c=(r.clips||[]).find(function(c){return c.thumb});return c&&safeUrl(c.thumb)}
+// Twitch liefert Vorschaubilder in jeder Größe: nur so groß laden, wie sie angezeigt werden (doppelte Auflösung für scharfe Displays)
+function tSz(u,w,h){return u&&/jtvnw\.net\/twitch-video-assets\//.test(u)?u.replace(/\d+x\d+\.jpg$/,w+'x'+h+'.jpg'):u}
+function thumbOf(r){if(r.live&&LIVE_ON!==false)return livePreview();var c=(r.clips||[]).find(function(c){return c.thumb});return c&&tSz(safeUrl(c.thumb),260,147)}
 function catBox(name){var c=CATS[name];return c&&c.box?safeUrl(c.box):null}
 function liveTag(r){return r.live?'<span class="tag livetag">● LIVE</span>':''}
 function catTag(r){var b=r.category&&catBox(r.category);return liveTag(r)+(r.category?'<span class="cat'+(r.category==='IRL'?' irl':'')+'">'+(b?'<img class="cat-ic" src="'+esc(b)+'" alt="" onerror="this.remove()">':'')+esc(r.category)+'</span>':'')}
@@ -2575,7 +2581,7 @@ function cardSide(r,th){
   if(!cat&&!th)return '';
   return '<span class="side">'+cat+(th?'<img class="thumb" src="'+esc(th)+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</span>';
 }
-function clipIcon(c){var u=c.thumb&&safeUrl(c.thumb);return '<span class="ic'+(u?' th':'')+'">'+(u?'<img src="'+esc(u)+'" alt="" loading="lazy">':'▶')+'</span>'}
+function clipIcon(c){var u=c.thumb&&tSz(safeUrl(c.thumb),160,90);return '<span class="ic'+(u?' th':'')+'">'+(u?'<img src="'+esc(u)+'" alt="" loading="lazy">':'▶')+'</span>'}
 function renderCats(){
   var cnt={};state.routes.forEach(function(r){if(r.category)cnt[r.category]=(cnt[r.category]||0)+1});
   var keys=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]});
@@ -2634,7 +2640,7 @@ function progressOf(p,ll){
 function sortStops(p,stops){return stops.slice().sort(function(a,b){return progressOf(p,[a.lat,a.lng])-progressOf(p,[b.lat,b.lng])})}
 function clipTime(c){var w=c.moment||c.at;if(!w)return '';var d=new Date(w);return isNaN(d)?'':d.toLocaleTimeString(LOC,{hour:'2-digit',minute:'2-digit'})+T(' Uhr','')}
 function clipCard(c,link){
-  var th=c.thumb&&safeUrl(c.thumb),u=safeUrl(c.url);
+  var th=c.thumb&&tSz(safeUrl(c.thumb),320,180),u=safeUrl(c.url);
   return (th?'<img class="ct-img" src="'+esc(th)+'" alt="" onerror="this.removeAttribute(\'src\')">':'<span class="ct-img"></span>')+
     '<div class="ct-b"><b>'+esc(c.title||'Clip')+'</b><small>'+esc([clipTime(c),c.views!=null?c.views.toLocaleString(LOC)+' '+T('Aufrufe','views'):''].filter(Boolean).join(' · '))+'</small>'+
     (link&&u?'<a class="ct-go" data-slug="'+esc(slugOf(u))+'" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">▶ '+T('Clip ansehen','Watch clip')+'</a>':'<span class="ct-go">▶ '+T('Klicken zum Abspielen','Click to play')+'</span>')+'</div>';
@@ -2990,7 +2996,7 @@ function renderEdPanel(){
   var stops=ed.stops.length?'<ol class="estops">'+ed.stops.map(function(s,i){return '<li class="estop"><span class="rstop">'+(i+1)+'</span><input type="text" maxlength="60" placeholder="'+T('Name, z. B. Altstadt','Name, e.g. old town')+'" value="'+esc(s.name)+'" data-si="'+i+'"'+(s.fresh?' data-fresh="1"':'')+' aria-label="'+T('Name der Station ','Name of stop ')+(i+1)+'"><button type="button" class="x" data-sdel="'+i+'" aria-label="'+T('Station entfernen','Remove stop')+'" title="'+T('Station entfernen','Remove stop')+'">×</button></li>'}).join('')+'</ol>':'<p class="help">'+T('Noch keine Stationen. Modus „Station“ wählen und auf die Route klicken.','No stops yet. Choose “Station” and click the route.')+'</p>';
   ed.stops.forEach(function(s){delete s.fresh});
   var clips=CL.length?'<div class="eclips">'+CL.map(function(c){
-    var sg=slugOf(c.url);if(!sg)return '';var on=!!ed.clips[sg],th=c.thumb&&safeUrl(c.thumb);
+    var sg=slugOf(c.url);if(!sg)return '';var on=!!ed.clips[sg],th=c.thumb&&tSz(safeUrl(c.thumb),160,90);
     return '<div class="eclip'+(on?' on':'')+(ed.armed===sg?' arm':'')+'" draggable="true" data-slug="'+esc(sg)+'" title="'+T('Auf die Karte ziehen oder antippen und dann auf die Karte tippen','Drag onto the map, or tap it and then tap the map')+'">'+
       (th?'<img src="'+esc(th)+'" alt="" loading="lazy" draggable="false">':'<span class="ph"></span>')+
       '<span style="min-width:0"><span class="t">'+esc(c.title||'Clip')+'</span><small>'+esc([clipTime(c),c.views!=null?c.views+' '+T('Aufrufe','views'):''].filter(Boolean).join(' · '))+(on?' · <b>'+T('auf der Route','on the route')+'</b>':'')+'</small></span>'+
@@ -3564,7 +3570,7 @@ function wrapCalc(y){
 function wrN(n,f){return '<b data-count="'+n+'"'+(f?' data-f="'+f+'"':'')+'>0</b>'}
 function wrMonth(m,long){return new Date(2000,m,15).toLocaleDateString(LOC,{month:long?'long':'short'})}
 function wrDay(t){return new Date(t).toLocaleDateString(LOC,{day:'numeric',month:'long'})}
-function wrClip(x,i){var u=safeUrl(x.c.url),th=x.c.thumb&&safeUrl(x.c.thumb);if(!u)return '';
+function wrClip(x,i){var u=safeUrl(x.c.url),th=x.c.thumb&&tSz(safeUrl(x.c.thumb),400,226);if(!u)return '';
   return '<a class="wr-clip" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" data-wclip="'+esc(slugOf(u))+'" data-wr="'+esc(x.r.id)+'"><div class="th">'+(th?'<img src="'+esc(th)+'" alt="" loading="lazy" onerror="this.remove()">':'')+(i!=null?'<i>#'+(i+1)+'</i>':'')+'<u>▶</u></div><div class="tx"><b>'+esc(x.c.title||'Clip')+'</b><small>'+(x.c.views||0).toLocaleString(LOC)+' '+T('Aufrufe','views')+' · '+esc(fmtDateShort(x.r.date))+'</small></div></a>'}
 function wrapSlides(d){
   var S=[],y=d.y,av=($('.hero .avatar img')||{}).src;
@@ -3620,7 +3626,7 @@ function closeWrap(){wrapMapOff();$('#wr-bg').innerHTML='';$('#wrap').hidden=tru
 // Hintergrund-Collage: Vorschaubilder der Clips des Jahres, gemischt, so oft wiederholt, dass der Bildschirm voll ist
 function wrapCollage(y){
   var d=wrapCalc(y),seen={},th=[];
-  d.clips.slice().sort(function(a,b){return (b.c.views||0)-(a.c.views||0)}).forEach(function(x){var u=x.c.thumb&&safeUrl(x.c.thumb);if(u&&!seen[u]){seen[u]=1;th.push(u)}});
+  d.clips.slice().sort(function(a,b){return (b.c.views||0)-(a.c.views||0)}).forEach(function(x){var u=x.c.thumb&&tSz(safeUrl(x.c.thumb),320,180);if(u&&!seen[u]){seen[u]=1;th.push(u)}});
   th=th.slice(0,70);for(var i=th.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=th[i];th[i]=th[j];th[j]=t}
   var box=$('#wr-bg');if(!th.length){box.innerHTML='';return}
   var cols=Math.ceil((innerWidth+160)/(innerWidth<=820?124:216)),rows=Math.ceil((innerHeight+160)/((innerWidth<=820?124:216)*9/16+6))+1,n=cols*rows,h='';
@@ -4390,7 +4396,7 @@ function loadData(first){
     if(SITE_PENDING===null){SITE_OFF=!!(v[4]&&v[4].offline);gateOffline();renderAuth()}
     if(SITE_OFF&&!canEdit(state.user))return v[2];
     var d=v[0],m=v[2];if(v[3]&&typeof v[3]==='object')CATS=v[3];if(v[1]&&typeof v[1]==='object'){ROUTES=v[1];cleanPending()}
-    if(m&&m.profileImage){var av=document.querySelector('.avatar img');if(!av){av=document.createElement('img');av.alt='';document.querySelector('.avatar').appendChild(av)}av.src=m.profileImage}
+    if(m&&m.profileImage){m.profileImage=String(m.profileImage).replace(/-300x300\./,'-150x150.');var av=document.querySelector('.avatar img');if(!av){av=document.createElement('img');av.alt='';document.querySelector('.avatar').appendChild(av)}av.src=m.profileImage}
     if(m&&m.updated){var dd=new Date(m.updated);$('#upd').textContent=T('Automatisch aktualisiert: ','Updated automatically: ')+dd.toLocaleString(LOC,{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})+T(' Uhr','')}
     if(Array.isArray(d)&&d.length)SAMPLE=d;
     DATA_LOADED=true;
