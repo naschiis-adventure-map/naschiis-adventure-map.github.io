@@ -2,6 +2,7 @@
 // Läuft per GitHub Actions. Braucht TWITCH_CLIENT_ID und TWITCH_CLIENT_SECRET als Umgebungsvariablen.
 // Node 20+, keine Abhängigkeiten.
 import { readFile, writeFile } from 'node:fs/promises';
+import { compactStreams } from './compact.mjs';
 
 const LOGIN = process.env.TWITCH_LOGIN || 'naschiitaschii';
 const CLIENT_ID = process.env.TWITCH_CLIENT_ID;
@@ -417,6 +418,13 @@ try { meta = JSON.parse(await readFile(META, 'utf8')); } catch {}
 const profile = { profileImage: user.profile_image_url || meta.profileImage || null, displayName: user.display_name || meta.displayName || LOGIN };
 const profileChanged = profile.profileImage !== meta.profileImage || profile.displayName !== meta.displayName;
 if (json !== old) await writeFile(DATA, json);
+// Kompakte Fassung für die Webseite (lädt deutlich schneller), immer passend zu streams.json
+{
+  const MIN = new URL('../data/streams.min.json', import.meta.url);
+  const min = JSON.stringify(compactStreams(streams, LOGIN));
+  let oldMin = ''; try { oldMin = await readFile(MIN, 'utf8'); } catch {}
+  if (min !== oldMin) await writeFile(MIN, min);
+}
 const clipTotal = streams.reduce((s, r) => s + (r.clips || []).length, 0);
 if (json !== old || profileChanged) {
   await writeFile(META, JSON.stringify({ updated: json !== old ? new Date().toISOString() : meta.updated, streams: streams.length, clips: clipTotal, ...profile }, null, 1) + '\n');
