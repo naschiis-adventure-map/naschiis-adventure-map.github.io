@@ -31,6 +31,16 @@ th{font:600 11px 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:up
 code{font-family:'IBM Plex Mono',monospace;font-size:13px;background:#251a2b;padding:1px 5px;border-radius:4px}
 </style>
 <script>
+// Kennzahlen: werden bei jeder Veröffentlichung aus der Git-Historie gezählt (data/stats.json, scripts/stats.mjs)
+fetch('data/stats.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(s){if(!s)return;
+  var set=function(id,t){var e=document.getElementById(id);if(e&&t)e.textContent=t};
+  var nf=function(n){return Number(n).toLocaleString('de-DE')};
+  if(s.first){var d=Math.floor((Date.now()-new Date(s.first+'T00:00:00').getTime())/864e5)+1;if(d>0)set('st-days',d+(d===1?' Tag':' Tage'))}
+  if(s.changes)set('st-changes',nf(s.changes));
+  if(s.dataUpdates)set('st-updates',nf(s.dataUpdates));
+}).catch(function(){});
+</script>
+<script>
 // Eingebettet in der Karte: eigenen Kopf ausblenden, Links an die Karte weitergeben
 (function(){var emb=false;try{emb=window.parent!==window&&!!window.parent.closeDoc}catch(e){}
 if(!emb)return;document.documentElement.classList.add('embed');document.documentElement.dataset.title='Changelog';
@@ -90,12 +100,12 @@ else if(h==='anleitung.html'||h==='datenschutz.html'||h==='changelog.html'){e.pr
 <header><h1>Naschii’s Adventure Map</h1><p>Changelog</p></header>
 <main>
 <a class="back" href="./">← Zurück zur Karte</a>
-<div class="box"><b>Was ist neu?</b> Hier steht, wie die Karte entstanden ist und was sich seitdem geändert hat – neueste Änderungen oben. Die Zeitangaben sind ungefähre Arbeitszeiten laut Änderungsprotokoll. Die automatischen Daten-Updates alle 15 Minuten stehen hier nicht einzeln drin.</div>
+<div class="box"><b>Was ist neu?</b> Hier steht, wie die Karte entstanden ist und was sich seitdem geändert hat – neueste Änderungen oben. Die Zeitangaben sind ungefähre Arbeitszeiten laut Änderungsprotokoll. Bauzeit, Änderungen und Daten-Updates zählt die Seite bei jeder Veröffentlichung selbst. Die automatischen Daten-Updates alle 15 Minuten stehen hier nicht einzeln drin.</div>
 <div class="stats">
-<div><b>14 Tage</b><small>Bauzeit</small></div>
+<div><b id="st-days">13 Tage</b><small>Bauzeit</small></div>
 <div><b>ca. 50 Std.</b><small>Arbeit</small></div>
-<div><b>184</b><small>Änderungen</small></div>
-<div><b>600+</b><small>Daten-Updates</small></div>
+<div><b id="st-changes">193</b><small>Änderungen</small></div>
+<div><b id="st-updates">600+</b><small>Daten-Updates</small></div>
 <div><b>0 €</b><small>Kosten</small></div>
 </div>
 <p class="small"><span class="t neu" style="position:static;display:inline-block;width:auto;padding:1px 6px">Neu</span> neue Funktion · <span class="t besser" style="position:static;display:inline-block;width:auto;padding:1px 6px">Verbessert</span> bestehendes besser · <span class="t fix" style="position:static;display:inline-block;width:auto;padding:1px 6px">Behoben</span> Fehler beseitigt · <span class="t weg" style="position:static;display:inline-block;width:auto;padding:1px 6px">Entfernt</span> rausgenommen · <span class="t technik" style="position:static;display:inline-block;width:auto;padding:1px 6px">Technik</span> unter der Haube</p>
