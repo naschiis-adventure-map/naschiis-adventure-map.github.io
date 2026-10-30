@@ -1045,7 +1045,7 @@ body.s-halloween .kevin-rail b::after{content:'👻';position:absolute;left:-14p
 @keyframes fxGhost{from{transform:translate(0,0) rotate(-6deg);opacity:.75}to{transform:translate(14px,-16px) rotate(6deg);opacity:1}}
 /* Castle-Deko (nur ganz hineingezoomt) */
 .castle .sd{display:none;position:absolute;z-index:1;font-size:20px;line-height:1;pointer-events:none;filter:drop-shadow(0 2px 2px #000a)}
-body.s-on #map.z-near .castle .sd{display:block}
+body.s-on #map .castle .sd{display:block}
 .castle .sd1{left:50%;bottom:-8px;transform:translateX(-50%)}
 .castle .sd2{left:-58px;top:64px;font-size:17px;z-index:-1}
 .castle .sd3{left:118px;top:52px;font-size:17px;z-index:-1}
@@ -1058,7 +1058,7 @@ body.s-spring .castle .sd1::before{content:'🌷'}body.s-spring .castle .sd2::be
 body.s-summer .castle .sd1::before{content:'⛱️'}body.s-summer .castle .sd2::before{content:'🌴'}body.s-summer .castle .sd3::before{content:'🐚'}body.s-summer .castle .sd4::before{content:'☀️'}
 /* Halloween: Fledermäuse ums Castle */
 .castle .sbats{display:none;position:absolute;left:30px;top:22px;width:0;height:0;pointer-events:none;z-index:2}
-body.s-halloween #map:not(.z-far):not(.z-world) .castle .sbats{display:block}
+body.s-halloween #map .castle .sbats{display:block}
 .castle .sbats i{position:absolute;font-style:normal;font-size:18px;animation:fxOrbit 5s linear infinite}
 .castle .sbats i+i{animation-duration:7s;animation-direction:reverse;font-size:12px}
 @keyframes fxOrbit{from{transform:rotate(0) translateX(62px) rotate(0)}to{transform:rotate(360deg) translateX(62px) rotate(-360deg)}}
@@ -1159,9 +1159,9 @@ body.s-halloween .castle .sd5::before{content:'🐈‍⬛'}body.s-halloween .cas
 body.s-halloween .castle .sd1,body.s-halloween .castle .sd6{filter:drop-shadow(0 0 6px #ff8a1a) drop-shadow(0 0 12px #ff6a1a)}
 body.s-halloween .castle .sd9{animation:aRise 5s ease-in-out infinite}
 .castle .smoon{display:none;position:absolute;left:96px;top:-36px;width:44px;height:44px;z-index:-2;pointer-events:none}
-body.s-halloween #map.z-near .castle .smoon{display:block}
+body.s-halloween #map .castle .smoon{display:block}
 .castle .sfog{display:none;position:absolute;left:-110px;top:70px;width:300px;height:70px;z-index:2;pointer-events:none;border-radius:50%;background:radial-gradient(ellipse at 50% 60%,#c9d6cf88,transparent 70%);filter:blur(8px);animation:aBob 6s ease-in-out infinite alternate}
-body.s-halloween #map.z-near .castle .sfog{display:block}
+body.s-halloween #map .castle .sfog{display:block}
 /* ---------- Winter: Eiszapfen, Eisbahn, Schneeballschlacht, Schlitten, Heißgetränke ---------- */
 .ice{position:absolute;top:-1px;width:var(--w,8px);height:var(--h,16px);clip-path:polygon(0 0,100% 0,55% 100%,45% 100%);background:linear-gradient(90deg,#dff3ff,#ffffff 40%,#b7dcf5);opacity:.92;filter:drop-shadow(0 2px 2px #0005)}
 .ice::after{content:'';position:absolute;left:50%;top:calc(100% - 3px);width:3px;height:4px;margin-left:-1.5px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:#cfeaff;opacity:0;animation:drip var(--d,6s) ease-in var(--dl,0s) infinite}
@@ -1603,9 +1603,9 @@ body.presenting #panel,body.presenting .grip,body.presenting .totop{display:none
 .thought i.b1{width:14px;height:14px;left:-12px;top:calc(var(--ty,50%) - 7px)}
 .thought i.b2{width:8px;height:8px;left:-26px;top:calc(var(--ty,50%) + 1px)}
 @media (prefers-reduced-motion:reduce){.thought{transition:none}}
-.castle .isle{display:none;position:absolute;left:-107px;top:2px;width:290px;height:155px;z-index:-1;pointer-events:none}
-#map.z-near .castle .isle{display:block}
-#map.z-near .castle{filter:drop-shadow(0 4px 8px #000b)}
+.castle .isle{display:block;position:absolute;left:-107px;top:2px;width:290px;height:155px;z-index:-1;pointer-events:none}
+/* Insel samt Deko in jeder Zoomstufe; die ganze Gruppe wird über transform mitskaliert */
+#map .castle{filter:drop-shadow(0 4px 8px #000b)}
 .castle b{position:absolute;right:-4px;bottom:2px;min-width:24px;height:24px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border-radius:999px;background:radial-gradient(circle at 35% 30%,#ffd3ec,var(--accent) 55%,var(--pink-deep));color:var(--accent-ink);font:700 11px var(--f-mono);border:2px solid #fff}
 .tag.home{color:#ffe2b8;border-color:#c98b4a99}
 .ed-loc{position:relative}
@@ -2329,7 +2329,7 @@ function drawLines(){
   Object.keys(gl).forEach(function(k){
     var g=gl[k],n=g.items.length;g.size=Math.round(26+Math.min(n,25)*1.3);
     var home=isHome(g.name);
-    var m=L.marker([g.lat,g.lng],{keyboard:true,title:g.name+' · '+n+' Streams',riseOnHover:true,
+    var m=L.marker([g.lat,g.lng],{keyboard:true,title:g.name+' · '+n+' Streams',riseOnHover:true,zIndexOffset:home?-1000:0,
       icon:home?L.divIcon({className:'grp-wrap',html:'<div class="castle"><svg class="isle" viewBox="0 0 180 96" aria-hidden="true"><ellipse cx="90" cy="52" rx="86" ry="40" fill="none" stroke="#5d7a80" stroke-opacity=".45" stroke-width="2" stroke-dasharray="10 7"/><path d="M14 52c4-14 22-24 44-27 14-2 22-8 38-7 20 1 30 7 46 10 16 4 26 12 26 24 0 12-12 20-30 25-16 4-30 3-46 6-18 3-34 1-50-4-18-6-31-14-28-27z" fill="#4b3f2e"/><path d="M28 52c4-11 18-18 36-21 12-2 20-7 33-6 17 1 25 6 38 9 13 3 21 10 20 19-1 9-11 15-26 18-14 3-26 2-40 4-15 2-28 1-41-3-14-5-23-11-20-20z" fill="#2f4628"/><g fill="#3d5a31"><circle cx="40" cy="58" r="6"/><circle cx="49" cy="63" r="5"/><circle cx="136" cy="55" r="6"/><circle cx="146" cy="60" r="4.5"/><circle cx="128" cy="64" r="4"/></g></svg><span class="sd sd2"></span><span class="sd sd3"></span><img src="castle.webp" alt="" width="76" height="80" decoding="async"><span class="sd sd1"></span><span class="sd sd4"></span><span class="sd sd5"></span><span class="sd sd6"></span><span class="sd sd7"></span><span class="sd sd8"></span><span class="sd sd9"></span><span class="sbats"><i>🦇</i><i>🦇</i></span><span class="smoon moon" style="--s:44px"></span><span class="sfog"></span><b>'+n+'</b></div>',iconSize:[76,80],iconAnchor:[38,60]})
                :L.divIcon({className:'grp-wrap',html:'<div class="grp" style="width:'+g.size+'px;height:'+g.size+'px">'+n+'</div>',iconSize:[g.size,g.size],iconAnchor:[g.size/2,g.size/2]})}).addTo(drawLayer);
     if(canHover){m.on('mouseover',function(){showGroup(g)});m.on('mouseout',function(){hideTip()})}
