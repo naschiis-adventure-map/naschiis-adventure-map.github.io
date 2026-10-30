@@ -1913,6 +1913,13 @@ body.site-off main.app,body.site-off .rail,body.site-off #stats,body.site-off #u
 .pl-x:hover{border-color:var(--accent);color:var(--accent)}
 .pl-frame{position:relative;aspect-ratio:16/9;background:#000}
 .pl-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.pl-stage{position:relative}
+.pl-bar{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--accent);z-index:2;pointer-events:none;opacity:.85}
+.pl-cd{position:absolute;right:10px;bottom:14px;z-index:3;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 20px);padding:8px 10px;border-radius:12px;background:#1c0f21eb;border:1px solid var(--accent);box-shadow:0 6px 20px #000a;font:600 13px var(--f-body);color:var(--fg)}
+.pl-cd[hidden]{display:none}
+.pl-cd b{color:var(--accent);font-family:var(--f-mono)}
+.pl-cd .btn{padding:5px 10px;font-size:12px}
+#pl-auto[aria-pressed=true]{border-color:var(--accent);color:var(--accent);background:#f5a9d61f}
 .pl-foot{display:flex;align-items:center;gap:8px;padding:10px 14px}
 .pl-foot #pl-pos{font-size:12px;color:var(--muted)}
 .pl-foot #pl-tw{margin-left:auto;text-decoration:none;color:var(--fg)}
@@ -2075,8 +2082,8 @@ body.s-halloween .kevin-rail .homebtn{margin-bottom:30px}
 <div class="player" id="player" role="dialog" aria-modal="true" aria-labelledby="pl-title" hidden>
   <div class="pl-box">
     <div class="pl-head"><div class="pl-tt"><b id="pl-title"></b><small id="pl-meta"></small></div><button type="button" class="pl-x" id="pl-close" aria-label="Schließen">×</button></div>
-    <div class="pl-frame" id="pl-frame"></div>
-    <div class="pl-foot"><button type="button" class="btn" id="pl-prev">‹</button><span id="pl-pos" class="mono"></span><button type="button" class="btn" id="pl-next">›</button><a class="btn" id="pl-tw" href="#" target="_blank" rel="noopener noreferrer">Twitch ↗</a></div>
+    <div class="pl-stage"><div class="pl-frame" id="pl-frame"></div><div class="pl-bar" id="pl-bar" aria-hidden="true"></div><div class="pl-cd" id="pl-cd" role="status" aria-live="polite" hidden><span id="pl-cd-t"></span><button type="button" class="btn" id="pl-cd-stop"></button><button type="button" class="btn" id="pl-cd-now"></button></div></div>
+    <div class="pl-foot"><button type="button" class="btn" id="pl-prev">‹</button><span id="pl-pos" class="mono"></span><button type="button" class="btn" id="pl-next">›</button><button type="button" class="btn" id="pl-auto" aria-pressed="false" hidden></button><a class="btn" id="pl-tw" href="#" target="_blank" rel="noopener noreferrer">Twitch ↗</a></div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -3309,7 +3316,7 @@ var PL={list:[],i:0,r:null,random:false};
 function openPlayer(list,i,r,random){
   vodPause();
   PL={list:list,i:i,r:r,random:!!random};showClip();
-  $('#player').hidden=false;document.body.style.overflow='hidden';
+  $('#player').hidden=false;document.body.style.overflow='hidden';apStart();
   setTimeout(function(){$('#pl-close').focus()},30);
 }
 function showClip(){
@@ -3321,7 +3328,7 @@ function showClip(){
     $('#pl-meta').textContent='● LIVE'+(r0()?' · '+T('seit ','since ')+(PL.r.start||''):'');
     $('#pl-frame').innerHTML='<iframe src="https://player.twitch.tv/?channel='+encodeURIComponent(CHANNEL)+'&parent='+encodeURIComponent(location.hostname)+'&autoplay=true&muted=false" allowfullscreen allow="autoplay; fullscreen" title="'+esc(c.title||'Livestream')+'"></iframe>';
     $('#pl-tw').href=c.url;$('#pl-tw').textContent=T('Auf Twitch öffnen ↗','Open on Twitch ↗');
-    $('#pl-prev').hidden=true;$('#pl-next').hidden=true;$('#pl-pos').textContent='';return;
+    $('#pl-prev').hidden=true;$('#pl-next').hidden=true;$('#pl-pos').textContent='';apClear();apBtn(c);return;
   }
   $('#pl-frame').innerHTML='<iframe src="https://clips.twitch.tv/embed?clip='+encodeURIComponent(sg)+'&parent='+encodeURIComponent(location.hostname)+'&autoplay=true&muted=false" allowfullscreen allow="autoplay; fullscreen" title="'+esc(c.title||'Clip')+'"></iframe>';
   $('#pl-tw').href=safeUrl(c.url)||'#';$('#pl-tw').textContent=T('Auf Twitch öffnen ↗','Open on Twitch ↗');
@@ -3329,9 +3336,27 @@ function showClip(){
   $('#pl-prev').hidden=PL.random||n<2;$('#pl-next').hidden=!PL.random&&n<2;
   $('#pl-next').textContent=PL.random?'🎲 '+T('Noch einer','Another one'):'›';
   $('#pl-pos').textContent=PL.random?'':(n>1?(PL.i+1)+' / '+n:'');
+  apStart();
 }
 function r0(){return PL&&PL.r&&PL.r.start}
-function closePlayer(){$('#player').hidden=true;$('#pl-frame').innerHTML='';document.body.style.overflow=''}
+/* Autoplay: Twitch meldet bei Clips kein Ende. Darum läuft ein Timer nach der Clip-Länge,
+   danach 5 s Countdown mit Stopp-Knopf – wer pausiert hat, kann den Wechsel so noch abbrechen. */
+var AP={on:store('shm.autoplay')==='on',t:null,cd:null,n:0};
+function apHasNext(){return PL.random||PL.i<PL.list.length-1}
+function apClear(){clearTimeout(AP.t);clearInterval(AP.cd);AP.t=AP.cd=null;$('#pl-cd').hidden=true;var b=$('#pl-bar');b.style.transition='none';b.style.width='0'}
+function apBtn(c){var b=$('#pl-auto');b.hidden=!c||!!c.live||(!PL.random&&PL.list.length<2);b.setAttribute('aria-pressed',AP.on?'true':'false');
+  b.textContent='🔁 Autoplay'+(AP.on?T(' an',' on'):T(' aus',' off'));b.title=T('Nach dem Clip automatisch den nächsten abspielen','Automatically play the next clip when this one ends')}
+function apStart(){apClear();var c=PL.list[PL.i];apBtn(c);if(!AP.on||!c||c.live||!apHasNext()||$('#player').hidden)return;
+  var ms=(Math.max(5,+c.dur||30)+1.5)*1000,b=$('#pl-bar');void b.offsetWidth;b.style.transition='width '+ms+'ms linear';b.style.width='100%';
+  AP.t=setTimeout(apCountdown,ms)}
+function apCdText(){$('#pl-cd-t').innerHTML=(PL.random?T('Nächster Zufallsclip in ','Next random clip in '):T('Nächster Clip in ','Next clip in '))+'<b>'+AP.n+'</b> s'}
+function apCountdown(){AP.n=5;$('#pl-cd-stop').textContent='⏸ '+T('Stopp','Stop');$('#pl-cd-now').textContent='▶ '+T('Jetzt','Now');apCdText();$('#pl-cd').hidden=false;
+  AP.cd=setInterval(function(){AP.n--;if(AP.n<=0)apNext();else apCdText()},1000)}
+function apNext(){apClear();if(PL.random)randomClip();else{PL.i++;showClip()}}
+$('#pl-cd-stop').addEventListener('click',function(){apClear();toast(T('Autoplay für diesen Clip gestoppt','Autoplay stopped for this clip'))});
+$('#pl-cd-now').addEventListener('click',apNext);
+$('#pl-auto').addEventListener('click',function(){AP.on=!AP.on;store('shm.autoplay',AP.on?'on':null);apStart()});
+function closePlayer(){apClear();$('#player').hidden=true;$('#pl-frame').innerHTML='';document.body.style.overflow=''}
 $('#pl-close').addEventListener('click',closePlayer);
 $('#player').addEventListener('click',function(e){if(e.target.id==='player')closePlayer()});
 $('#pl-prev').addEventListener('click',function(){if(PL.i>0){PL.i--;showClip()}else{PL.i=PL.list.length-1;showClip()}});
