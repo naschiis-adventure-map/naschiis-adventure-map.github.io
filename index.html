@@ -1916,6 +1916,8 @@ body.site-off main.app,body.site-off .rail,body.site-off #stats,body.site-off #u
 .pl-foot{display:flex;align-items:center;gap:8px;padding:10px 14px}
 .pl-foot #pl-pos{font-size:12px;color:var(--muted)}
 .pl-foot #pl-tw{margin-left:auto;text-decoration:none;color:var(--fg)}
+.pl-foot #pl-go{margin-left:auto}
+.pl-foot #pl-go:not([hidden])+#pl-tw{margin-left:0}
 @media (max-width:820px){.player{padding:0;place-items:end center}.pl-box{border-radius:14px 14px 0 0}}
 .tools2{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line)}
 @media (max-width:420px){.tools2{padding:10px 12px;gap:6px}.tools2 .chipbtn{padding:5px 8px;font-size:12px}}
@@ -2076,7 +2078,7 @@ body.s-halloween .kevin-rail .homebtn{margin-bottom:30px}
   <div class="pl-box">
     <div class="pl-head"><div class="pl-tt"><b id="pl-title"></b><small id="pl-meta"></small></div><button type="button" class="pl-x" id="pl-close" aria-label="Schließen">×</button></div>
     <div class="pl-frame" id="pl-frame"></div>
-    <div class="pl-foot"><button type="button" class="btn" id="pl-prev">‹</button><span id="pl-pos" class="mono"></span><button type="button" class="btn" id="pl-next">›</button><a class="btn" id="pl-tw" href="#" target="_blank" rel="noopener noreferrer">Twitch ↗</a></div>
+    <div class="pl-foot"><button type="button" class="btn" id="pl-prev">‹</button><span id="pl-pos" class="mono"></span><button type="button" class="btn" id="pl-next">›</button><button type="button" class="btn" id="pl-go" hidden>📍 Zum Stream</button><a class="btn" id="pl-tw" href="#" target="_blank" rel="noopener noreferrer">Twitch ↗</a></div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -2569,7 +2571,6 @@ function randomClip(){
   var all=[];state.routes.forEach(function(r){(r.clips||[]).forEach(function(c){if(slugOf(c.url))all.push([c,r])})});
   if(!all.length)return;
   var p=all[Math.floor(Math.random()*all.length)];
-  if(!state.editing&&state.selectedId!==p[1].id)select(p[1].id);
   if($('#player').hidden)openPlayer([p[0]],0,p[1],true);else{PL={list:[p[0]],i:0,r:p[1],random:true};showClip()}
 }
 
@@ -3321,7 +3322,7 @@ function showClip(){
     $('#pl-meta').textContent='● LIVE'+(r0()?' · '+T('seit ','since ')+(PL.r.start||''):'');
     $('#pl-frame').innerHTML='<iframe src="https://player.twitch.tv/?channel='+encodeURIComponent(CHANNEL)+'&parent='+encodeURIComponent(location.hostname)+'&autoplay=true&muted=false" allowfullscreen allow="autoplay; fullscreen" title="'+esc(c.title||'Livestream')+'"></iframe>';
     $('#pl-tw').href=c.url;$('#pl-tw').textContent=T('Auf Twitch öffnen ↗','Open on Twitch ↗');
-    $('#pl-prev').hidden=true;$('#pl-next').hidden=true;$('#pl-pos').textContent='';return;
+    $('#pl-prev').hidden=true;$('#pl-next').hidden=true;$('#pl-pos').textContent='';$('#pl-go').hidden=true;return;
   }
   $('#pl-frame').innerHTML='<iframe src="https://clips.twitch.tv/embed?clip='+encodeURIComponent(sg)+'&parent='+encodeURIComponent(location.hostname)+'&autoplay=true&muted=false" allowfullscreen allow="autoplay; fullscreen" title="'+esc(c.title||'Clip')+'"></iframe>';
   $('#pl-tw').href=safeUrl(c.url)||'#';$('#pl-tw').textContent=T('Auf Twitch öffnen ↗','Open on Twitch ↗');
@@ -3329,10 +3330,13 @@ function showClip(){
   $('#pl-prev').hidden=PL.random||n<2;$('#pl-next').hidden=!PL.random&&n<2;
   $('#pl-next').textContent=PL.random?'🎲 '+T('Noch einer','Another one'):'›';
   $('#pl-pos').textContent=PL.random?'':(n>1?(PL.i+1)+' / '+n:'');
+  // Zufallsclip: der Stream wird erst geöffnet, wenn man „Zum Stream“ drückt
+  var go=$('#pl-go'),rr=c.__r||PL.r;go.hidden=!PL.random||!rr||state.editing;go.textContent='📍 '+T('Zum Stream','Go to stream');if(rr)go.title=rr.title||'';
 }
 function r0(){return PL&&PL.r&&PL.r.start}
 function closePlayer(){$('#player').hidden=true;$('#pl-frame').innerHTML='';document.body.style.overflow=''}
 $('#pl-close').addEventListener('click',closePlayer);
+$('#pl-go').addEventListener('click',function(){var rr=PL.list[PL.i]&&(PL.list[PL.i].__r||PL.r);closePlayer();if(rr&&!state.editing)select(rr.id)});
 $('#player').addEventListener('click',function(e){if(e.target.id==='player')closePlayer()});
 $('#pl-prev').addEventListener('click',function(){if(PL.i>0){PL.i--;showClip()}else{PL.i=PL.list.length-1;showClip()}});
 $('#pl-next').addEventListener('click',function(){if(PL.random){randomClip();return}PL.i=(PL.i+1)%PL.list.length;showClip()});
