@@ -3341,7 +3341,7 @@ function showClip(){
 function r0(){return PL&&PL.r&&PL.r.start}
 /* Autoplay: Twitch meldet bei Clips kein Ende. Darum läuft ein Timer nach der Clip-Länge,
    danach 5 s Countdown mit Stopp-Knopf – wer pausiert hat, kann den Wechsel so noch abbrechen. */
-var AP={on:store('shm.autoplay')==='on',t:null,cd:null,n:0};
+var AP={on:store('shm.autoplay')!=='off',t:null,cd:null,n:0};
 function apHasNext(){return PL.random||PL.i<PL.list.length-1}
 function apClear(){clearTimeout(AP.t);clearInterval(AP.cd);AP.t=AP.cd=null;$('#pl-cd').hidden=true;var b=$('#pl-bar');b.style.transition='none';b.style.width='0'}
 function apBtn(c){var b=$('#pl-auto');b.hidden=!c||!!c.live||(!PL.random&&PL.list.length<2);b.setAttribute('aria-pressed',AP.on?'true':'false');
@@ -3355,7 +3355,7 @@ function apCountdown(){AP.n=5;$('#pl-cd-stop').textContent='⏸ '+T('Stopp','Sto
 function apNext(){apClear();if(PL.random)randomClip();else{PL.i++;showClip()}}
 $('#pl-cd-stop').addEventListener('click',function(){apClear();toast(T('Autoplay für diesen Clip gestoppt','Autoplay stopped for this clip'))});
 $('#pl-cd-now').addEventListener('click',apNext);
-$('#pl-auto').addEventListener('click',function(){AP.on=!AP.on;store('shm.autoplay',AP.on?'on':null);apStart()});
+$('#pl-auto').addEventListener('click',function(){AP.on=!AP.on;store('shm.autoplay',AP.on?null:'off');apStart()});
 function closePlayer(){apClear();$('#player').hidden=true;$('#pl-frame').innerHTML='';document.body.style.overflow=''}
 $('#pl-close').addEventListener('click',closePlayer);
 $('#player').addEventListener('click',function(e){if(e.target.id==='player')closePlayer()});
