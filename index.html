@@ -4028,15 +4028,19 @@ function kwVisible(el){if(!el)return null;var r=el.getBoundingClientRect();retur
 // Wo kann Kevin gerade auftauchen?
 function kwVenues(){
   var v=[],mobile=innerWidth<=820;
-  if(kwVisible($('header.hero')))v.push(['hero',3]);
+  // beim VoD ist die Karte weg und das Video groß: dann öfter oben in der Kopfleiste
+  if(kwVisible($('header.hero')))v.push(['hero',document.body.classList.contains('vodon')?6:3]);
   if(kwVisible(document.querySelector('.frame.foot')))v.push(['foot',2]);
   if(!mobile&&kwVisible(document.querySelector('.frame.rail'))&&document.querySelectorAll('#kevin-rail button[data-kevin]').length)v.push(['rail',2]);
   var mw=document.querySelector('.map-wrap');if(!document.body.classList.contains('vodon')&&!document.body.classList.contains('mapc')&&typeof map!=='undefined'&&map&&kwVisible(mw)&&mw.getBoundingClientRect().height>140)v.push(['map',3]);
   if(!$('#v-list').hidden&&kwCards().length)v.push(['list',3]);
+  if(!$('#v-detail').hidden&&kwClips().length)v.push(['clips',3]);
   return v;
 }
+// sichtbare Clips in der Clipliste eines geöffneten Streams
+function kwClips(){var pr=$('#panel').getBoundingClientRect();return [].slice.call(document.querySelectorAll('#v-detail a.clip:not([hidden])')).filter(function(c){var r=c.getBoundingClientRect();return r.top>=pr.top+40&&r.bottom<=pr.bottom-10&&r.height>30&&r.width>120})}
 function kwCards(){var pr=$('#panel').getBoundingClientRect();return [].slice.call(document.querySelectorAll('#list .card')).filter(function(c){var r=c.getBoundingClientRect();return r.top>=pr.top+40&&r.bottom<=pr.bottom-10&&r.height>40})}
-var KW_ORDER=['hero','list','map','rail','foot'],KW_I=0;
+var KW_ORDER=['hero','list','clips','map','rail','foot'],KW_I=0;
 function kwPick(){
   var v=kwVenues();if(!v.length)return null;
   var fv=(location.search.match(/[?&]kevin=(\w+)/)||[])[1];if(fv&&v.some(function(x){return x[0]===fv}))return fv;
@@ -4046,11 +4050,18 @@ function kwPick(){
 // Sprüche passend zum Ort
 function kwCtxLine(ctx){
   var en=LANG==='en',P=function(a){return a[Math.floor(Math.random()*a.length)]};
-  if(ctx.stream){var r=ctx.stream,n=(r.clips||[]).length,h=fmtDur(r.durationMin||0),d=fmtDateShort(r.date),t=String(r.title||'').replace(/[|│┃].*$/,'').replace(/!\w+/g,'').trim();
+  if(ctx.stream&&!ctx.clip){var r=ctx.stream,n=(r.clips||[]).length,h=fmtDur(r.durationMin||0),d=fmtDateShort(r.date),t=String(r.title||'').replace(/[|│┃].*$/,'').replace(/!\w+/g,'').trim();
     var A=en?[h+" live and nobody looked for me?",n?n+" clips in this stream. Not a single one with me.":"Zero clips in this one. Even I wasn't filmed.","The stream on "+d+"? I was hiding under the sofa.",(r.location&&!r.location.home?"I almost caught up in "+r.location.name+". Almost.":"Castle stream. I could smell the snacks from outside.")]
       :[h+" live und keiner hat mich gesucht?",n?n+" Clips in diesem Stream. Und kein einziger mit mir.":"Null Clips hier. Nicht mal ich wurde gefilmt.","Der Stream vom "+d+"? Da lag ich unterm Sofa.",(r.location&&!r.location.home?"In "+r.location.name+" hätte ich sie fast eingeholt. Fast.":"Castle-Stream. Ich konnte die Snacks bis draußen riechen.")];
     if(t&&t.length<44&&!KW_BAD.test(t))A.push(en?"“"+t+"” – was I there? No comment.":"„"+t+"“ – war ich dabei? Kein Kommentar.");
     return P(A)}
+  if(ctx.clip){var k=ctx.clip,ct=k.title.replace(/[|│┃].*$/,'').trim(),B=en
+      ?["I'm in this clip. Way in the back. Blurry. Trust me.","Rewind a bit … was that me on the left?","Clips without me are only half as good. Science.","Psst, play this one. I've seen it nine times."]
+      :["Ich bin in diesem Clip. Ganz hinten. Unscharf. Glaub mir.","Spul mal zurück … war das da links ich?","Clips ohne mich sind nur halb so gut. Wissenschaftlich bewiesen.","Psst, spiel den hier ab. Ich hab ihn schon neunmal gesehen."];
+    if(k.views)B.push(en?k.views+" views – and nobody spotted me in the background.":k.views+" Aufrufe – und keiner hat mich im Hintergrund entdeckt.");
+    if(k.dur&&k.dur<=30)B.push(en?"Only "+k.dur+" seconds? I need longer than that to roll into the picture.":"Nur "+k.dur+" Sekunden? So lange brauch ich, um ins Bild zu rollen.");
+    if(ct&&ct.length<40&&ct.indexOf('@')<0&&!KW_BAD.test(ct))B.push(en?"“"+ct+"” – I'd have loved to be in that one.":"„"+ct+"“ – da wär ich gern dabei gewesen.");
+    return P(B)}
   if(ctx.place){var p=ctx.place;return P(en?[p+"? Never been there. …Okay, once.","Who put my picture up for "+p+"?! Fake news.","I'm only passing through "+p+". Officially."]:[p+"? Da war ich nie. …Okay, einmal.","Wer hat mein Bild bei "+p+" aufgehängt?! Fake News.","Ich bin in "+p+" nur auf der Durchreise. Offiziell."])}
   if(ctx.castle)return P(en?["Get away from the castle before Naschii spots me!","The castle? Too many cameras. I'm out.","Home sweet… nope. Running."]:["Bloß weg vom Castle, bevor Naschii mich sieht!","Das Castle? Zu viele Kameras. Ich bin raus.","Home sweet… nee. Weiterlaufen."]);
   if(ctx.mapPlace)return P(en?["Just checking out "+ctx.mapPlace+". For a new life.","Maybe I'll settle in "+ctx.mapPlace+". Nobody knows me there."]:["Ich schau mir mal "+ctx.mapPlace+" an. Für ein neues Leben.","Vielleicht zieh ich nach "+ctx.mapPlace+". Da kennt mich keiner."]);
@@ -4092,9 +4103,12 @@ async function kevinGo(force){
         start={x:mr.left+tx+(fromL?-kw*.2:kw*.2),y:mr.top+ty};stop={x:mr.left+tx+(fromL?kw*1.4:-kw*1.4),y:mr.top+ty};mode='castle';
       }else{start={x:fromL?mr.left-kw-10:mr.right+10,y:mr.top+ty};stop={x:mr.left+tx,y:mr.top+ty}}
       clipR={l:mr.left,t:mr.top,w:mr.width,h:mr.height};
-    }else{ // list: lugt hinter einer Stream-Karte hervor
-      var cs=kwCards(),c=cs[Math.floor(Math.random()*cs.length)],rc=c.getBoundingClientRect();kw=mobile?44:52;var lkh=kw*.62;
-      ctx.stream=byId(c.dataset.id);mode='peek';acts=['peek'];
+    }else{ // list/clips: lugt hinter einer Stream-Karte bzw. einem Clip hervor
+      var cs=venue==='clips'?kwClips():kwCards(),c=cs[Math.floor(Math.random()*cs.length)],rc=c.getBoundingClientRect();kw=mobile?44:52;var lkh=kw*.62;
+      if(venue==='clips'){var tt=c.querySelector('.tt'),sm=c.querySelector('.tt small'),vw=sm&&(sm.textContent.match(/([\d.,]+)\s*(Aufrufe|views)/)||[])[1],du=sm&&(sm.textContent.match(/(\d+)\s*s\b/)||[])[1];
+        ctx.clip={title:tt&&tt.firstChild?String(tt.firstChild.textContent||'').trim():'',views:vw||'',dur:du?+du:0};ctx.stream=byId(state.selectedId)}
+      else ctx.stream=byId(c.dataset.id);
+      mode='peek';acts=['peek'];
       clipR={l:rc.left,t:rc.top,w:rc.width,h:rc.height};
       var py=rc.top+rc.height-lkh-4;start={x:rc.right+2,y:py};stop={x:rc.right-kw*.78,y:py};
       var pn=$('#panel'),st0=pn.scrollTop,onScroll=function(){if(Math.abs(pn.scrollTop-st0)>15){KW.abort=true;KW.silent=true;if(KW.wake)KW.wake();if(KW.anim)try{KW.anim.finish()}catch(e){}}};pn.addEventListener('scroll',onScroll);stopWatch=function(){pn.removeEventListener('scroll',onScroll)};
