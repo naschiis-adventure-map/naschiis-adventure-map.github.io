@@ -9,6 +9,12 @@ on:
     branches: [main]
   workflow_dispatch:
   workflow_call:
+    inputs:
+      soft:
+        # true bei den automatischen Abläufen: hängt GitHub Pages, gilt der Lauf trotzdem als erfolgreich
+        # (die Daten sind dann schon gespeichert und gehen mit der nächsten Veröffentlichung raus)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -38,3 +44,9 @@ jobs:
           path: .
       - id: deploy
         uses: actions/deploy-pages@v4
+        continue-on-error: ${{ inputs.soft == true }}
+        with:
+          timeout: 180000   # 3 Minuten; normal dauert es unter einer Minute
+      - name: Hinweis bei Pages-Störung
+        if: steps.deploy.outcome == 'failure'
+        run: echo "::warning::GitHub Pages hat die Veröffentlichung nicht angenommen (Störung oder Zeitüberschreitung bei GitHub). Die Daten sind gespeichert und gehen mit dem nächsten Lauf raus."

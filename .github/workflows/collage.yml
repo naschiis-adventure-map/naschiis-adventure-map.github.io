@@ -55,3 +55,5 @@ jobs:
       pages: write
       id-token: write
     uses: ./.github/workflows/deploy.yml
+    with:
+      soft: true
