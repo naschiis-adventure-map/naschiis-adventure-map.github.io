@@ -2741,18 +2741,33 @@ function playStart(r){
   var p=r.points,cut={};(r.breaks||[]).forEach(function(b){cut[b]=1});
   var cum=[0];for(var i=1;i<p.length;i++)cum.push(cum[i-1]+(cut[i]?0:hav(p[i-1],p[i])));
   var LT=cum[cum.length-1]||1;
-  // Clips der Route nach ihrer Lage auf der Strecke ordnen
+  // Zeitachse: der Punkt läuft nach der echten Uhrzeit. Jeder Clip ist ein Ankerpunkt (Uhrzeit → Stelle auf der Strecke);
+  // bei Rundwegen wird pro Clip die passende Runde gewählt (die nächste Stelle nach dem vorigen Clip).
+  var t0=new Date(r.date+'T'+(r.start||'00:00')+':00').getTime(),dur=(r.durationMin||0)*60000;
+  var cand=function(pos){var out=[],best=null,bd=1e9,cs=Math.cos(rad(pos[0]));
+    for(var i=1;i<p.length;i++){if(cut[i])continue;
+      var ax=p[i-1][1]*cs,ay=p[i-1][0],bx=p[i][1]*cs,by=p[i][0],dx=bx-ax,dy=by-ay,l2=dx*dx+dy*dy,k=l2?Math.max(0,Math.min(1,((pos[1]*cs-ax)*dx+(pos[0]-ay)*dy)/l2)):0;
+      var q=[ay+k*dy,(ax+k*dx)/cs],d=hav(q,pos),at=cum[i-1]+(cum[i]-cum[i-1])*k;
+      if(d<0.04)out.push(at);if(d<bd){bd=d;best=at}}
+    return out.length?out.sort(function(a,b){return a-b}):[best]};
   var clips=[];Object.keys(r.clipPos||{}).forEach(function(sg){
-    var c=(r.clips||[]).find(function(x){return slugOf(x.url)===sg});if(!c)return;var pos=r.clipPos[sg],bi=0,bd=1e9;
-    for(var j=0;j<p.length;j++){var d=hav(p[j],pos);if(d<bd){bd=d;bi=j}}
-    clips.push({c:c,pos:pos,f:cum[bi]/LT});
+    var c=(r.clips||[]).find(function(x){return slugOf(x.url)===sg});if(!c)return;
+    var tm=new Date(c.moment||c.at).getTime(),tf=dur&&!isNaN(t0)&&!isNaN(tm)?Math.max(0,Math.min(1,(tm-t0)/dur)):null;
+    clips.push({c:c,pos:r.clipPos[sg],tf:tf,cs:cand(r.clipPos[sg])});
   });
+  clips.sort(function(a,b){return (a.tf==null?2:a.tf)-(b.tf==null?2:b.tf)});
+  var anc=[[0,0]],last=0;
+  clips.forEach(function(x){if(x.tf==null)return;var nx=x.cs.filter(function(v){return v>=last-0.015});
+    if(nx.length){x.d=nx[0];if(x.d>=last&&x.tf>anc[anc.length-1][0]&&x.d/LT<=1){anc.push([x.tf,x.d/LT]);last=x.d}}});
+  if(anc[anc.length-1][0]<1)anc.push([1,1]);
+  var fOfD=function(fd){for(var i=1;i<anc.length;i++)if(anc[i][1]>=fd){var a=anc[i-1],b=anc[i];return b[1]>a[1]?a[0]+(b[0]-a[0])*(fd-a[1])/(b[1]-a[1]):a[0]}return 1};
+  clips.forEach(function(x){if(x.d==null)x.d=x.cs[0];x.f=x.tf!=null?x.tf:fOfD(x.d/LT)});
   clips.sort(function(a,b){return a.f-b.f});
   var bar=document.createElement('div');bar.className='plbar';bar.setAttribute('role','group');bar.setAttribute('aria-label',T('Route abspielen','Play route'));
   bar.innerHTML='<button type="button" data-pl="pp" aria-label="Pause">⏸</button><span data-pl="time">'+esc(r.start||'')+'</span><div class="pl-track" data-pl="track"><b></b>'+clips.map(function(x){return '<i style="left:'+(x.f*100).toFixed(1)+'%"></i>'}).join('')+'</div><span data-pl="km">0,0 / '+fmtKm(LT)+'</span><button type="button" data-pl="cl" class="pl-cl" aria-pressed="'+plClipsOn()+'" title="'+T('Clips unterwegs abspielen','Play clips along the way')+'">🎬 Clips</button><span class="pl-sp">'+[1,2,4].map(function(v){return '<button type="button" data-plsp="'+v+'" aria-pressed="'+(v===1)+'">'+v+'×</button>'}).join('')+'</span><button type="button" data-pl="x" aria-label="'+T('Abspielen beenden','Stop playback')+'">✕</button>';
   $('.map-wrap').appendChild(bar);
   var dot=L.marker(p[0],{icon:L.divIcon({className:'',html:'<div class="pl-dot"></div>',iconSize:[22,22],iconAnchor:[11,11]}),interactive:false,zIndexOffset:2000,keyboard:false}).addTo(map);
-  PLAY={r:r,p:p,cum:cum,L:LT,clips:clips,t:0,speed:1,playing:true,last:0,next:0,bar:bar,dot:dot,pop:null,popT:0};
+  PLAY={r:r,p:p,cum:cum,L:LT,clips:clips,anc:anc,t:0,speed:1,playing:true,last:0,next:0,bar:bar,dot:dot,pop:null,popT:0};
   map.fitBounds(L_bounds(p),{padding:[60,60],maxZoom:17,animate:!reduceMotion});
   bar.addEventListener('click',function(e){
     var b=e.target.closest('[data-pl],[data-plsp]');if(!b||!PLAY)return;
@@ -2767,15 +2782,16 @@ function playStart(r){
   PLAY.raf=requestAnimationFrame(playTick);
 }
 function L_bounds(p){return L.latLngBounds(p)}
+function playFrac(t){var A=PLAY.anc;for(var i=1;i<A.length;i++)if(A[i][0]>=t){var a=A[i-1],b=A[i];return b[0]>a[0]?a[1]+(b[1]-a[1])*(t-a[0])/(b[0]-a[0]):b[1]}return 1}
 function playAt(t){
-  var P=PLAY,d=t*P.L,c=P.cum,i=1;while(i<c.length-1&&c[i]<d)i++;
+  var P=PLAY,d=playFrac(t)*P.L,c=P.cum,i=1;while(i<c.length-1&&c[i]<d)i++;
   var seg=c[i]-c[i-1],f=seg>0?(d-c[i-1])/seg:0,a=P.p[i-1],b=P.p[i];
   return [a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f];
 }
 function playUI(){
   var P=PLAY;if(!P)return;var b=P.bar;
   b.querySelector('.pl-track b').style.width=(P.t*100).toFixed(2)+'%';
-  b.querySelector('[data-pl=km]').textContent=fmtKm(P.t*P.L).replace(' km','')+' / '+fmtKm(P.L);
+  b.querySelector('[data-pl=km]').textContent=fmtKm(playFrac(P.t)*P.L).replace(' km','')+' / '+fmtKm(P.L);
   var st=P.r.start&&/^\d\d:\d\d$/.test(P.r.start)?P.r.start:null;
   b.querySelector('[data-pl=time]').textContent=st?addMin(st,Math.round(P.t*(P.r.durationMin||0))):'';
   var pp=b.querySelector('[data-pl=pp]');if(P.cw){pp.textContent=P.cw.hold?'▶':'⏸';pp.setAttribute('aria-label',P.cw.hold?T('Abspielen','Play'):'Pause');return}pp.textContent=P.playing?'⏸':(P.t>=1?'↺':'▶');pp.setAttribute('aria-label',P.playing?'Pause':T('Abspielen','Play'));
