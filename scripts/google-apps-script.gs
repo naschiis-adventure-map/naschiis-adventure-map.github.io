@@ -251,6 +251,32 @@ function entwuerfeEinrichten() {
   console.log('Entwürfe-Ordner bereit: ' + f.getName() + ' (' + f.getUrl() + ')');
 }
 
+/**
+ * Einmal von Hand ausführen: übernimmt automatisch erstellte Routen-Vorlagen als Entwürfe.
+ * Vorher die Datei "vorlagen-import.json" in den Ordner "Adventure Map – Entwürfe (privat)" hochladen.
+ * Jede Vorlage landet als Entwurf "Automatische Vorlage (grob)" beim jeweiligen Stream – nichts wird veröffentlicht.
+ * Ein erneuter Import ersetzt nur die alte automatische Vorlage, eigene Entwürfe bleiben unangetastet.
+ */
+function vorlagenImportieren() {
+  const ordner = entwurfOrdner();
+  const it = ordner.getFilesByName('vorlagen-import.json');
+  if (!it.hasNext()) throw new Error('Datei "vorlagen-import.json" nicht im Entwürfe-Ordner gefunden.');
+  const datei = it.next();
+  const alle = JSON.parse(datei.getBlob().getDataAsString());
+  const NAME = 'Automatische Vorlage (grob)';
+  let n = 0;
+  Object.keys(alle).forEach(function (sid) {
+    if (!/^[\w-]{1,80}$/.test(sid) || !alle[sid] || typeof alle[sid] !== 'object') return;
+    const list = entwuerfeLesen(sid).filter(function (x) { return x.name !== NAME; });
+    if (list.filter(function (x) { return !x.backup; }).length >= 10) { console.log('Übersprungen (schon 10 Entwürfe): ' + sid); return; }
+    list.push({ did: Utilities.getUuid().slice(0, 8), name: NAME, by: 'automatisch', at: new Date().toISOString(), route: alle[sid] });
+    entwuerfeSchreiben(sid, list);
+    n++;
+  });
+  datei.setTrashed(true);
+  console.log(n + ' Vorlagen als Entwürfe gespeichert. Die Import-Datei liegt jetzt im Papierkorb.');
+}
+
 /** Zum Testen im Editor: zeigt, dass die Web-App erreichbar ist. */
 function doGet() {
   return antwort({ ok: true, info: 'Adventure Map Speicher-Dienst läuft.' });
