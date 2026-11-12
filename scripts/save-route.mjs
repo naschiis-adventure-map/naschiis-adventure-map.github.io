@@ -41,6 +41,7 @@ if (route !== null) {
   }
   if (cs.length > 15) fail('höchstens 15 Clips pro Route');
   clean = {
+    ...(route.fav === true ? { fav: true } : {}),   // im Editor als Highlight markiert
     ...(desc ? { desc } : {}),
     ...(loc ? { loc } : {}),
     points: points.map(([a, b]) => [r5(a), r5(b)]),

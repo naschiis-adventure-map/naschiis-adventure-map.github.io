@@ -2003,6 +2003,46 @@ body.s-halloween .kevin-rail .homebtn{margin-bottom:30px}
 body:not(.dl) .list{min-height:150vh}
 body:not(.dl) #listhint{display:none}
 body:not(.dl) .kevin-pane{visibility:hidden}
+
+/* Reiter Unterwegs / Alle + Highlights */
+.vtabs{display:flex;gap:6px;margin:10px 0 2px}
+.vtabs button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;text-align:center;padding:7px 4px;border-radius:10px;font:600 13px var(--f-body);border:1px solid #f5a9d655;color:#f1cfe6;background:#1c0f21}
+.vtabs button[aria-selected=true]{background:var(--accent);color:#2a0f22;border-color:var(--accent)}
+.vtabs button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#hl:empty{display:none}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 4px}
+.hl button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;height:66px;border-radius:10px;overflow:hidden;background:#2a1a30 center/cover;border:1px solid #f5a9d644;transition:transform .15s,border-color .15s}
+.hl button:hover,.hl button:focus-visible{transform:scale(1.03);border-color:var(--accent)}
+.hl button span{position:absolute;left:0;right:0;bottom:0;padding:12px 7px 4px;font:700 11.5px var(--f-body);color:#fff;background:linear-gradient(transparent,#000d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hl button small{position:absolute;top:4px;right:5px;font:600 9.5px var(--f-mono);color:#fff;background:#000a;border-radius:5px;padding:1px 5px}
+.tag.est{border-style:dashed;border-color:#f2a65f;color:#f2a65f}
+.facts.f4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.facts.f4 div:nth-child(3n+1){padding-left:12px;border-left:1px solid var(--line)}
+.facts.f4 div:nth-child(4n+1){padding-left:0;border-left:0}
+.playbtn{width:100%;justify-content:center;margin:2px 0 10px}
+/* Route abspielen */
+.pl-dot{width:22px;height:22px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 6px #f5a9d655,0 0 22px var(--accent)}
+.pl-pop{width:190px;background:#1c0f21f2;border:1px solid var(--accent);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px #000c;cursor:pointer;animation:plIn .25s ease-out}
+.pl-pop .ph{height:96px;background:#2a1a30 center/cover}
+.pl-pop div{padding:6px 9px;color:#fff;font:600 12px/1.3 var(--f-body)}
+.pl-pop small{display:block;color:#f1cfe6bb;font:400 10px var(--f-mono);margin-top:2px}
+@keyframes plIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.plbar{position:absolute;left:12px;right:12px;bottom:12px;z-index:1200;display:flex;align-items:center;gap:10px;background:#1c0f21f2;border:1px solid #f5a9d655;border-radius:14px;padding:8px 12px;color:#f1cfe6;font:600 12px var(--f-mono);box-shadow:0 6px 20px #000a}
+.plbar button{all:unset;cursor:pointer;padding:3px 7px;border-radius:7px;color:#f1cfe6}
+.plbar button:hover,.plbar button:focus-visible,.plbar button[aria-pressed=true]{background:#f5a9d633;color:#fff}
+.pl-track{flex:1;height:6px;border-radius:3px;background:#ffffff22;position:relative;cursor:pointer}
+.pl-track b{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--accent)}
+.pl-track i{position:absolute;top:-3px;width:3px;height:12px;margin-left:-1px;background:#fffa;border-radius:2px}
+@media (max-width:820px){.plbar{gap:6px;padding:6px 8px;font-size:11px}.plbar .pl-sp{display:none}}
+/* Kevin-Leiste lesbarer, größere Tippflächen auf der Karte */
+.kevin-rail button{width:66px}
+.kevin-rail button span{font-size:10.5px;max-width:62px}
+@media (pointer:coarse){.grp-wrap::after{content:'';position:absolute;inset:-9px;border-radius:50%}}
+.ed-fav{display:flex;align-items:center;gap:8px;font:600 13px var(--f-body);cursor:pointer}
+.ed-fav input{width:18px;height:18px;accent-color:var(--accent)}
+/* Platz für Reiter und Highlights freihalten, bis die Daten da sind (kein Springen) */
+body:not(.dl) .vtabs{min-height:34px}
+body:not(.dl):not(.tab-all) #hl{display:block;min-height:150px}
 </style>
 
 <header class="hero">
@@ -2041,6 +2081,7 @@ body:not(.dl) .kevin-pane{visibility:hidden}
   <aside class="panel" id="panel" aria-label="Routen">
     <div id="v-list">
       <div class="tools"><div class="qwrap"><input type="text" id="q" placeholder="Suchen: Titel, Ort, Datum, Clip" aria-label="Streams durchsuchen" autocomplete="off"><button type="button" id="qclear" class="qclear" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><select id="flt" aria-label="Streams filtern"><option value="all">Alle</option><option value="loc">Mit Ort</option><option value="none">Ohne Ort</option><option value="route">Mit Route</option><option value="noroute">Ohne Route (Nur IRL)</option></select><select id="cat" aria-label="Nach Kategorie filtern"><option value="">Alle Kategorien</option></select><select id="srt" aria-label="Streams sortieren"><option value="new">Neueste zuerst</option><option value="old">Älteste zuerst</option><option value="time">Längste Streamzeit</option></select></div>
+      <div class="vtabs" id="vtabs" role="tablist" aria-label="Streams"></div><div id="hl"></div>
       <div class="tools2"><button type="button" class="chipbtn" id="calbtn" aria-pressed="false">📅 <span>Kalender</span></button><button type="button" class="chipbtn" id="rndbtn">🎲 <span>Zufälliger Clip</span></button><p class="count mono" id="count"></p></div>
       <div id="memo"></div>
       <div id="cliphits"></div>
@@ -2173,6 +2214,10 @@ var map, lines={}, selGroup;
 
 function prep(r,i){r.km=dist(r.points,r.breaks);r.color=r.color||PALETTE[i%PALETTE.length];return r}
 function hasRoute(r){return r.points&&r.points.length>1}
+// Titel ohne Chat-Befehle wie „| !partnerplus !dc !insta“ (nur für die Anzeige, die Suche nutzt den vollen Titel)
+function ttl(r){var t=String(r&&r.title||'');var c=t.replace(/\s*[|┃│]\s*(![\w-]+[\s,]*)+$/u,'').replace(/(\s+![\w-]+)+\s*$/u,'').replace(/\s*[|┃│]\s*$/u,'').trim();return c||t}
+// „Unterwegs“: IRL-Streams und alles mit Route, aber keine Streams aus dem Castle
+function isOut(r){return (r.category==='IRL'||hasRoute(r))&&!(r.location&&r.location.home)}
 /* Gezeichnete Routen liegen getrennt in data/routes.json; frisch gespeicherte bis zum nächsten Laden im Browser */
 var ROUTES={},CATS={};
 function loadPending(){try{return JSON.parse(store('shm.pending')||'{}')||{}}catch(e){return{}}}
@@ -2197,6 +2242,7 @@ function buildRoutes(){
 // Beschreibung und Ort von Hand (aus dem Editor) haben Vorrang vor den automatischen Werten
 function applyExtra(x,rt){
   x.desc=rt&&typeof rt.desc==='string'&&rt.desc?rt.desc:x._autoDesc;
+  x.fav=!!(rt&&rt.fav);x.est=!!(rt&&rt.auto&&rt.points&&rt.points.length>1);
   x.location=rt&&rt.loc&&isFinite(rt.loc.lat)?{name:rt.loc.name,lat:rt.loc.lat,lng:rt.loc.lng,manual:true}:x._autoLoc;
   // Gaming- und Just-Chatting-Streams ohne Ort im Titel: Naschii ist zu Hause – in ihrer Burg
   var h=homeLoc();
@@ -2208,7 +2254,7 @@ function applyExtra(x,rt){
 var NONGAME=['IRL','Just Chatting','Music','Art','Talk Shows & Podcasts','Special Events','ASMR','Pools, Hot Tubs, and Beaches','Travel & Outdoors','Sports','Food & Drink','Science & Technology','Makers & Crafting','Software and Game Development','Fitness & Health','Politics','Variety','Summer Game Fest'];
 function isGame(c){return !!c&&NONGAME.indexOf(c)<0}
 // Homebase: fest im Code, damit sie beim Bearbeiten nicht versehentlich verschoben werden kann
-var HOME={name:'Nashii´s Castle',lat:54.57206,lng:3.80127};
+var HOME={name:'Naschii´s Castle',lat:54.57206,lng:3.80127};
 function homeLoc(){return HOME}
 function isHome(name){return /castle/i.test(name||'')}
 function byId(id){return state.routes.filter(function(r){return r.id===id})[0]}
@@ -2385,7 +2431,7 @@ function select(id){
   renderDetail(r);showView('detail');renderListSelection();
 }
 function deselect(){
-  closeVod();
+  closeVod();playStop();
   state.selectedId=null;selGroup.clearLayers();
   undimAll();
   fitAll();showView('list');
@@ -2420,8 +2466,8 @@ function cardHTML(r){
     var side=cardSide(r,th);
     return '<button type="button" class="card'+(side?' has-thumb':'')+'" data-id="'+esc(r.id)+'" aria-pressed="'+(r.id===state.selectedId)+'"><span class="cbody">'+
       '<div class="d"><span class="dot" style="background:'+r.color+'"></span>'+esc(fmtDateShort(r.date))+' · '+esc(r.start||'')+liveTag(r)+routeTag(r)+vodTag(r)+'</div>'+
-      '<h3>'+esc(r.title)+'</h3>'+
-      '<div class="m mm"><span class="m1">'+esc(fmtDur(r.durationMin))+((r.clips||[]).length?' · '+r.clips.length+(r.clips.length===1?' Clip':' Clips'):'')+(function(){var n=q.length>=2?(r.clips||[]).filter(function(c){return clipMatch(c,q)}).length:0;return n?' · <span class="hl">🎬 '+n+T(' passend',' matching')+'</span>':''})()+'</span>'+(r.location?'<span class="m2" title="'+esc(r.location.name)+'">📍 '+esc(r.location.name)+'</span>':'')+'</div></span>'+side+'</button>';
+      '<h3>'+esc(ttl(r))+'</h3>'+
+      '<div class="m mm"><span class="m1">'+esc(fmtDur(r.durationMin))+((r.clips||[]).length?' · '+r.clips.length+(r.clips.length===1?' Clip':' Clips'):'')+(function(){var n=q.length>=2?(r.clips||[]).filter(function(c){return clipMatch(c,q)}).length:0;return n?' · <span class="hl">🎬 '+n+T(' passend',' matching')+'</span>':''})()+'</span>'+(r.location?'<span class="m2" title="'+esc(r.location.name)+'">'+(r.location.home?'🏰':'📍')+' '+esc(r.location.name)+'</span>':'')+'</div></span>'+side+'</button>';
   }
 function listMore(){
   var rows=LIST.rows,from=LIST.n;if(from>=rows.length)return;
@@ -2445,6 +2491,7 @@ function renderList(){
     if(f==='noroute'&&(hasRoute(r)||r.category!=='IRL'))return false;
     if(f==='none'&&(r.location||hasRoute(r)))return false;
     if(state.cat&&r.category!==state.cat)return false;
+    if(state.tab!=='all'&&!isOut(r))return false;
     if(!q)return true;
     var hay=[r.title,r.desc,fmtDate(r.date),r.date,numDates(r.date),r.location?r.location.name:'',r.category||''].concat((r.stops||[]).map(function(s){return s.name})).join(' ').toLowerCase();
     if(hay.indexOf(q)>=0)return true;
@@ -2473,13 +2520,39 @@ function renderList(){
   var cal=state.view==='cal';$('#cal').hidden=!cal;$('#list').hidden=cal;$('#calbtn').setAttribute('aria-pressed',cal);
   if(cal){renderCal();return}
   LIST.q=q;LIST.rows=rows;
-  var lk=[q,f,state.cat||'',srt].join('|');if(lk!==LIST.key){LIST.key=lk;LIST.n=LIST_CHUNK}
+  renderTabs();renderHL(q);
+  var lk=[q,f,state.cat||'',srt,state.tab].join('|');if(lk!==LIST.key){LIST.key=lk;LIST.n=LIST_CHUNK}
   if(lastCard){var li=rows.findIndex(function(r){return r.id===lastCard});if(li>=LIST.n)LIST.n=li+10}
   $('#list').innerHTML=rows.length?rows.slice(0,LIST.n).map(cardHTML).join('')+(rows.length>LIST.n?'<div class="list-more" id="list-more" aria-hidden="true"></div>':''):'<p class="empty">'+(DATA_LOADED||location.protocol==='file:'?T('Keine Streams gefunden.','No streams found.'):'<span class="loading">'+T('Lade Streams …','Loading streams …')+'</span>')+'</p>';
   listWatch();
   $('#listhint').textContent=canEdit(state.user)?'':(state.user?T('Nur Kanalbetreiber, Mods und Berechtigte können Routen bearbeiten.','Only the channel owner, mods and authorised people can edit routes.'):T('Kanalbetreiber, Mods und Berechtigte können sich mit Twitch anmelden, um Routen zu ergänzen.','The channel owner, mods and authorised people can log in with Twitch to add routes.'));
   $('#listhint').hidden=!SHOW_LOGIN||canEdit(state.user);
 }
+/* ---------- Reiter „Unterwegs / Alle“ und Highlights ---------- */
+state.tab=store('shm.view')==='all'?'all':'out';document.body.classList.toggle('tab-all',state.tab==='all');
+function renderTabs(){
+  var n=state.routes.filter(isOut).length,box=$('#vtabs');
+  box.innerHTML='<button type="button" role="tab" data-tab="out" aria-selected="'+(state.tab!=='all')+'">🚶 '+T('Unterwegs','Out & about')+' ('+n+')</button><button type="button" role="tab" data-tab="all" aria-selected="'+(state.tab==='all')+'">'+T('Alle Streams','All streams')+' ('+state.routes.length+')</button>';
+}
+// Favoriten (im Editor markiert) zuerst, freie Plätze füllt die Automatik: meiste Clip-Aufrufe, neuere Streams leicht bevorzugt
+function hlPick(){
+  var now=Date.now(),cand=state.routes.filter(function(r){return hasRoute(r)&&isOut(r)});
+  var fav=cand.filter(function(r){return r.fav}).sort(function(a,b){return a.date<b.date?1:-1});
+  var score=function(r){var v=(r.clips||[]).reduce(function(a,c){return a+(c.views||0)},0),age=(now-new Date(r.date+'T12:00:00').getTime())/864e5;return v/(1+Math.max(0,age)/120)};
+  var auto=cand.filter(function(r){return !r.fav}).sort(function(a,b){return score(b)-score(a)});
+  return fav.concat(auto).slice(0,4);
+}
+function hlName(r){var t=ttl(r).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,'').replace(/\s+/g,' ').trim();return t||(r.location&&r.location.name)||''}
+function renderHL(q){
+  var box=$('#hl');
+  if(state.tab==='all'||q||state.cat||(state.filter&&state.filter!=='all')||state.view==='cal'||!DATA_LOADED){box.innerHTML='';return}
+  var pick=hlPick();if(!pick.length){box.innerHTML='';return}
+  box.innerHTML='<div class="hl" aria-label="Highlights">'+pick.map(function(r){
+    var c=(r.clips||[]).filter(function(c){return c.thumb}).sort(function(a,b){return (b.views||0)-(a.views||0)})[0],th=c&&tSz(safeUrl(c.thumb),320,180);
+    return '<button type="button" data-hl="'+esc(r.id)+'" title="'+esc(ttl(r))+'"'+(th?' style="background-image:url(\''+esc(th)+'\')"':'')+'><small>'+esc(shortDate(r.date))+'</small><span>'+(r.fav?'⭐ ':'')+esc(hlName(r))+'</span></button>'}).join('')+'</div>';
+}
+$('#vtabs').addEventListener('click',function(e){var b=e.target.closest('[data-tab]');if(!b)return;state.tab=b.dataset.tab==='all'?'all':'out';document.body.classList.toggle('tab-all',state.tab==='all');store('shm.view',state.tab==='all'?'all':null);renderList();$('#panel').scrollTop=0});
+$('#hl').addEventListener('click',function(e){var b=e.target.closest('[data-hl]');if(b)select(b.dataset.hl)});
 /* ---------- Clip-Suche ---------- */
 function clipMatch(c,q){return ((c.title||'')+' '+(c.by||'')).toLowerCase().indexOf(q)>=0}
 function markQ(s,q){s=String(s||'');var i=s.toLowerCase().indexOf(q);if(!q||i<0)return esc(s);return esc(s.slice(0,i))+'<mark>'+esc(s.slice(i,i+q.length))+'</mark>'+esc(s.slice(i+q.length))}
@@ -2610,10 +2683,11 @@ function renderCats(){
   if(cur&&cnt[cur])sel.value=cur;else{state.cat='';sel.value=''}
 }
 function vodTag(r){return r.vod?'<span class="tag vodtag" title="'+T('Ganzer Stream (VoD) noch auf Twitch','Full stream (VoD) still on Twitch')+'">📼 VoD</span>':''}
-function routeTag(r){if(hasRoute(r))return '<span class="tag route">ROUTE</span>';if(r.location&&r.location.home)return '';return r.location&&!r.location.manual?'<span class="tag">'+T('ORT UNGEFÄHR','APPROX. PLACE')+'</span>':''}
+function routeTag(r){if(hasRoute(r))return r.est?'<span class="tag route est" title="'+T('Automatisch aus Titel, Clips und Streamdauer geschätzt – noch nicht von einem Mod bestätigt','Estimated automatically from title, clips and stream length – not yet confirmed by a mod')+'">≈ '+T('ROUTE GESCHÄTZT','ESTIMATED ROUTE')+'</span>':'<span class="tag route">ROUTE</span>';if(r.location&&r.location.home)return '';return r.location&&!r.location.manual?'<span class="tag">'+T('ORT UNGEFÄHR','APPROX. PLACE')+'</span>':''}
 function renderListSelection(){var cs=document.querySelectorAll('.card');for(var i=0;i<cs.length;i++){cs[i].setAttribute('aria-pressed',cs[i].dataset.id===state.selectedId)}}
 function safeUrl(u){try{var x=new URL(u);return x.protocol==='https:'?x.href:null}catch(e){return null}}
 function renderDetail(r){
+  playStop();
   var stops=(r.stops||[]).map(function(s,i){return '<li><button type="button" data-stop="'+i+'"><span class="n">'+(i+1)+'</span><span class="t">'+esc(s.time||'')+'</span><span><span class="nm">'+esc(s.name)+'</span><span class="nt">'+esc(s.note||'')+'</span></span></button></li>'}).join('');
   var CL=r.clips||[];
   var chrono=state.clipSort==='time';
@@ -2624,11 +2698,12 @@ function renderDetail(r){
   $('#v-detail').innerHTML=
     '<button type="button" class="back" id="back">'+T('← Alle Streams','← All streams')+'</button>'+
     '<div class="when"><span class="dot" style="background:'+r.color+'"></span>'+esc(fmtDate(r.date))+catTag(r)+routeTag(r)+'</div>'+
-    '<h2>'+esc(r.title)+'</h2>'+(CL[0]&&CL[0].thumb&&safeUrl(CL[0].thumb)?'<a class="hero-thumb" href="'+esc(safeUrl(CL[0].url))+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(safeUrl(CL[0].thumb))+'" alt="" loading="lazy" onerror="this.parentNode.remove()"><span>▶ Top-Clip: '+esc(CL[0].title)+(CL[0].views!=null?' · '+CL[0].views.toLocaleString(LOC)+' '+T('Aufrufe','views'):'')+'</span></a>':(r.live&&LIVE_ON!==false?'<a class="hero-thumb" data-live="1" href="https://www.twitch.tv/'+CHANNEL+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(livePreview())+'" alt="" onerror="this.parentNode.remove()"><span>● LIVE · '+T('Jetzt live ansehen','Watch live now')+'</span></a>':''))+
-    '<div class="facts"><div><b>'+esc(fmtDur(r.durationMin))+'</b><small>'+T('Dauer','Duration')+'</small></div><div><b>'+esc(r.start||'–')+(r.start?'–'+addMin(r.start,r.durationMin):'')+'</b><small>'+T('Uhrzeit','Time')+'</small></div><div><b>'+CL.length.toLocaleString(LOC)+'</b><small>Clips</small></div>'+
+    '<h2>'+esc(ttl(r))+'</h2>'+(CL[0]&&CL[0].thumb&&safeUrl(CL[0].thumb)?'<a class="hero-thumb" href="'+esc(safeUrl(CL[0].url))+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(safeUrl(CL[0].thumb))+'" alt="" loading="lazy" onerror="this.parentNode.remove()"><span>▶ Top-Clip: '+esc(CL[0].title)+(CL[0].views!=null?' · '+CL[0].views.toLocaleString(LOC)+' '+T('Aufrufe','views'):'')+'</span></a>':(r.live&&LIVE_ON!==false?'<a class="hero-thumb" data-live="1" href="https://www.twitch.tv/'+CHANNEL+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(livePreview())+'" alt="" onerror="this.parentNode.remove()"><span>● LIVE · '+T('Jetzt live ansehen','Watch live now')+'</span></a>':''))+
+    '<div class="facts'+(hasRoute(r)?' f4':'')+'"><div><b>'+esc(fmtDur(r.durationMin))+'</b><small>'+T('Dauer','Duration')+'</small></div><div><b>'+esc(r.start||'–')+(r.start?'–'+addMin(r.start,r.durationMin):'')+'</b><small>'+T('Uhrzeit','Time')+'</small></div><div><b>'+CL.length.toLocaleString(LOC)+'</b><small>Clips</small></div>'+(hasRoute(r)?'<div><b>'+fmtKm(dist(r.points,r.breaks)).replace(' km','')+'</b><small>'+T('km unterwegs','km walked')+'</small></div>':'')+
     '</div>'+
     (r.live&&LIVE_ON!==false?'<button type="button" class="btn vodbtn livebtn" id="liveopen">'+liveBtnLabel(r)+'</button>':'')+
     (r.vod?'<button type="button" class="btn vodbtn" id="vodopen">'+vodBtnLabel(r)+'</button>':'')+
+    (hasRoute(r)&&state.routes?'<button type="button" class="btn primary playbtn" id="rplay">▶ '+T('Route abspielen','Play route')+'</button>':'')+
     routeInfo+
     (r.desc?'<p class="desc">'+esc(r.desc)+'</p>':'')+
     (stops?'<div class="sec"><h3>'+T('Stationen','Stops')+'</h3><ol class="stops">'+stops+'</ol></div>':'')+
@@ -2636,6 +2711,76 @@ function renderDetail(r){
     '<div class="actions">'+
     (canEdit(state.user)?'<button type="button" class="btn primary" id="redit">'+(hasRoute(r)?T('Route bearbeiten','Edit route'):T('Route zeichnen','Draw route'))+'</button>':'')+'</div>'+
     (CL.length?'<p class="note src-note">'+[CL.length?'Clips: Twitch, '+(chrono?T('vom Streamanfang bis zum Ende','from start to end of stream'):T('nach Aufrufen sortiert','sorted by views')):''].filter(Boolean).join(' · ')+'</p>':'');
+}
+/* ---------- Route abspielen: Punkt läuft die Strecke ab, Clips springen am passenden Ort auf ---------- */
+var PLAY=null,PLAY_MS=40000;
+function playStop(){
+  if(!PLAY)return;cancelAnimationFrame(PLAY.raf);
+  [PLAY.dot,PLAY.pop].forEach(function(m){if(m)map.removeLayer(m)});
+  if(PLAY.bar)PLAY.bar.remove();PLAY=null;
+}
+function playStart(r){
+  playStop();if(!r||!hasRoute(r)||!map)return;
+  var p=r.points,cut={};(r.breaks||[]).forEach(function(b){cut[b]=1});
+  var cum=[0];for(var i=1;i<p.length;i++)cum.push(cum[i-1]+(cut[i]?0:hav(p[i-1],p[i])));
+  var LT=cum[cum.length-1]||1;
+  // Clips der Route nach ihrer Lage auf der Strecke ordnen
+  var clips=[];Object.keys(r.clipPos||{}).forEach(function(sg){
+    var c=(r.clips||[]).find(function(x){return slugOf(x.url)===sg});if(!c)return;var pos=r.clipPos[sg],bi=0,bd=1e9;
+    for(var j=0;j<p.length;j++){var d=hav(p[j],pos);if(d<bd){bd=d;bi=j}}
+    clips.push({c:c,pos:pos,f:cum[bi]/LT});
+  });
+  clips.sort(function(a,b){return a.f-b.f});
+  var bar=document.createElement('div');bar.className='plbar';bar.setAttribute('role','group');bar.setAttribute('aria-label',T('Route abspielen','Play route'));
+  bar.innerHTML='<button type="button" data-pl="pp" aria-label="Pause">⏸</button><span data-pl="time">'+esc(r.start||'')+'</span><div class="pl-track" data-pl="track"><b></b>'+clips.map(function(x){return '<i style="left:'+(x.f*100).toFixed(1)+'%"></i>'}).join('')+'</div><span data-pl="km">0,0 / '+fmtKm(LT)+'</span><span class="pl-sp">'+[1,2,4].map(function(v){return '<button type="button" data-plsp="'+v+'" aria-pressed="'+(v===1)+'">'+v+'×</button>'}).join('')+'</span><button type="button" data-pl="x" aria-label="'+T('Abspielen beenden','Stop playback')+'">✕</button>';
+  $('.map-wrap').appendChild(bar);
+  var dot=L.marker(p[0],{icon:L.divIcon({className:'',html:'<div class="pl-dot"></div>',iconSize:[22,22],iconAnchor:[11,11]}),interactive:false,zIndexOffset:2000,keyboard:false}).addTo(map);
+  PLAY={r:r,p:p,cum:cum,L:LT,clips:clips,t:0,speed:1,playing:true,last:0,next:0,bar:bar,dot:dot,pop:null,popT:0};
+  map.fitBounds(L_bounds(p),{padding:[60,60],maxZoom:17,animate:!reduceMotion});
+  bar.addEventListener('click',function(e){
+    var b=e.target.closest('[data-pl],[data-plsp]');if(!b||!PLAY)return;
+    if(b.dataset.plsp){PLAY.speed=+b.dataset.plsp;bar.querySelectorAll('[data-plsp]').forEach(function(x){x.setAttribute('aria-pressed',x===b)});return}
+    var a=b.dataset.pl;
+    if(a==='x'){playStop();return}
+    if(a==='pp'){if(PLAY.t>=1){PLAY.t=0;PLAY.next=0}PLAY.playing=!PLAY.playing;PLAY.last=0;playUI();if(PLAY.playing)PLAY.raf=requestAnimationFrame(playTick);return}
+    if(a==='track'){var rc=b.getBoundingClientRect();PLAY.t=Math.max(0,Math.min(1,(e.clientX-rc.left)/rc.width));PLAY.next=PLAY.clips.findIndex(function(x){return x.f>=PLAY.t});if(PLAY.next<0)PLAY.next=PLAY.clips.length;playMove()}
+  });
+  PLAY.raf=requestAnimationFrame(playTick);
+}
+function L_bounds(p){return L.latLngBounds(p)}
+function playAt(t){
+  var P=PLAY,d=t*P.L,c=P.cum,i=1;while(i<c.length-1&&c[i]<d)i++;
+  var seg=c[i]-c[i-1],f=seg>0?(d-c[i-1])/seg:0,a=P.p[i-1],b=P.p[i];
+  return [a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f];
+}
+function playUI(){
+  var P=PLAY;if(!P)return;var b=P.bar;
+  b.querySelector('.pl-track b').style.width=(P.t*100).toFixed(2)+'%';
+  b.querySelector('[data-pl=km]').textContent=fmtKm(P.t*P.L).replace(' km','')+' / '+fmtKm(P.L);
+  var st=P.r.start&&/^\d\d:\d\d$/.test(P.r.start)?P.r.start:null;
+  b.querySelector('[data-pl=time]').textContent=st?addMin(st,Math.round(P.t*(P.r.durationMin||0))):'';
+  var pp=b.querySelector('[data-pl=pp]');pp.textContent=P.playing?'⏸':(P.t>=1?'↺':'▶');pp.setAttribute('aria-label',P.playing?'Pause':T('Abspielen','Play'));
+}
+function playMove(){
+  var P=PLAY,pos=playAt(P.t);P.dot.setLatLng(pos);
+  var b=map.getBounds().pad(-0.15);if(!b.contains(pos))map.panTo(pos,{animate:!reduceMotion});
+  playUI();
+}
+function playPop(x){
+  var P=PLAY;if(P.pop)map.removeLayer(P.pop);
+  var th=x.c.thumb&&tSz(safeUrl(x.c.thumb),320,180),tm=clipTime(x.c);
+  P.pop=L.marker(x.pos,{icon:L.divIcon({className:'',html:'<div class="pl-pop"><div class="ph"'+(th?' style="background-image:url(\''+esc(th)+'\')"':'')+'></div><div>'+esc(x.c.title||'Clip')+'<small>'+esc([tm,x.c.views!=null?x.c.views.toLocaleString(LOC)+' '+T('Aufrufe','views'):''].filter(Boolean).join(' · '))+'</small></div></div>',iconSize:[190,150],iconAnchor:[-14,150]}),zIndexOffset:2100,keyboard:false}).addTo(map);
+  P.pop.on('click',function(){var r=P.r;if(PLAY){PLAY.playing=false;playUI()}openPlayer([x.c],0,r)});
+  P.popT=performance.now();
+}
+function playTick(now){
+  var P=PLAY;if(!P||!P.playing)return;
+  if(P.last){P.t=Math.min(1,P.t+(now-P.last)*P.speed/PLAY_MS)}P.last=now;
+  while(P.next<P.clips.length&&P.clips[P.next].f<=P.t){playPop(P.clips[P.next]);P.next++}
+  if(P.pop&&now-P.popT>3200/P.speed){map.removeLayer(P.pop);P.pop=null}
+  playMove();
+  if(P.t>=1){P.playing=false;playUI();return}
+  P.raf=requestAnimationFrame(playTick);
 }
 /* ---------- Routen: Geometrie ---------- */
 function cumKm(p){var c=[0];for(var i=1;i<p.length;i++)c.push(c[i-1]+hav(p[i-1],p[i]));return c}
@@ -2719,7 +2864,7 @@ function openEditor(id){
   closeVod();
   var r=byId(id);if(!r||!canEdit(state.user))return;
   hideTip(true);selGroup.clearLayers();clipMarkers={};
-  ed={id:id,r:r,points:(r.points||[]).map(function(x){return x.slice()}),breaks:(r.breaks||[]).slice(),stops:(r.stops||[]).map(function(s){return {lat:s.lat,lng:s.lng,name:s.name||''}}),
+  ed={id:id,r:r,fav:!!(routeFor(id)&&routeFor(id).fav),points:(r.points||[]).map(function(x){return x.slice()}),breaks:(r.breaks||[]).slice(),stops:(r.stops||[]).map(function(s){return {lat:s.lat,lng:s.lng,name:s.name||''}}),
       clips:JSON.parse(JSON.stringify(r.clipPos||{})),undo:[],mode:'pan',armed:null,dirty:false,saving:false,
       desc:(routeFor(id)&&routeFor(id).desc)||'',loc:r.location&&r.location.manual?{name:r.location.name,lat:r.location.lat,lng:r.location.lng}:null,armLoc:false,drafts:null,draftId:null,draftBusy:false,dname:''};
   state.editing=true;document.body.classList.add('editing');
@@ -3023,11 +3168,12 @@ function renderEdPanel(){
   }).join('')+'</div>':'<p class="help">'+T('Zu diesem Stream gibt es keine Clips.','There are no clips for this stream.')+'</p>';
   $('#v-route').innerHTML=
     '<button type="button" class="back" id="ed-back">'+T('← Zurück zum Stream','← Back to stream')+'</button>'+
-    '<h2>'+T('Route bearbeiten','Edit route')+'</h2><p class="sub2">'+esc(fmtDate(r.date))+' · '+esc(r.title)+'</p>'+
+    '<h2>'+T('Route bearbeiten','Edit route')+'</h2><p class="sub2">'+esc(fmtDate(r.date))+' · '+esc(ttl(r))+'</p>'+
     draftsHtml()+
     '<div class="modes" role="group" aria-label="Werkzeug">'+modes+'</div>'+
     '<p class="help" id="ed-help">'+(ed.armed?T('Jetzt auf die Karte klicken, um den Clip zu platzieren. Esc bricht ab.','Now click the map to place the clip. Esc cancels.'):MODES[ed.mode][2])+'</p>'+
     '<div class="row"><button type="button" class="btn" id="ed-undo">'+T('↶ Rückgängig','↶ Undo')+'</button><button type="button" class="btn" id="ed-clear">'+T('Route leeren','Clear route')+'</button><button type="button" class="btn" id="ed-import" title="'+T('GPX-, KML- oder KMZ-Datei laden, z. B. aus gpx.studio, Google My Maps oder einer Tracking-App','Load a GPX, KML or KMZ file, e.g. from gpx.studio, Google My Maps or a tracking app')+'">'+T('📂 Route importieren','📂 Import route')+'</button>'+(ed.points.length>1?'<button type="button" class="btn" id="ed-snap"'+(ed.snapping?' disabled':'')+' title="'+T('Linie automatisch an echte Fußwege aus OpenStreetMap anpassen. Dafür werden nur die Punkte der Route an routing.openstreetmap.de geschickt.','Snap the line to real footpaths from OpenStreetMap. Only the route points are sent to routing.openstreetmap.de.')+'">'+(ed.snapping?T('🧭 Suche Fußwege …','🧭 Finding paths …'):T('🧭 An Fußwege anpassen','🧭 Snap to footpaths'))+'</button>':'')+(CL.some(function(c){return c.at})&&ed.points.length>1?'<button type="button" class="btn" id="ed-auto" title="'+T('Die 10 meistgesehenen Clips anhand ihrer Uhrzeit auf der Route verteilen','Place the 10 most viewed clips along the route by their time')+'">'+T('Top-10-Clips nach Uhrzeit verteilen','Place top 10 clips by time')+'</button>':'')+'</div>'+
+    '<div class="sec"><label class="ed-fav"><input type="checkbox" id="ed-fav"'+(ed.fav?' checked':'')+'> ⭐ '+T('Als Highlight zeigen','Show as highlight')+'</label><p class="help">'+T('Markierte Streams stehen immer in den Highlight-Kacheln über der Liste. Freie Plätze füllt die Seite automatisch.','Marked streams always appear in the highlight tiles above the list. Free slots are filled automatically.')+'</p></div>'+
     '<div class="sec"><h3>'+T('Was wurde gemacht?','What happened?')+'</h3><textarea id="ed-desc" class="ed-ta" maxlength="1500" placeholder="'+T('Kurze Beschreibung des Streams, z. B. „Altstadt, Rheinufer und Eis essen“','Short description, e.g. “old town, riverside and ice cream”')+'">'+esc(ed.desc)+'</textarea></div>'+
     '<div class="sec"><h3>'+T('Ort','Place')+(ed.loc?'':'<span>'+(ed.r._autoLoc?T('automatisch: ','auto: ')+esc(ed.r._autoLoc.name):T('noch keiner','none yet'))+'</span>')+'</h3>'+
       '<div class="ed-loc"><input type="text" id="ed-locname" maxlength="60" placeholder="'+T('Ortsname, z. B. Düsseldorf Altstadt','Place name, e.g. Düsseldorf old town')+'" value="'+esc(ed.loc?ed.loc.name:(ed.locName||''))+'">'+
@@ -3102,7 +3248,7 @@ function edPayload(){
   var loc=ed.loc&&isFinite(ed.loc.lat)?{name:(ln||ed.loc.name||T('Ort','Place')).slice(0,60),lat:ed.loc.lat,lng:ed.loc.lng}:(ln&&ed.r._autoLoc&&ln!==ed.r._autoLoc.name?{name:ln.slice(0,60),lat:ed.r._autoLoc.lat,lng:ed.r._autoLoc.lng}:null);
   if(ed.points.length<2&&!ed.stops.length&&!Object.keys(ed.clips).length&&!desc&&!loc)return null;
   var clips={};Object.keys(ed.clips).forEach(function(k){clips[k]=r5(ed.clips[k])});
-  var out={desc:desc||undefined,loc:loc||undefined,points:ed.points.map(r5),breaks:ed.breaks.length?ed.breaks.slice():undefined,stops:ed.stops.map(function(s,i){var p=r5([s.lat,s.lng]);return {lat:p[0],lng:p[1],name:(s.name||'').trim().slice(0,60)||'Station '+(i+1)}}),clips:clips};
+  var out={fav:ed.fav?true:undefined,desc:desc||undefined,loc:loc||undefined,points:ed.points.map(r5),breaks:ed.breaks.length?ed.breaks.slice():undefined,stops:ed.stops.map(function(s,i){var p=r5([s.lat,s.lng]);return {lat:p[0],lng:p[1],name:(s.name||'').trim().slice(0,60)||'Station '+(i+1)}}),clips:clips};
   return out;
 }
 function applySaved(id,route,at){
@@ -3192,7 +3338,7 @@ function loadDraftInto(d){
   var r=d.route||{};pushUndo();
   ed.points=(r.points||[]).map(function(x){return x.slice()});ed.breaks=(r.breaks||[]).slice();
   ed.stops=(r.stops||[]).map(function(x){return {lat:x.lat,lng:x.lng,name:x.name||''}});
-  ed.clips=JSON.parse(JSON.stringify(r.clips||{}));ed.desc=r.desc||'';ed.loc=r.loc?{name:r.loc.name,lat:r.loc.lat,lng:r.loc.lng}:null;ed.locName='';
+  ed.clips=JSON.parse(JSON.stringify(r.clips||{}));ed.desc=r.desc||'';ed.fav=!!r.fav;ed.loc=r.loc?{name:r.loc.name,lat:r.loc.lat,lng:r.loc.lng}:null;ed.locName='';
   ed.newDraft=false;ed.draftId=d.backup?null:d.did;ed.fromBackup=!!d.backup;ed.dname='';ed.dirty=!!d.backup;renderEd();
   var pts=ed.points.slice();ed.stops.forEach(function(x){pts.push([x.lat,x.lng])});Object.keys(ed.clips).forEach(function(k){pts.push(ed.clips[k])});
   if(pts.length>1)map.fitBounds(L.latLngBounds(pts),{padding:[60,60],maxZoom:16});else if(pts.length)map.setView(pts[0],15);
@@ -3354,7 +3500,7 @@ $('#panel').addEventListener('input',function(e){
   if(ed&&e.target.id==='ed-dname'){ed.dname=e.target.value;return}
   if(ed&&e.target.id==='ed-locname'){ed.locName=e.target.value;if(ed.loc)ed.loc.name=e.target.value;ed.dirty=true;showLocSug(e.target);return}
   var i=e.target.dataset&&e.target.dataset.si;if(i===undefined||!ed)return;if(!ed.typing){pushUndo();ed.typing=true}ed.stops[+i].name=e.target.value;});
-$('#panel').addEventListener('change',function(e){if(e.target.dataset&&e.target.dataset.si!==undefined&&ed){ed.typing=false}});
+$('#panel').addEventListener('change',function(e){if(ed&&e.target.id==='ed-fav'){ed.fav=e.target.checked;ed.dirty=true;return}if(e.target.dataset&&e.target.dataset.si!==undefined&&ed){ed.typing=false}});
 $('#panel').addEventListener('dragstart',function(e){var ec=e.target.closest&&e.target.closest('.eclip');if(!ec)return;e.dataTransfer.setData('text/plain',ec.dataset.slug);e.dataTransfer.effectAllowed='copy'});
 
 /* ---------- Clip-Player: Twitch-Player lädt erst nach Klick (Datenschutz) ---------- */
@@ -3454,7 +3600,7 @@ function openVod(r,t){
     // Stream im Castle ohne Route: die Karte zeigt nur das Schloss – dann gleich großes Bild ohne Karte
     home:!!(r.location&&r.location.home&&!hasRoute(r)&&!(r.stops||[]).length&&!Object.keys(r.clipPos||{}).length)};
   var ticks=list.map(function(x,i){return '<button type="button" class="vt-c'+(tops.indexOf(x.c)>=0?' top':'')+'" data-vi="'+i+'" style="left:'+(x.o/sec*100).toFixed(3)+'%" aria-label="'+esc((x.c.title||'Clip')+' · '+fmtHMS(x.o))+'"></button>'}).join('');
-  box.innerHTML='<div class="vod-top"><b>📼 '+esc(fmtDateShort(r.date))+' · '+esc(r.title)+'</b><a href="https://www.twitch.tv/videos/'+encodeURIComponent(v.id)+'" id="vod-tw" target="_blank" rel="noopener noreferrer">'+T('Auf Twitch ↗','On Twitch ↗')+'</a>'+(VOD.home?'':'<button type="button" class="vod-big" id="vod-big" aria-pressed="'+vodBig+'">'+vodBigLabel()+'</button>')+'<button type="button" class="vod-x" id="vod-x" aria-label="'+T('VoD schließen','Close VoD')+'">× '+T('Schließen','Close')+'</button></div>'+
+  box.innerHTML='<div class="vod-top"><b>📼 '+esc(fmtDateShort(r.date))+' · '+esc(ttl(r))+'</b><a href="https://www.twitch.tv/videos/'+encodeURIComponent(v.id)+'" id="vod-tw" target="_blank" rel="noopener noreferrer">'+T('Auf Twitch ↗','On Twitch ↗')+'</a>'+(VOD.home?'':'<button type="button" class="vod-big" id="vod-big" aria-pressed="'+vodBig+'">'+vodBigLabel()+'</button>')+'<button type="button" class="vod-x" id="vod-x" aria-label="'+T('VoD schließen','Close VoD')+'">× '+T('Schließen','Close')+'</button></div>'+
     '<div class="vod-frame"><div id="vod-player"></div></div>'+
     '<div class="vod-tl"><div class="vt-bar" id="vt-bar" role="group" aria-label="'+T('Zeitleiste: Clips im Stream','Timeline: clips in the stream')+'"><div class="vt-prog" id="vt-prog"></div>'+ticks+'<div class="vt-head" id="vt-head"></div><div class="vt-tip" id="vt-tip" hidden></div></div>'+
     '<div class="vt-info"><span class="vt-now" id="vt-now">'+(list.length?list.length+' '+T('Clips auf der Zeitleiste – antippen zum Hinspringen','clips on the timeline – tap to jump'):T('Keine Clips mit Zeitangabe','No clips with a timestamp'))+'</span><span class="vt-t" id="vt-t">0:00 / '+fmtHMS(sec)+'</span></div></div>'+'<div class="vod-grip" id="vod-grip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="'+T('Video größer oder kleiner ziehen','Drag to resize video')+'" title="'+T('Ziehen: Video größer/kleiner · Doppelklick: zurücksetzen','Drag: resize video · Double-click: reset')+'"><i></i></div>';
@@ -3664,7 +3810,7 @@ function wrapSlides(d){
     rec('🚀',T('Erster Stream des Jahres','First stream of the year'),fmtDateShort(d.first.date),d.first)+
     '<div class="wr-rec"><div class="e">📅</div><small>'+T('Lieblings-Streamtag','Favourite stream day')+'</small><b>'+esc(new Date(2024,0,7+d.wday.i).toLocaleDateString(LOC,{weekday:'long'}))+'</b><p>'+d.wday.n+T(' Streams an diesem Wochentag',' streams on this weekday')+'</p></div></div></div>');
   S.push('<div class="ws" data-wmap="1"><p class="kick">'+T('Unterwegs','On the road')+'</p><h2>'+(d.places.length?d.places.length+(d.places.length===1?T(' Ausflug',' trip'):T(' Orte',' places'))+T(' außerhalb vom Castle',' outside the castle'):T('Ein Jahr im Castle','A year in the castle'))+'</h2>'+
-    '<p class="lead">'+d.home+T(' von ',' of ')+d.n+T(' Streams liefen zu Hause in ',' streams came from home in ')+'<b>Nashii´s Castle</b>'+(d.places.length?T(' – und hier ging es raus: ',' – and this is where she went: ')+d.places.map(function(p){return '<b>'+esc(p.l.name)+'</b> ('+p.rs.map(function(r){return esc(fmtDateShort(r.date))}).join(', ')+')'}).join(', '):'')+'.</p><div class="wr-map" id="wr-map"></div></div>');
+    '<p class="lead">'+d.home+T(' von ',' of ')+d.n+T(' Streams liefen zu Hause in ',' streams came from home in ')+'<b>Naschii´s Castle</b>'+(d.places.length?T(' – und hier ging es raus: ',' – and this is where she went: ')+d.places.map(function(p){return '<b>'+esc(p.l.name)+'</b> ('+p.rs.map(function(r){return esc(fmtDateShort(r.date))}).join(', ')+')'}).join(', '):'')+'.</p><div class="wr-map" id="wr-map"></div></div>');
   S.push('<div class="ws"><p class="kick">'+T('Die meistgesehenen Clips','Most viewed clips')+'</p><h2>'+T('Top-Clips ','Top clips ')+y+'</h2><div class="wr-clips">'+d.topClips.map(wrClip).join('')+'</div></div>');
   // alle Monate zeigen: Clip des Monats, sonst eine Kachel für Pause oder „keine Clips“
   var mc=d.months.filter(function(m){return m.top});
@@ -3719,7 +3865,7 @@ function wrapMap(d){
   loadGeo(function(G){if(WR.map===m)L.geoJSON(G,{pane:'base',interactive:false,style:function(){return {color:'#8c7a92',weight:.8,opacity:.55,fillColor:'#24142a',fillOpacity:1}}}).addTo(m)});
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,className:'osm-dark',attribution:'© OpenStreetMap'}).addTo(m);
   var pts=[[HOME.lat,HOME.lng]];
-  L.marker([HOME.lat,HOME.lng],{icon:L.divIcon({className:'',html:'<div style="font-size:30px;filter:drop-shadow(0 2px 4px #000)">🏰</div>',iconSize:[34,34],iconAnchor:[17,17]})}).addTo(m).bindTooltip('Nashii´s Castle · '+d.home+' Streams',{direction:'top',offset:[0,-14]});
+  L.marker([HOME.lat,HOME.lng],{icon:L.divIcon({className:'',html:'<div style="font-size:30px;filter:drop-shadow(0 2px 4px #000)">🏰</div>',iconSize:[34,34],iconAnchor:[17,17]})}).addTo(m).bindTooltip('Naschii´s Castle · '+d.home+' Streams',{direction:'top',offset:[0,-14]});
   d.places.forEach(function(p){var ll=[p.l.lat,p.l.lng];pts.push(ll);
     L.circleMarker(ll,{radius:9,color:'#fff',weight:2,fillColor:'#f5a9d6',fillOpacity:1}).addTo(m).bindTooltip(esc(p.l.name)+' · '+p.rs.length+' Stream'+(p.rs.length>1?'s':''),{permanent:true,direction:'top',offset:[0,-8]});
     L.polyline([[HOME.lat,HOME.lng],ll],{color:'#f5a9d6',weight:2.5,dashArray:'6 7',opacity:.9}).addTo(m)});
@@ -4422,6 +4568,7 @@ document.addEventListener('click',function(e){
   if(t.dataset.stop!==undefined){var m=stopMarkers[+t.dataset.stop];if(m){map.flyTo(m.getLatLng(),Math.max(map.getZoom(),16),{duration:reduceMotion?0:.6});m.openPopup()}return}
   switch(t.id){
     case 'back':deselect();break;
+    case 'rplay':playStart(byId(state.selectedId));break;
     case 'qclear':setQuery('');$('#q').focus();break;
     case 'calbtn':state.view=state.view==='cal'?'list':'cal';renderList();break;
     case 'rndbtn':randomClip();break;

@@ -239,7 +239,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'||h==='changelog.html'){e.pr
       <li><span class="ui-num">1</span> <b>Stationen</b> mit Namen, z. B. „Altstadt“ – Maus drüber zeigt den Namen.</li>
       <li><span class="ui-play">▶</span> <b>Clip-Marker</b> genau dort, wo der Clip entstand. Maus drüber zeigt Bild, Titel, Uhrzeit und Aufrufe, ein Klick spielt ihn ab.</li>
       <li><span class="ui-tag">ORT UNGEFÄHR</span> = aus dem Streamtitel oder Clip-Titeln erkannt, auf Stadtebene.</li>
-      <li><img src="castle.png" alt="" style="height:22px;vertical-align:-6px"> <b>Nashii´s Castle – die Homebase:</b> Gaming- und Just-Chatting-Streams ohne Ort im Titel landen automatisch in Naschiis Burg – in der Liste steht dann „Nashii´s Castle“ als Ort. Steht ein Ort im Titel oder wurde einer von Hand gesetzt, gilt der.</li>
+      <li><img src="castle.png" alt="" style="height:22px;vertical-align:-6px"> <b>Naschii´s Castle – die Homebase:</b> Gaming- und Just-Chatting-Streams ohne Ort im Titel landen automatisch in Naschiis Burg – in der Liste steht dann „Naschii´s Castle“ als Ort. Steht ein Ort im Titel oder wurde einer von Hand gesetzt, gilt der.</li>
       <li>Ein ausgewählter Stream wird hervorgehoben, alles andere tritt zurück.</li>
       <li><img src="kevin.png" alt="" style="height:18px;vertical-align:-4px"> <b>Kevin, das Croissant:</b> Naschiis Kuscheltier ging vermutlich auf der Polaris in Hamburg verloren. Auf der Karte sind der Ort, an dem er verloren ging, seine letzte Sichtung und ein paar <i>vermutete Aufenthaltsorte</i> markiert – Maus drüber oder antippen zeigt, was er dort angeblich treibt. Am Computer stehen alle Kevin-Orte unter „Wo ist Kevin?“ in der rechten Seitenleiste – ein Klick fliegt direkt hin. Der Castle-Knopf „Start“ darüber bringt die Karte zurück zur Startansicht.</li>
     </ul>
@@ -249,6 +249,11 @@ else if(h==='anleitung.html'||h==='datenschutz.html'||h==='changelog.html'){e.pr
 <!-- Finden -->
 <section class="s" id="finden">
   <p class="kicker">Streams finden</p>
+  <h2>Unterwegs, alle Streams und Highlights</h2>
+  <div class="grid2">
+    <div class="card"><h3>🚶 Unterwegs / Alle Streams</h3><p>Ganz oben in der Liste zwei Reiter: <span class="ui-btn">🚶 Unterwegs</span> zeigt nur IRL-Streams und alles mit Route – also die Abenteuer draußen. <span class="ui-btn">Alle Streams</span> zeigt zusätzlich die Gaming- und Quatsch-Streams aus dem Castle. Die Seite merkt sich, welchen Reiter du zuletzt hattest.</p></div>
+    <div class="card"><h3>⭐ Highlights</h3><p>Unter „Unterwegs“ stehen vier Kacheln mit besonders beliebten Touren – ein Klick fliegt direkt zur Route. Die Seite wählt sie automatisch nach Clip-Aufrufen (neuere Touren leicht bevorzugt). Mods können im Editor Touren mit <span class="ui-btn">⭐ Als Highlight zeigen</span> fest markieren; die stehen dann immer vorn. Beim Suchen oder Filtern verschwinden die Kacheln, damit Platz für die Treffer ist.</p></div>
+  </div>
   <h2>Suchen, Filtern, Sortieren</h2>
   <p class="lead">Fast 400 Streams sind schnell durchsucht. Alle drei lassen sich kombinieren. Die Trefferzahl steht rechts neben „Zufälliger Clip“ – ohne Filter z. B. „<span data-n="streams">394</span> Streams“, beim Suchen „29 von <span data-n="streams">394</span> Streams · 44 Clips“.</p>
   <div class="grid2">
@@ -314,6 +319,8 @@ else if(h==='anleitung.html'||h==='datenschutz.html'||h==='changelog.html'){e.pr
   <div class="grid2">
     <div class="card"><h3>Die Details</h3><ul>
       <li><b>Top-Clip</b> groß mit Bild – Klick spielt ihn direkt auf der Seite ab</li>
+      <li>Bei Routen: <b>km unterwegs</b> und der Knopf <span class="ui-btn">▶ Route abspielen</span> – ein Punkt läuft die Strecke ab, an jedem Clip springt das Vorschaubild auf (Klick spielt den Clip). Unten Pause, Tempo 1×/2×/4× und ✕; in die Zeitleiste klicken springt.</li>
+      <li><span class="ui-btn">≈ Route geschätzt</span> heißt: automatisch aus Titel, Clips und Dauer geschätzt, noch nicht von einem Mod bestätigt. Sobald ein Mod die Route im Editor speichert, verschwindet der Hinweis.</li>
       <li><b>Fakten:</b> Dauer, Uhrzeit von–bis, Anzahl Clips</li>
       <li><b>Was wurde gemacht?</b> – kurze, augenzwinkernde Beschreibung des Streams (Mods können sie im Editor ändern)</li>
       <li><b>Ort</b> („Ort ungefähr“ oder ⌂ von Hand gesetzt) und nummerierte <b>Stationen</b> der Route – Klick auf eine Station zoomt dorthin</li>
@@ -358,7 +365,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'||h==='changelog.html'){e.pr
       <li>In der Clipliste springt <span class="ui-btn" style="color:#ffd36b">📼 1:05:00</span> neben einem Clip direkt an diese Stelle im ganzen Stream.</li>
       <li>Am Computer sitzt unter der Zeitleiste ein <b>Schieber</b> <span style="display:inline-block;width:34px;height:5px;border-radius:9px;background:var(--accent);vertical-align:middle"></span>: nach unten ziehen = Video größer, nach oben = mehr Karte. Doppelklick setzt ihn zurück.</li>
       <li><span class="ui-btn">⛶ Karte ausblenden</span> (am Computer) macht das VoD so groß wie möglich und blendet die Karte aus, <span class="ui-btn">🗺️ Karte einblenden</span> holt sie zurück. Die Wahl gilt für alle VoDs, bis die Seite neu geladen wird.</li>
-      <li>Streams in <b>Nashii´s Castle</b> ohne Route zeigen das VoD gleich groß und <b>ohne Karte</b> – dort wäre ja nur das Schloss zu sehen.</li>
+      <li>Streams in <b>Naschii´s Castle</b> ohne Route zeigen das VoD gleich groß und <b>ohne Karte</b> – dort wäre ja nur das Schloss zu sehen.</li>
       <li><span class="ui-btn">× Schließen</span> oder ein anderer Stream gibt der Karte ihren Platz zurück.</li>
       <li><b>Nur solange Twitch das VoD hat:</b> Twitch löscht vergangene Streams nach einiger Zeit. Danach verschwinden Knopf und Kennzeichen automatisch – Clips bleiben.</li>
       <li>Auch hier lädt der Twitch-Player <b>erst nach dem Klick</b> (Datenschutz).</li>
@@ -431,6 +438,7 @@ else if(h==='anleitung.html'||h==='datenschutz.html'||h==='changelog.html'){e.pr
   <div class="grid3" style="margin-top:14px">
     <div class="card"><h3>Clips platzieren</h3><ul><li>Clip aus der Liste <b>auf die Karte ziehen</b> – er rastet auf der Route ein (Handy: antippen, dann Karte tippen)</li><li><span class="ui-btn">× Alle Clips von der Karte nehmen</span> räumt alle Clips auf einmal weg (↶ holt sie zurück)</li><li><b>Höchstens 15 Clips pro Route</b> – die Seite zeigt „x / 15“; für einen weiteren erst einen anderen per × entfernen</li><li><span class="ui-btn">Top-10-Clips nach Uhrzeit verteilen</span> setzt die beliebtesten grob an die passende Stelle, danach nur nachschieben</li><li>Das <b>×</b> neben einem Clip nimmt ihn von der Karte</li></ul></div>
     <div class="card"><h3>Hilfen</h3><ul><li><span class="ui-btn">↶ Rückgängig</span> oder <kbd>Strg</kbd>+<kbd>Z</kbd></li><li><b>Route leeren</b> löscht Linie und Stationen (fragt vorher nach)</li><li><b>Abbrechen</b> verwirft Änderungen erst nach Rückfrage</li><li>Unten steht live, wie viele Punkte, Kilometer und Teilstücke die Route hat</li><li>Am Handy werden Header und Fußleiste beim Bearbeiten ausgeblendet</li></ul></div>
+    <div class="card"><h3>⭐ Als Highlight zeigen</h3><ul><li>Haken im Editor über „Was wurde gemacht?“</li><li>Markierte Touren stehen immer in den Highlight-Kacheln über der Liste, die neuesten zuerst</li><li>Freie Plätze (bis 4) füllt die Seite automatisch</li></ul></div>
     <div class="card"><h3>Was wurde gemacht?</h3><ul><li>Kurzer Text im Editor, bis 1.500 Zeichen – auch für Streams ganz ohne Route</li><li>Erscheint in den Details unter den Fakten</li><li>Wird von der Suche gefunden, z. B. „Eis“</li></ul></div>
   </div>
   <div class="card" style="margin-top:14px"><h3>🧭 An Fußwege anpassen</h3>
