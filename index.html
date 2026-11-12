@@ -2157,6 +2157,8 @@ function segsOf(p,br){if(!br||!br.length)return p;var cut={},s=[],cur=[];br.forE
 function fmtKm(k){return k.toLocaleString(LOC,{minimumFractionDigits:1,maximumFractionDigits:1})+' km'}
 function fmtDur(m){var h=Math.floor(m/60),r=m%60;return (h?h+T(' Std. ',' h '):'')+(r||!h?r+T(' Min.',' min'):'')}
 function fmtDate(iso){var d=new Date(iso+'T12:00:00');if(isNaN(d))return iso;return d.toLocaleDateString(LOC,{weekday:'short',day:'2-digit',month:'long',year:'numeric'})}
+// Datum auch so durchsuchbar, wie man es tippt: 27.03.2026, 27.03.26, 27.3.2026, 27.3.
+function numDates(iso){var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||'');if(!m)return '';var d=m[3],mo=m[2],y=m[1],d1=String(+d),m1=String(+mo);return [d+'.'+mo+'.'+y,d+'.'+mo+'.'+y.slice(2),d1+'.'+m1+'.'+y,d1+'.'+m1+'.'+y.slice(2)].join(' ')}
 function fmtDateShort(iso){var d=new Date(iso+'T12:00:00');if(isNaN(d))return iso;return d.toLocaleDateString(LOC,{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit'})}
 function addMin(t,m){var a=(t||'00:00').split(':');var x=(parseInt(a[0],10)*60+parseInt(a[1],10)+m)%1440;return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0')}
 function pad2(n){return String(n).padStart(2,'0')}
@@ -2444,7 +2446,7 @@ function renderList(){
     if(f==='none'&&(r.location||hasRoute(r)))return false;
     if(state.cat&&r.category!==state.cat)return false;
     if(!q)return true;
-    var hay=[r.title,r.desc,fmtDate(r.date),r.date,r.location?r.location.name:'',r.category||''].concat((r.stops||[]).map(function(s){return s.name})).join(' ').toLowerCase();
+    var hay=[r.title,r.desc,fmtDate(r.date),r.date,numDates(r.date),r.location?r.location.name:'',r.category||''].concat((r.stops||[]).map(function(s){return s.name})).join(' ').toLowerCase();
     if(hay.indexOf(q)>=0)return true;
     return q.length>=2&&(r.clips||[]).some(function(c){return clipMatch(c,q)});
   });
