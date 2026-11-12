@@ -1987,17 +1987,22 @@ body.editing .grp-wrap{pointer-events:none}
 .cat-ic{width:11px;height:15px;border-radius:2px;object-fit:cover;vertical-align:-3px;margin-right:4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
-@media (max-width:820px){.hero .upd{flex-basis:100%;min-height:18px;margin:0;display:flex;justify-content:center;align-items:center}.hero .upd:empty{visibility:hidden}}
+@media (max-width:820px){.hero .upd{min-width:min(358px,100%);flex-basis:100%;min-height:18px;margin:0;display:flex;justify-content:center;align-items:center}.hero .upd:empty{visibility:hidden}}
 
-#stats:empty{min-height:30px;min-width:390px}
+#stats{min-height:30px;min-width:390px}
 @media (min-width:821px){.hero .upd:empty{min-width:250px}}
-@media (max-width:820px){#stats:empty{min-height:22px;min-width:330px}}
+@media (max-width:820px){#stats{min-height:22px;min-width:330px}}
 
 .list .card{content-visibility:auto;contain-intrinsic-size:auto 132px}
 
 .kevin-rail .homebtn{flex-shrink:0;margin-bottom:8px;border-color:#e7b07a99}
 body.s-halloween .kevin-rail .homebtn{margin-bottom:30px}
 .kevin-rail .homebtn img{width:34px}
+
+/* bis die Daten da sind: Platz für die Liste freihalten und den Anmelde-Hinweis darunter noch nicht zeigen (sonst springt alles) */
+body:not(.dl) .list{min-height:150vh}
+body:not(.dl) #listhint{display:none}
+body:not(.dl) .kevin-pane{visibility:hidden}
 </style>
 
 <header class="hero">
@@ -4447,7 +4452,7 @@ function loadData(first){
     if(m&&m.profileImage){m.profileImage=String(m.profileImage).replace(/-300x300\./,'-150x150.');var av=document.querySelector('.avatar img');if(!av){av=document.createElement('img');av.alt='';document.querySelector('.avatar').appendChild(av)}av.src=m.profileImage}
     if(m&&m.updated){var dd=new Date(m.updated);$('#upd').textContent=T('Automatisch aktualisiert: ','Updated automatically: ')+dd.toLocaleString(LOC,{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})+T(' Uhr','')}
     if(Array.isArray(d)&&d.length)SAMPLE=d;
-    DATA_LOADED=true;
+    DATA_LOADED=true;document.body.classList.add('dl');
     if(state.editing)return m;
     var sel=state.selectedId;buildRoutes();drawLines();renderStats();renderList();
     if(first){if(sel&&byId(sel))select(sel);else if(!sel)fitAll()}

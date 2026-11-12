@@ -32,7 +32,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 0   # ganze Historie, damit die Kennzahlen im Changelog gezählt werden können
