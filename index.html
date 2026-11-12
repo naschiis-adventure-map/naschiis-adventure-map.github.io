@@ -12,7 +12,7 @@
 <meta property="og:title" content="Naschii’s Adventure Map">
 <meta property="og:description" content="Alle Streams von naschiitaschii auf einer Karte: Orte, Routen, Clips und Streamzeiten – automatisch aktualisiert.">
 <meta property="og:url" content="https://naschiis-adventure-map.github.io/">
-<meta property="og:image" content="https://naschiis-adventure-map.github.io/og.png?v=0b612dbf2f">
+<meta property="og:image" content="https://naschiis-adventure-map.github.io/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -3025,7 +3025,7 @@ function renderEdPanel(){
     draftsHtml()+
     '<div class="modes" role="group" aria-label="Werkzeug">'+modes+'</div>'+
     '<p class="help" id="ed-help">'+(ed.armed?T('Jetzt auf die Karte klicken, um den Clip zu platzieren. Esc bricht ab.','Now click the map to place the clip. Esc cancels.'):MODES[ed.mode][2])+'</p>'+
-    '<div class="row"><button type="button" class="btn" id="ed-undo">'+T('↶ Rückgängig','↶ Undo')+'</button><button type="button" class="btn" id="ed-clear">'+T('Route leeren','Clear route')+'</button><button type="button" class="btn" id="ed-import" title="'+T('GPX-, KML- oder KMZ-Datei laden, z. B. aus gpx.studio, Google My Maps oder einer Tracking-App','Load a GPX, KML or KMZ file, e.g. from gpx.studio, Google My Maps or a tracking app')+'">'+T('📂 Route importieren','📂 Import route')+'</button>'+(CL.some(function(c){return c.at})&&ed.points.length>1?'<button type="button" class="btn" id="ed-auto" title="'+T('Die 10 meistgesehenen Clips anhand ihrer Uhrzeit auf der Route verteilen','Place the 10 most viewed clips along the route by their time')+'">'+T('Top-10-Clips nach Uhrzeit verteilen','Place top 10 clips by time')+'</button>':'')+'</div>'+
+    '<div class="row"><button type="button" class="btn" id="ed-undo">'+T('↶ Rückgängig','↶ Undo')+'</button><button type="button" class="btn" id="ed-clear">'+T('Route leeren','Clear route')+'</button><button type="button" class="btn" id="ed-import" title="'+T('GPX-, KML- oder KMZ-Datei laden, z. B. aus gpx.studio, Google My Maps oder einer Tracking-App','Load a GPX, KML or KMZ file, e.g. from gpx.studio, Google My Maps or a tracking app')+'">'+T('📂 Route importieren','📂 Import route')+'</button>'+(ed.points.length>1?'<button type="button" class="btn" id="ed-snap"'+(ed.snapping?' disabled':'')+' title="'+T('Linie automatisch an echte Fußwege aus OpenStreetMap anpassen. Dafür werden nur die Punkte der Route an routing.openstreetmap.de geschickt.','Snap the line to real footpaths from OpenStreetMap. Only the route points are sent to routing.openstreetmap.de.')+'">'+(ed.snapping?T('🧭 Suche Fußwege …','🧭 Finding paths …'):T('🧭 An Fußwege anpassen','🧭 Snap to footpaths'))+'</button>':'')+(CL.some(function(c){return c.at})&&ed.points.length>1?'<button type="button" class="btn" id="ed-auto" title="'+T('Die 10 meistgesehenen Clips anhand ihrer Uhrzeit auf der Route verteilen','Place the 10 most viewed clips along the route by their time')+'">'+T('Top-10-Clips nach Uhrzeit verteilen','Place top 10 clips by time')+'</button>':'')+'</div>'+
     '<div class="sec"><h3>'+T('Was wurde gemacht?','What happened?')+'</h3><textarea id="ed-desc" class="ed-ta" maxlength="1500" placeholder="'+T('Kurze Beschreibung des Streams, z. B. „Altstadt, Rheinufer und Eis essen“','Short description, e.g. “old town, riverside and ice cream”')+'">'+esc(ed.desc)+'</textarea></div>'+
     '<div class="sec"><h3>'+T('Ort','Place')+(ed.loc?'':'<span>'+(ed.r._autoLoc?T('automatisch: ','auto: ')+esc(ed.r._autoLoc.name):T('noch keiner','none yet'))+'</span>')+'</h3>'+
       '<div class="ed-loc"><input type="text" id="ed-locname" maxlength="60" placeholder="'+T('Ortsname, z. B. Düsseldorf Altstadt','Place name, e.g. Düsseldorf old town')+'" value="'+esc(ed.loc?ed.loc.name:(ed.locName||''))+'">'+
@@ -3035,6 +3035,50 @@ function renderEdPanel(){
     '<div class="sec"><h3>'+T('Stationen','Stops')+' <span>'+ed.stops.length+'</span></h3>'+stops+'</div>'+
     '<div class="sec"><h3>Clips <span>'+placed+' / '+MAX_CLIPS+T(' auf der Route',' on the route')+(CL.length>MAX_CLIPS?T(' · '+CL.length+' im Stream',' · '+CL.length+' in stream'):'')+'</span></h3>'+(CL.length?'<p class="help">'+T('Clip mit der Maus auf die Route ziehen. Am Handy: Clip antippen, dann auf die Karte tippen. Höchstens '+MAX_CLIPS+' Clips pro Route.','Drag a clip onto the route. On mobile: tap the clip, then tap the map. At most '+MAX_CLIPS+' clips per route.')+'</p>':'')+(placed?'<div class="row"><button type="button" class="btn" id="ed-clipsclear">'+T('× Alle Clips von der Karte nehmen','× Remove all clips from the map')+'</button></div>':'')+clips+'</div>'+
     '<div class="bar"><button type="button" class="btn primary" id="ed-save"'+(ed.saving?' disabled':'')+'>'+(ed.saving?T('Speichere …','Saving …'):T('Speichern','Save'))+'</button><button type="button" class="btn ghost" id="ed-cancel">'+T('Abbrechen','Cancel')+'</button><span class="st">'+ed.points.length+T(' Punkte · ',' points · ')+fmtKm(dist(ed.points,ed.breaks))+(ed.breaks.length?' · '+(ed.breaks.length+1)+T(' Teile',' parts'):'')+'</span></div>';
+}
+/* ---------- Route an Fußwege anpassen (OpenStreetMap-Fußrouting, kostenlos, direkt aus dem Browser des Bearbeiters) ---------- */
+var SNAP_URL='https://routing.openstreetmap.de/routed-foot/route/v1/driving/';
+function snapChunk(ch){
+  var url=SNAP_URL+ch.map(function(p){return (+p[1]).toFixed(6)+','+(+p[0]).toFixed(6)}).join(';')+'?overview=full&geometries=geojson&steps=false';
+  var straight=0;for(var i=1;i<ch.length;i++)straight+=hav(ch[i-1],ch[i]);
+  return fetch(url).then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(function(j){
+    var g=j&&j.code==='Ok'&&j.routes&&j.routes[0];
+    // großer Umweg = kein passender Weg in der Nähe (Messe, Park …): dieses Stück bleibt, wie es war
+    if(!g||g.distance/1000>Math.max(straight*2.5,straight+0.3))return {ok:false,pts:ch.slice()};
+    return {ok:true,pts:g.geometry.coordinates.map(function(c){return [+c[1].toFixed(6),+c[0].toFixed(6)]})};
+  });
+}
+function snapPart(seg,stat){
+  // Wegpunkte ausdünnen (etwa alle 120 m einer, höchstens 60 pro Teil), dann in Häppchen zu 25 Punkten abfragen
+  var w=[seg[0]],acc=0;
+  for(var i=1;i<seg.length;i++){acc+=hav(seg[i-1],seg[i]);if(acc>=0.12||i===seg.length-1){w.push(seg[i]);acc=0}}
+  while(w.length>60)w=w.filter(function(_,i){return i%2===0||i===w.length-1});
+  var chunks=[];for(var s0=0;s0<w.length-1;s0+=24)chunks.push(w.slice(s0,s0+25));
+  return chunks.reduce(function(pr,ch){return pr.then(function(out){
+    return new Promise(function(res){setTimeout(res,250)}).then(function(){return snapChunk(ch)}).then(function(r){
+      stat.n++;if(r.ok)stat.ok++;return out.length?out.concat(r.pts.slice(1)):r.pts;
+    });
+  })},Promise.resolve([]));
+}
+function thinPts(p,minKm){var o=[p[0]];for(var i=1;i<p.length-1;i++)if(hav(o[o.length-1],p[i])>=minKm)o.push(p[i]);if(p.length>1)o.push(p[p.length-1]);return o}
+function snapToPaths(){
+  if(!ed||ed.snapping||ed.points.length<2)return;
+  var me=ed,cuts=[0].concat(ed.breaks.slice().sort(function(a,b){return a-b}),[ed.points.length]),parts=[],stat={n:0,ok:0};
+  for(var i=0;i<cuts.length-1;i++)parts.push(ed.points.slice(cuts[i],cuts[i+1]));
+  ed.snapping=true;renderEdPanel();
+  parts.reduce(function(pr,part){return pr.then(function(acc){
+    return (part.length>1?snapPart(part,stat):Promise.resolve(part)).then(function(r){acc.push(r);return acc});
+  })},Promise.resolve([])).then(function(res){
+    if(ed!==me)return;
+    ed.snapping=false;
+    if(!stat.ok){renderEdPanel();toast(T('Hier wurden keine passenden Fußwege gefunden – die Route bleibt, wie sie ist.','No matching footpaths found here – the route stays as it is.'));return}
+    var pts=[],br=[],min=0.004;
+    res=res.map(function(r){return thinPts(r,min)});
+    while(res.reduce(function(a,r){return a+r.length},0)>2500){min*=2;res=res.map(function(r){return thinPts(r,min)})}
+    res.forEach(function(r,i){if(i&&r.length)br.push(pts.length);pts=pts.concat(r)});
+    pushUndo();ed.points=pts;ed.breaks=br;renderEd();
+    toast(stat.ok===stat.n?T('Route an Fußwege angepasst. ↶ macht es rückgängig.','Route snapped to footpaths. ↶ undoes it.'):T(stat.ok+' von '+stat.n+' Abschnitten an Fußwege angepasst, der Rest bleibt gerade (dort kennt OpenStreetMap keinen Weg). ↶ macht es rückgängig.',stat.ok+' of '+stat.n+' sections snapped; the rest stays straight (no path known there). ↶ undoes it.'));
+  }).catch(function(){if(ed===me){ed.snapping=false;renderEdPanel();toast(T('Fußwege konnten nicht geladen werden. Bitte später nochmal versuchen.','Could not load footpaths. Please try again later.'))}});
 }
 function autoPlace(){
   var r=ed.r,t0=new Date(r.date+'T'+(r.start||'00:00')+':00').getTime(),dur=(r.durationMin||1)*60000,n=0;
@@ -3258,6 +3302,7 @@ $('#panel').addEventListener('click',function(e){
     case 'ed-back':case 'ed-cancel':closeEditor(false);break;
     case 'ed-undo':undoEd();break;
     case 'ed-auto':autoPlace();break;
+    case 'ed-snap':snapToPaths();break;
     case 'ed-clipsclear':pushUndo();ed.clips={};renderEd();toast(T('Alle Clips von der Karte genommen. ↶ holt sie zurück.','All clips removed from the map. ↶ brings them back.'));break;
     case 'ed-import':pickRouteFile();break;
     case 'ed-save':saveEd();break;
