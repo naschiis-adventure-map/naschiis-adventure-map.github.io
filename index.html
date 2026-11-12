@@ -2005,12 +2005,12 @@ body:not(.dl) #listhint{display:none}
 body:not(.dl) .kevin-pane{visibility:hidden}
 
 /* Reiter Unterwegs / Alle + Highlights */
-.vtabs{display:flex;gap:6px;margin:10px 0 2px}
+.vtabs{display:flex;gap:6px;padding:10px 16px 2px}
 .vtabs button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;text-align:center;padding:7px 4px;border-radius:10px;font:600 13px var(--f-body);border:1px solid #f5a9d655;color:#f1cfe6;background:#1c0f21}
 .vtabs button[aria-selected=true]{background:var(--accent);color:#2a0f22;border-color:var(--accent)}
 .vtabs button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 #hl:empty{display:none}
-.hl{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 4px}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px 16px 4px}
 .hl button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;height:66px;border-radius:10px;overflow:hidden;background:#2a1a30 center/cover;border:1px solid #f5a9d644;transition:transform .15s,border-color .15s}
 .hl button:hover,.hl button:focus-visible{transform:scale(1.03);border-color:var(--accent)}
 .hl button span{position:absolute;left:0;right:0;bottom:0;padding:12px 7px 4px;font:700 11.5px var(--f-body);color:#fff;background:linear-gradient(transparent,#000d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2493,10 +2493,11 @@ function listWatch(){
   if(!listObs)listObs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){listObs.unobserve(e.target);listMore()}})},{root:$('#panel'),rootMargin:'0px 0px 900px 0px'});
   listObs.observe(m);
 }
+var LIST_FILTER=function(){return false};
 function renderList(){
   var q=state.query.trim().toLowerCase();
   var f=state.filter||'all';
-  var rows=state.routes.filter(function(r){
+  var LF=function(r){
     if(f==='loc'&&!(r.location||hasRoute(r)))return false;
     if(f==='route'&&!hasRoute(r))return false;
     if(f==='noroute'&&(hasRoute(r)||r.category!=='IRL'))return false;
@@ -2507,7 +2508,8 @@ function renderList(){
     var hay=[r.title,r.desc,fmtDate(r.date),r.date,numDates(r.date),r.location?r.location.name:'',r.category||''].concat((r.stops||[]).map(function(s){return s.name})).join(' ').toLowerCase();
     if(hay.indexOf(q)>=0)return true;
     return q.length>=2&&(r.clips||[]).some(function(c){return clipMatch(c,q)});
-  });
+  };
+  LIST_FILTER=LF;var rows=state.routes.filter(LF);
   var srt=state.sort||'new';
   var key=function(r){return r.date+' '+(r.start||'')};
   var num=function(v){return v==null?-Infinity:v};
@@ -2534,6 +2536,7 @@ function renderList(){
   renderTabs();renderHL(q);
   var lk=[q,f,state.cat||'',srt,state.tab].join('|');if(lk!==LIST.key){LIST.key=lk;LIST.n=LIST_CHUNK}
   if(lastCard){var li=rows.findIndex(function(r){return r.id===lastCard});if(li>=LIST.n)LIST.n=li+10}
+  if(!rows.length&&state.tab!=='all'){var tabSave=state.tab;state.tab='all';var nAll=state.routes.filter(function(r){return LIST_FILTER(r)}).length;state.tab=tabSave;if(nAll){$('#list').innerHTML='<p class="empty">'+T('Unter „Unterwegs“ nichts gefunden.','Nothing found under “Out & about”.')+'</p><p class="empty"><button type="button" class="btn" data-tab="all" id="to-all">'+T('In „Alle Streams“ anzeigen ('+nAll+')','Show in “All streams” ('+nAll+')')+'</button></p>';return}}
   $('#list').innerHTML=rows.length?rows.slice(0,LIST.n).map(cardHTML).join('')+(rows.length>LIST.n?'<div class="list-more" id="list-more" aria-hidden="true"></div>':''):'<p class="empty">'+(DATA_LOADED||location.protocol==='file:'?T('Keine Streams gefunden.','No streams found.'):'<span class="loading">'+T('Lade Streams …','Loading streams …')+'</span>')+'</p>';
   listWatch();
   $('#listhint').textContent=canEdit(state.user)?'':(state.user?T('Nur Kanalbetreiber, Mods und Berechtigte können Routen bearbeiten.','Only the channel owner, mods and authorised people can edit routes.'):T('Kanalbetreiber, Mods und Berechtigte können sich mit Twitch anmelden, um Routen zu ergänzen.','The channel owner, mods and authorised people can log in with Twitch to add routes.'));
@@ -2563,6 +2566,7 @@ function renderHL(q){
     return '<button type="button" data-hl="'+esc(r.id)+'" title="'+esc(ttl(r))+'"'+(th?' style="background-image:url(\''+esc(th)+'\')"':'')+'><small>'+esc(shortDate(r.date))+'</small><span>'+(r.fav?'⭐ ':'')+esc(hlName(r))+'</span></button>'}).join('')+'</div>';
 }
 $('#vtabs').addEventListener('click',function(e){var b=e.target.closest('[data-tab]');if(!b)return;state.tab=b.dataset.tab==='all'?'all':'out';document.body.classList.toggle('tab-all',state.tab==='all');store('shm.view',state.tab==='all'?'all':null);renderList();$('#panel').scrollTop=0});
+$('#list').addEventListener('click',function(e){if(e.target.id==='to-all'){state.tab='all';document.body.classList.add('tab-all');store('shm.view','all');renderList()}});
 $('#hl').addEventListener('click',function(e){var b=e.target.closest('[data-hl]');if(b)select(b.dataset.hl)});
 /* ---------- Clip-Suche ---------- */
 function clipMatch(c,q){return ((c.title||'')+' '+(c.by||'')).toLowerCase().indexOf(q)>=0}
@@ -4621,7 +4625,7 @@ function setQuery(v){state.query=v;state.clipAll=false;$('#q').value=v;$('#qclea
 $('#q').addEventListener('input',function(e){setQuery(e.target.value)});
 $('#q').addEventListener('keydown',function(e){if(e.key==='Escape'&&e.target.value){setQuery('');e.preventDefault()}});
 $('#flt').addEventListener('change',function(e){state.filter=e.target.value;renderList()});
-$('#cat').addEventListener('change',function(e){state.cat=e.target.value;renderList();$('#panel').scrollTop=0});
+$('#cat').addEventListener('change',function(e){state.cat=e.target.value;if(state.cat&&state.tab!=='all'&&!state.routes.some(function(r){return r.category===state.cat&&isOut(r)})){state.tab='all';document.body.classList.add('tab-all');store('shm.view','all')}renderList();$('#panel').scrollTop=0});
 $('#srt').addEventListener('change',function(e){state.sort=e.target.value;state.hitSort=null;renderList();$('#panel').scrollTop=0});
 
 /* ---------- Gedankenblase: Beschreibung beim Drüberfahren in der Liste (nur mit Maus, am PC) ---------- */
