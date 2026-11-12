@@ -2720,7 +2720,7 @@ function renderDetail(r){
     '</div>'+
     (r.live&&LIVE_ON!==false?'<button type="button" class="btn vodbtn livebtn" id="liveopen">'+liveBtnLabel(r)+'</button>':'')+
     (r.vod?'<button type="button" class="btn vodbtn" id="vodopen">'+vodBtnLabel(r)+'</button>':'')+
-    (hasRoute(r)&&state.routes?'<button type="button" class="btn primary playbtn" id="rplay">▶ '+T('Route abspielen','Play route')+'</button>':'')+
+    (PLAY_BTN&&hasRoute(r)&&state.routes?'<button type="button" class="btn primary playbtn" id="rplay">▶ '+T('Route abspielen','Play route')+'</button>':'')+
     routeInfo+
     (r.desc?'<p class="desc">'+esc(r.desc)+'</p>':'')+
     (stops?'<div class="sec"><h3>'+T('Stationen','Stops')+'</h3><ol class="stops">'+stops+'</ol></div>':'')+
@@ -2730,6 +2730,8 @@ function renderDetail(r){
     (CL.length?'<p class="note src-note">'+[CL.length?'Clips: Twitch, '+(chrono?T('vom Streamanfang bis zum Ende','from start to end of stream'):T('nach Aufrufen sortiert','sorted by views')):''].filter(Boolean).join(' · ')+'</p>':'');
 }
 /* ---------- Route abspielen: Punkt läuft die Strecke ab, Clips springen am passenden Ort auf ---------- */
+// „Route abspielen“ vorerst ausgeblendet (wird überarbeitet) – true schaltet den Knopf wieder ein
+var PLAY_BTN=false;
 var PLAY=null,PLAY_MS=40000;
 function playStop(){
   if(!PLAY)return;cancelAnimationFrame(PLAY.raf);plClipClose();
