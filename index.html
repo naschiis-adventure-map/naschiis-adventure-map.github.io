@@ -2043,6 +2043,17 @@ body:not(.dl) .kevin-pane{visibility:hidden}
 /* Platz für Reiter und Highlights freihalten, bis die Daten da sind (kein Springen) */
 body:not(.dl) .vtabs{min-height:34px}
 body:not(.dl):not(.tab-all) #hl{display:block;min-height:150px}
+
+/* Editor: klar sichtbar, was gerade im Editor ist und was live ist */
+.ed-status{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:12px;margin:10px 0 12px;font:600 13px/1.3 var(--f-body);border:1px solid}
+.ed-status>i{font-style:normal;font-size:18px}
+.ed-status small{display:block;font:400 11px var(--f-mono);opacity:.85;margin-top:2px}
+.ed-status.live{background:#0f2a1c;border-color:#3ddc84;color:#c9f7dc}
+.ed-status.draft{background:#2a1f10;border-color:#f2a65f;color:#ffe2b8}
+.dbadge{display:inline-block;font:700 9.5px var(--f-mono);letter-spacing:.06em;border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+.dbadge.live{color:#0f2a1c;background:#3ddc84}
+.dbadge.ed{color:#f2a65f;border:1px dashed #f2a65f}
+.drow.pub.cur{border-color:var(--accent)}
 </style>
 
 <header class="hero">
@@ -3168,7 +3179,7 @@ function renderEdPanel(){
   }).join('')+'</div>':'<p class="help">'+T('Zu diesem Stream gibt es keine Clips.','There are no clips for this stream.')+'</p>';
   $('#v-route').innerHTML=
     '<button type="button" class="back" id="ed-back">'+T('← Zurück zum Stream','← Back to stream')+'</button>'+
-    '<h2>'+T('Route bearbeiten','Edit route')+'</h2><p class="sub2">'+esc(fmtDate(r.date))+' · '+esc(ttl(r))+'</p>'+
+    '<h2>'+T('Route bearbeiten','Edit route')+'</h2><p class="sub2">'+esc(fmtDate(r.date))+' · '+esc(ttl(r))+'</p>'+edStatusHtml()+''+
     draftsHtml()+
     '<div class="modes" role="group" aria-label="Werkzeug">'+modes+'</div>'+
     '<p class="help" id="ed-help">'+(ed.armed?T('Jetzt auf die Karte klicken, um den Clip zu platzieren. Esc bricht ab.','Now click the map to place the clip. Esc cancels.'):MODES[ed.mode][2])+'</p>'+
@@ -3295,15 +3306,32 @@ function loadDrafts(){
 function realDrafts(){return (ed&&ed.drafts||[]).filter(function(d){return !d.backup})}
 function findDraft(did){return (ed&&ed.drafts||[]).filter(function(d){return d.did===did})[0]||null}
 function draftWhen(iso){var d=new Date(iso);return isNaN(d)?'':d.toLocaleString(LOC,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function routeSig(o){o=o||{};return JSON.stringify({p:o.points||[],s:(o.stops||[]).map(function(x){return [x.lat,x.lng,x.name||'']}),c:o.clips||{},d:o.desc||'',l:o.loc?[o.loc.name,o.loc.lat,o.loc.lng]:null})}
+function pubRoute(){var pub=routeFor(ed.id);return pub&&((pub.points&&pub.points.length>1)||(pub.stops&&pub.stops.length)||Object.keys(pub.clips||{}).length||pub.desc||pub.loc)?pub:null}
+function isLiveDraft(d){var pub=pubRoute();return !!(pub&&d&&d.route&&routeSig(d.route)===routeSig(pub))}
+function edStatusHtml(){
+  if(!ed||!CONFIG.saveUrl)return '';
+  var cur=ed.draftId&&findDraft(ed.draftId),pub=pubRoute(),ch=ed.dirty;
+  var box=function(cls,ic,a,b){return '<div class="ed-status '+cls+'" role="status"><i>'+ic+'</i><span>'+a+'<small>'+b+'</small></span></div>'};
+  if(cur&&!ch&&isLiveDraft(cur))return box('live','🌐',T('Im Editor: Entwurf „','In editor: draft “')+esc(cur.name||'Entwurf')+T('“','”'),T('entspricht der Live-Route · Besucher sehen genau das','matches the live route · visitors see exactly this'));
+  if(cur)return box('draft','📝',T('Im Editor: Entwurf „','In editor: draft “')+esc(cur.name||'Entwurf')+T('“','”'),T('nicht live','not live')+(ch?T(' · ungespeicherte Änderungen',' · unsaved changes'):'')+T(' · „Speichern“ ganz unten veröffentlicht ihn',' · “Save” at the bottom publishes it'));
+  if(ed.fromBackup)return box('draft','🛟',T('Im Editor: Vorherige Route (Sicherung)','In editor: previous route (backup)'),T('nicht live · „Speichern“ ganz unten stellt sie wieder her','not live · “Save” at the bottom restores it'));
+  if(ed.newDraft)return box('draft','📝',T('Im Editor: neuer Entwurf','In editor: new draft'),T('noch nicht gespeichert · nicht live','not saved yet · not live'));
+  if(!pub&&!ch)return box('draft','✏️',T('Noch keine Route veröffentlicht','No route published yet'),T('Zeichnen, dann „Speichern“ ganz unten – oder als Entwurf sichern','Draw, then “Save” at the bottom – or keep it as a draft'));
+  if(ch)return box('draft','🌐',T('Im Editor: Live-Route – geändert','In editor: live route – changed'),T('ungespeicherte Änderungen · Besucher sehen noch die alte Fassung, bis du „Speichern“ drückst','unsaved changes · visitors still see the old version until you press “Save”'));
+  return box('live','🌐',T('Im Editor: Live-Route','In editor: live route'),T('Das sehen Besucher gerade · noch nichts geändert','This is what visitors see right now · nothing changed yet'));
+}
 function draftsHtml(){
   if(!CONFIG.saveUrl)return '';
   var all=ed.drafts,cur=ed.draftId&&findDraft(ed.draftId),L0=all?all.filter(function(d){return !d.backup}):null,bk=all?all.filter(function(d){return d.backup})[0]:null,n=L0?L0.length:0;
   var pub=routeFor(ed.id),hasPub=pub&&((pub.points&&pub.points.length>1)||(pub.stops&&pub.stops.length)||Object.keys(pub.clips||{}).length||pub.desc||pub.loc);
-  var pubRow=(ed.draftId||ed.fromBackup||ed.newDraft)?'<div class="dlist"><div class="drow pub"><i>🌐</i><span class="dn"><b>'+T('Veröffentlichte Route','Published route')+'</b><small>'+(hasPub?T('die Route, die Besucher gerade sehen','the route visitors currently see'):T('noch keine – der Stream hat keine Route','none yet – the stream has no route'))+'</small></span><button type="button" class="btn sm" id="ed-dpub" title="'+T('Zurück zur veröffentlichten Route','Back to the published route')+'">'+T('Laden','Load')+'</button></div></div>':'';
+  var atPub=!(ed.draftId||ed.fromBackup||ed.newDraft);
+  var pubRow='<div class="dlist"><div class="drow pub'+(atPub?' cur':'')+'"><i>🌐</i><span class="dn"><b>'+T('Veröffentlichte Route','Published route')+(hasPub?'<span class="dbadge live">LIVE</span>':'')+(atPub&&ed.dirty?'<span class="dbadge ed">'+T('IM EDITOR · GEÄNDERT','IN EDITOR · CHANGED')+'</span>':'')+'</b><small>'+(hasPub?T('die Route, die Besucher gerade sehen','the route visitors currently see'):T('noch keine – der Stream hat keine Route','none yet – the stream has no route'))+(atPub?T(' · im Editor geöffnet',' · open in editor'):'')+'</small></span>'+(atPub?'':'<button type="button" class="btn sm" id="ed-dpub" title="'+T('Zurück zur veröffentlichten Route','Back to the published route')+'">'+T('Laden','Load')+'</button>')+'</div></div>';
   var list=L0===null?'<p class="help">'+T('Lade Entwürfe …','Loading drafts …')+'</p>':pubRow+
     (ed.draftsErr?'<p class="help">'+esc(ed.draftsErr)+'</p>':'')+
     (n?'<div class="dlist">'+L0.map(function(d,i){
-      return '<div class="drow'+(d.did===ed.draftId?' cur':'')+'"><i style="background:'+PALETTE[i%PALETTE.length]+'"></i><span class="dn"><b>'+esc(d.name||'Entwurf')+'</b><small>'+esc([d.by?T('von ','by ')+d.by:'',draftWhen(d.at),(d.route&&d.route.points?d.route.points.length:0)+T(' Punkte',' points'),Object.keys(d.route&&d.route.clips||{}).length+' Clips'].filter(Boolean).join(' · '))+'</small></span>'+
+      var inEd=d.did===ed.draftId;
+      return '<div class="drow'+(inEd?' cur':'')+'"><span class="dn"><b>'+esc(d.name||'Entwurf')+(isLiveDraft(d)?'<span class="dbadge live">LIVE</span>':'')+(inEd?'<span class="dbadge ed">'+(ed.dirty?T('IM EDITOR · GEÄNDERT','IN EDITOR · CHANGED'):T('IM EDITOR','IN EDITOR'))+'</span>':'')+'</b><small>'+esc([d.by?T('von ','by ')+d.by:'',draftWhen(d.at),(d.route&&d.route.points?d.route.points.length:0)+T(' Punkte',' points'),Object.keys(d.route&&d.route.clips||{}).length+' Clips'].filter(Boolean).join(' · '))+'</small></span>'+
         '<button type="button" class="btn sm" data-dload="'+esc(d.did)+'" title="'+T('In den Editor laden','Load into editor')+'">'+(d.did===ed.draftId?T('Neu laden','Reload'):T('Laden','Load'))+'</button>'+
         '<button type="button" class="btn sm" data-dpres="'+i+'" title="'+T('Ab hier präsentieren','Present from here')+'">▶</button>'+
         '<button type="button" class="x" data-ddel="'+esc(d.did)+'" title="'+T('Entwurf löschen','Delete draft')+'">×</button></div>'}).join('')+'</div>'
