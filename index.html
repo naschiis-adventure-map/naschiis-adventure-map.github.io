@@ -2818,6 +2818,8 @@ function plClipShow(x){
     +'<div class="pl-cw-v"><iframe src="https://clips.twitch.tv/embed?clip='+encodeURIComponent(sg)+'&parent='+encodeURIComponent(location.hostname)+'&autoplay=true&muted=false" allowfullscreen allow="autoplay; fullscreen" title="'+esc(c.title||'Clip')+'"></iframe></div>'
     +'<div class="pl-cw-f"><span class="pl-cw-t"><i></i></span><span class="pl-cw-s"></span><button type="button" data-cw="hold">⏸ '+T('Anhalten','Hold')+'</button><button type="button" data-cw="next">⏭ '+T('Weiter','Next')+'</button></div>';
   $('.map-wrap').appendChild(w);
+  // Twitch hält eingebettete Clips an, sobald etwas darüber liegt – Kevin macht solange Pause
+  try{if(KW.busy){KW.abort=true;KW.silent=true;if(KW.wake)KW.wake()}var kl=$('#kevin-walker');if(kl)kl.hidden=true}catch(e){}
   P.cw={el:w,left:total,total:total,hold:false,last:performance.now()};
   P.playing=false;playUI();
   w.addEventListener('click',function(e){var b=e.target.closest('[data-cw]');if(!b||!PLAY||!PLAY.cw)return;if(b.dataset.cw==='next')plClipDone();else plClipHold(!PLAY.cw.hold)});
@@ -4374,7 +4376,7 @@ function kwCtxLine(ctx){
 async function kevinGo(force){
   var layer=$('#kevin-walker');
   if(!layer||KW.busy)return;
-  if(!force&&(document.hidden||SEASON.off||!$('#wrap').hidden||state.editing||!$('#player').hidden||!$('#docview').hidden))return kwPlan();
+  if(!force&&(document.hidden||SEASON.off||!$('#wrap').hidden||state.editing||!$('#player').hidden||!$('#docview').hidden||document.querySelector('.pl-cw')))return kwPlan();
   var venue=kwPick();if(!venue)return kwPlan();
   KW.busy=true;KW.abort=false;KW.react=false;KW.reacting=false;KW.reacted=false;KW.clicks=0;KW.at=null;KW.venue=venue;
   var clip=layer.querySelector('.kw-clip'),pos=layer.querySelector('.kw-pos'),flip=layer.querySelector('.kw-flip'),bod=layer.querySelector('.kw-bod'),prop=layer.querySelector('.kw-prop'),fx=layer.querySelector('.kw-fx');
