@@ -2005,10 +2005,7 @@ body:not(.dl) #listhint{display:none}
 body:not(.dl) .kevin-pane{visibility:hidden}
 
 /* Reiter Unterwegs / Alle + Highlights */
-.vtabs{display:flex;gap:6px;padding:10px 16px 2px}
-.vtabs button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;text-align:center;padding:7px 4px;border-radius:10px;font:600 13px var(--f-body);border:1px solid #f5a9d655;color:#f1cfe6;background:#1c0f21}
-.vtabs button[aria-selected=true]{background:var(--accent);color:#2a0f22;border-color:var(--accent)}
-.vtabs button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.hl-h{margin:0;padding:12px 16px 0;font:600 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 #hl:empty{display:none}
 .hl{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px 16px 4px}
 .hl button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;height:66px;border-radius:10px;overflow:hidden;background:#2a1a30 center/cover;border:1px solid #f5a9d644;transition:transform .15s,border-color .15s}
@@ -2041,8 +2038,7 @@ body:not(.dl) .kevin-pane{visibility:hidden}
 .ed-fav{display:flex;align-items:center;gap:8px;font:600 13px var(--f-body);cursor:pointer}
 .ed-fav input{width:18px;height:18px;accent-color:var(--accent)}
 /* Platz für Reiter und Highlights freihalten, bis die Daten da sind (kein Springen) */
-body:not(.dl) .vtabs{min-height:34px}
-body:not(.dl):not(.tab-all) #hl{display:block;min-height:150px}
+body:not(.dl) #hl{display:block;min-height:176px}
 
 /* Editor: klar sichtbar, was gerade im Editor ist und was live ist */
 .ed-status{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:12px;margin:10px 0 12px;font:600 13px/1.3 var(--f-body);border:1px solid}
@@ -2092,7 +2088,7 @@ body:not(.dl):not(.tab-all) #hl{display:block;min-height:150px}
   <aside class="panel" id="panel" aria-label="Routen">
     <div id="v-list">
       <div class="tools"><div class="qwrap"><input type="text" id="q" placeholder="Suchen: Titel, Ort, Datum, Clip" aria-label="Streams durchsuchen" autocomplete="off"><button type="button" id="qclear" class="qclear" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><select id="flt" aria-label="Streams filtern"><option value="all">Alle</option><option value="loc">Mit Ort</option><option value="none">Ohne Ort</option><option value="route">Mit Route</option><option value="noroute">Ohne Route (Nur IRL)</option></select><select id="cat" aria-label="Nach Kategorie filtern"><option value="">Alle Kategorien</option></select><select id="srt" aria-label="Streams sortieren"><option value="new">Neueste zuerst</option><option value="old">Älteste zuerst</option><option value="time">Längste Streamzeit</option></select></div>
-      <div class="vtabs" id="vtabs" role="tablist" aria-label="Streams"></div><div id="hl"></div>
+      <div id="hl"></div>
       <div class="tools2"><button type="button" class="chipbtn" id="calbtn" aria-pressed="false">📅 <span>Kalender</span></button><button type="button" class="chipbtn" id="rndbtn">🎲 <span>Zufälliger Clip</span></button><p class="count mono" id="count"></p></div>
       <div id="memo"></div>
       <div id="cliphits"></div>
@@ -2503,7 +2499,6 @@ function renderList(){
     if(f==='noroute'&&(hasRoute(r)||r.category!=='IRL'))return false;
     if(f==='none'&&(r.location||hasRoute(r)))return false;
     if(state.cat&&r.category!==state.cat)return false;
-    if(state.tab!=='all'&&!isOut(r))return false;
     if(!q)return true;
     var hay=[r.title,r.desc,fmtDate(r.date),r.date,numDates(r.date),r.location?r.location.name:'',r.category||''].concat((r.stops||[]).map(function(s){return s.name})).join(' ').toLowerCase();
     if(hay.indexOf(q)>=0)return true;
@@ -2533,21 +2528,16 @@ function renderList(){
   var cal=state.view==='cal';$('#cal').hidden=!cal;$('#list').hidden=cal;$('#calbtn').setAttribute('aria-pressed',cal);
   if(cal){renderCal();return}
   LIST.q=q;LIST.rows=rows;
-  renderTabs();renderHL(q);
+  renderHL(q);
   var lk=[q,f,state.cat||'',srt,state.tab].join('|');if(lk!==LIST.key){LIST.key=lk;LIST.n=LIST_CHUNK}
   if(lastCard){var li=rows.findIndex(function(r){return r.id===lastCard});if(li>=LIST.n)LIST.n=li+10}
-  if(!rows.length&&state.tab!=='all'){var tabSave=state.tab;state.tab='all';var nAll=state.routes.filter(function(r){return LIST_FILTER(r)}).length;state.tab=tabSave;if(nAll){$('#list').innerHTML='<p class="empty">'+T('Unter „Unterwegs“ nichts gefunden.','Nothing found under “Out & about”.')+'</p><p class="empty"><button type="button" class="btn" data-tab="all" id="to-all">'+T('In „Alle Streams“ anzeigen ('+nAll+')','Show in “All streams” ('+nAll+')')+'</button></p>';return}}
   $('#list').innerHTML=rows.length?rows.slice(0,LIST.n).map(cardHTML).join('')+(rows.length>LIST.n?'<div class="list-more" id="list-more" aria-hidden="true"></div>':''):'<p class="empty">'+(DATA_LOADED||location.protocol==='file:'?T('Keine Streams gefunden.','No streams found.'):'<span class="loading">'+T('Lade Streams …','Loading streams …')+'</span>')+'</p>';
   listWatch();
   $('#listhint').textContent=canEdit(state.user)?'':(state.user?T('Nur Kanalbetreiber, Mods und Berechtigte können Routen bearbeiten.','Only the channel owner, mods and authorised people can edit routes.'):T('Kanalbetreiber, Mods und Berechtigte können sich mit Twitch anmelden, um Routen zu ergänzen.','The channel owner, mods and authorised people can log in with Twitch to add routes.'));
   $('#listhint').hidden=!SHOW_LOGIN||canEdit(state.user);
 }
 /* ---------- Reiter „Unterwegs / Alle“ und Highlights ---------- */
-state.tab=store('shm.view')==='all'?'all':'out';document.body.classList.toggle('tab-all',state.tab==='all');
-function renderTabs(){
-  var n=state.routes.filter(isOut).length,box=$('#vtabs');
-  box.innerHTML='<button type="button" role="tab" data-tab="out" aria-selected="'+(state.tab!=='all')+'">🚶 '+T('Unterwegs','Out & about')+' ('+n+')</button><button type="button" role="tab" data-tab="all" aria-selected="'+(state.tab==='all')+'">'+T('Alle Streams','All streams')+' ('+state.routes.length+')</button>';
-}
+state.tab='all';
 // Favoriten (im Editor markiert) zuerst, freie Plätze füllt die Automatik: meiste Clip-Aufrufe, neuere Streams leicht bevorzugt
 function hlPick(){
   var now=Date.now(),cand=state.routes.filter(function(r){return hasRoute(r)&&isOut(r)});
@@ -2559,14 +2549,12 @@ function hlPick(){
 function hlName(r){var t=ttl(r).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,'').replace(/\s+/g,' ').trim();return t||(r.location&&r.location.name)||''}
 function renderHL(q){
   var box=$('#hl');
-  if(state.tab==='all'||q||state.cat||(state.filter&&state.filter!=='all')||state.view==='cal'||!DATA_LOADED){box.innerHTML='';return}
+  if(q||state.cat||(state.filter&&state.filter!=='all')||state.view==='cal'||!DATA_LOADED){box.innerHTML='';return}
   var pick=hlPick();if(!pick.length){box.innerHTML='';return}
-  box.innerHTML='<div class="hl" aria-label="Highlights">'+pick.map(function(r){
+  box.innerHTML='<h3 class="hl-h">⭐ Highlights</h3><div class="hl" aria-label="Highlights">'+pick.map(function(r){
     var c=(r.clips||[]).filter(function(c){return c.thumb}).sort(function(a,b){return (b.views||0)-(a.views||0)})[0],th=c&&tSz(safeUrl(c.thumb),320,180);
     return '<button type="button" data-hl="'+esc(r.id)+'" title="'+esc(ttl(r))+'"'+(th?' style="background-image:url(\''+esc(th)+'\')"':'')+'><small>'+esc(shortDate(r.date))+'</small><span>'+(r.fav?'⭐ ':'')+esc(hlName(r))+'</span></button>'}).join('')+'</div>';
 }
-$('#vtabs').addEventListener('click',function(e){var b=e.target.closest('[data-tab]');if(!b)return;state.tab=b.dataset.tab==='all'?'all':'out';document.body.classList.toggle('tab-all',state.tab==='all');store('shm.view',state.tab==='all'?'all':null);renderList();$('#panel').scrollTop=0});
-$('#list').addEventListener('click',function(e){if(e.target.id==='to-all'){state.tab='all';document.body.classList.add('tab-all');store('shm.view','all');renderList()}});
 $('#hl').addEventListener('click',function(e){var b=e.target.closest('[data-hl]');if(b)select(b.dataset.hl)});
 /* ---------- Clip-Suche ---------- */
 function clipMatch(c,q){return ((c.title||'')+' '+(c.by||'')).toLowerCase().indexOf(q)>=0}
@@ -4625,7 +4613,7 @@ function setQuery(v){state.query=v;state.clipAll=false;$('#q').value=v;$('#qclea
 $('#q').addEventListener('input',function(e){setQuery(e.target.value)});
 $('#q').addEventListener('keydown',function(e){if(e.key==='Escape'&&e.target.value){setQuery('');e.preventDefault()}});
 $('#flt').addEventListener('change',function(e){state.filter=e.target.value;renderList()});
-$('#cat').addEventListener('change',function(e){state.cat=e.target.value;if(state.cat&&state.tab!=='all'&&!state.routes.some(function(r){return r.category===state.cat&&isOut(r)})){state.tab='all';document.body.classList.add('tab-all');store('shm.view','all')}renderList();$('#panel').scrollTop=0});
+$('#cat').addEventListener('change',function(e){state.cat=e.target.value;renderList();$('#panel').scrollTop=0});
 $('#srt').addEventListener('change',function(e){state.sort=e.target.value;state.hitSort=null;renderList();$('#panel').scrollTop=0});
 
 /* ---------- Gedankenblase: Beschreibung beim Drüberfahren in der Liste (nur mit Maus, am PC) ---------- */
